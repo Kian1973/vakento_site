@@ -50,6 +50,11 @@ function emptyStart() {
     inkoop: [],
     taken: [],
     documenten: [],
+    werkbonnen: [],
+    meerwerk: [],
+    fotos: [],
+    onderhoud: [],
+    dagnotities: [],
     toeslag: 12,
     kantoorZit: 2,
     papier: {
@@ -86,6 +91,11 @@ export function load() {
       data.inkoop ||= [];
       data.taken ||= [];
       data.documenten ||= [];
+      data.werkbonnen ||= [];
+      data.meerwerk ||= [];
+      data.fotos ||= [];
+      data.onderhoud ||= [];
+      data.dagnotities ||= [];
       data.klanten ||= [];
       data.klussen ||= [];
       data.offertes ||= [];

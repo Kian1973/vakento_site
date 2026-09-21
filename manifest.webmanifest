@@ -1,0 +1,9 @@
+{
+  "name": "Vakento",
+  "short_name": "Vakento",
+  "start_url": "/werk.html",
+  "display": "standalone",
+  "background_color": "#eef1ef",
+  "theme_color": "#13161c",
+  "lang": "nl"
+}

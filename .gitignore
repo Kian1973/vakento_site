@@ -1,0 +1,13 @@
+.env
+.env.*
+*.db
+*.sqlite
+*.sqlite3
+*.log
+data/
+private/
+storage/
+uploads/
+node_modules/
+backups/
+*.backup-*

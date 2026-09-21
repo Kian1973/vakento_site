@@ -63,6 +63,7 @@ const routes = {
   "#/taken": () => viewTaken(data),
   "#/post": viewPost,
   "#/cloud": viewCloud,
+  "#/slim": () => viewSlim(data),
 };
 
 function toast(msg) {

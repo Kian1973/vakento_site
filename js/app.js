@@ -39,6 +39,7 @@ import {
 } from "./papier.js?v=open1";
 import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=cloud1";
+import { viewSlim, bindSlim } from "./slim.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();
@@ -823,6 +824,7 @@ function bind(root) {
   }
   bindPapier(root, { data, persist, toast });
   bindKantoor(root, { data, persist, toast });
+  bindSlim(root, { data, persist, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);
 }

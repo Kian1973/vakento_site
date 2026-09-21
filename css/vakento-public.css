@@ -1,0 +1,36 @@
+/* Nieuw openbaar Vakento-kleurenschema: gelijk aan de homepage. */
+:root {
+  --bg: #f7f8fa;
+  --paper: #ffffff;
+  --ink: #111820;
+  --muted: #66717e;
+  --line: #e6e9ed;
+  --rust: #ff6b35;
+  --rust-ink: #ffffff;
+  --moss: #ff6b35;
+  --brass: #e65320;
+  --chalk: #13212f;
+}
+
+header {
+  background: rgba(247, 248, 250, 0.9);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+}
+
+.btn:hover {
+  background: #e65320;
+}
+
+.btn-ghost {
+  background: #ffffff;
+}
+
+.btn-ghost:hover {
+  color: #ffffff;
+  border-color: #e65320;
+}
+
+.card {
+  box-shadow: 0 12px 35px rgba(19, 33, 47, 0.06);
+}

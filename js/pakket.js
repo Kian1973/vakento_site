@@ -25,7 +25,7 @@ const PAKKET = [
   { tak: "Geld", titel: "Openstaand", tekst: "Herinnering, ontvangen afvinken, CSV naar de boekhouder." },
   { tak: "AI", titel: "Brein", tekst: "Offerte, ochtend, week, bon, inkoop lezen, vrije vraag. Vakregels eerst, jij drukt op akkoord." },
   { tak: "Klant", titel: "Klantportaal", tekst: "Elke klus heeft een link. Status, planning, ploeg, offerte, facturen, bonnen. Zonder account, zonder app-store." },
-  { tak: "Post", titel: "Mail", tekst: "Versturen vanaf Vakento. Ontvangen op hallo@vakento.nl, in de werkplaats." },
+  { tak: "Pro+", titel: "Eigen Vakento-mail", tekst: "Kies je eigen naam@vakento.nl. Een mailbox van 2 GB voor verzenden en ontvangen via webmail, Outlook en telefoon, met spam-, phishing- en virusscan." },
   { tak: "Cloud", titel: "5 GB mappen, overal open", tekst: "Eigen mappen op de server. Open op de klus of thuis. Deellink voor wie de map mag zien. Extra 1, 5 of 10 GB klein bij te kopen." },
 ];
 

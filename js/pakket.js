@@ -1,4 +1,9 @@
 const PAKKET = [
+  { tak: "Slim", titel: "Spraakassistent", tekst: "Spreek je werknotitie in. Vakento herkent uren, materiaal en meerwerk en zet het bij de juiste klus." },
+  { tak: "Slim", titel: "Digitale werkbon", tekst: "Werkzaamheden, uren, materiaal, foto’s en naam van de klant als akkoord in één werkbon." },
+  { tak: "Slim", titel: "Meerwerk en foto’s", tekst: "Leg meerwerk vast, registreer akkoord en bewaar voor-, tijdens- en nafoto’s per klus." },
+  { tak: "Slim", titel: "Werkdag afronden", tekst: "Vakento controleert uren, werkbon, foto’s, meerwerk en openstaande facturen voordat je stopt." },
+  { tak: "Slim", titel: "Onderhoud terughalen", tekst: "Plan wanneer je een bestaande klant opnieuw benadert voor controle of vervolgwerk." },
   { tak: "Kantoor", titel: "Vandaag", tekst: "Wie is op pad, welke offerte wacht, wie uren vergat, wat in de bus op is. AI-ochtendbriefing in één tik." },
   { tak: "Kantoor", titel: "Weekbord", tekst: "Ploeg in rijen, dagen in kolommen. Tik om te zetten. AI vult vrije vakken met open klussen." },
   { tak: "Kantoor", titel: "Klussen en klanten", tekst: "Eigen zaak, eigen dossier. Van offerte tot oplevering. Begroot, kosten en winst per klus." },

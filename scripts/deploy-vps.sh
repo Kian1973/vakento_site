@@ -35,6 +35,7 @@ mkdir -p "$SITE_ROOT/assets"
 install -m 0644 "$REPO_DIR/index.html" "$SITE_ROOT/index.html"
 install -m 0644 "$REPO_DIR/assets/vakento-home.css" "$SITE_ROOT/assets/vakento-home.css"
 install -m 0644 "$REPO_DIR/assets/vakento-home.js" "$SITE_ROOT/assets/vakento-home.js"
+chown www-data:www-data "$SITE_ROOT/index.html" "$SITE_ROOT/assets/vakento-home.css" "$SITE_ROOT/assets/vakento-home.js"
 
 echo "Vakento homepage gepubliceerd."
 echo "Backup: $BACKUP"

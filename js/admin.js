@@ -5,14 +5,23 @@ const board = document.querySelector("[data-board]");
 const err = document.querySelector("[data-err]");
 
 function rowUser(u) {
+  const plan = u.planSku === "proplus" ? "proplus" : "werkplaats";
   return `<tr>
     <td>${u.name}<br><span class="muted">${u.email}</span></td>
-    <td class="${u.paid ? "ok" : "warn"}">${u.trial ? "proef tot " : u.paid ? "lid tot " : ""}${u.paidUntil ? new Date(u.paidUntil).toLocaleDateString("nl-NL") : "gewist / niet betaald"}</td>
+    <td class="${u.paid ? "ok" : "warn"}">${u.trial ? "proef tot " : u.paid ? "lid tot " : ""}${u.paidUntil ? new Date(u.paidUntil).toLocaleDateString("nl-NL") : "niet betaald"}</td>
+    <td>${plan === "proplus" ? "Pro+" : "Pro"}</td>
     <td>${gb(u.usedBytes)} / ${gb(u.quotaBytes)} GB</td>
     <td>${u.admin ? "baas" : "lid"}</td>
     <td>
-      <button class="btn btn-ghost" data-maand="${u.id}">+1 maand</button>
-      <button class="btn btn-ghost" data-gb="${u.id}">+1 GB</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select data-plan="${u.id}">
+          <option value="werkplaats" ${plan === "werkplaats" ? "selected" : ""}>Pro</option>
+          <option value="proplus" ${plan === "proplus" ? "selected" : ""}>Pro+</option>
+        </select>
+        <input data-months="${u.id}" type="number" min="1" max="1200" value="1" style="width:78px" aria-label="Aantal maanden">
+        <button class="btn btn-ghost" data-membership="${u.id}">Toepassen</button>
+        <button class="btn btn-ghost" data-gb="${u.id}">+1 GB</button>
+      </div>
     </td>
   </tr>`;
 }
@@ -32,9 +41,12 @@ async function teken(data) {
     data.payments
       .map((p) => `<tr><td>${p.id}</td><td>${p.sku}</td><td>${euro(p.amount)}</td><td>${p.status}</td></tr>`)
       .join("") || "<tr><td>Nog geen betalingen.</td></tr>";
-  board.querySelectorAll("[data-maand]").forEach((btn) =>
+  board.querySelectorAll("[data-membership]").forEach((btn) =>
     btn.addEventListener("click", async () => {
-      await api("/api/admin/maand", { userId: btn.dataset.maand });
+      const id = btn.dataset.membership;
+      const plan = board.querySelector(`[data-plan="${id}"]`).value;
+      const months = Number(board.querySelector(`[data-months="${id}"]`).value);
+      await api("/api/admin/lidmaatschap", { userId: id, plan, months });
       await laad();
     })
   );
@@ -99,3 +111,33 @@ if (who.admin) {
     login.hidden = false;
   }
 }
+
+
+const addMember = document.querySelector("[data-add-member]");
+const addMemberMsg = document.querySelector("[data-add-member-msg]");
+addMember?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (addMemberMsg) addMemberMsg.hidden = true;
+  const f = new FormData(addMember);
+  try {
+    await api("/api/admin/lid", {
+      name: f.get("name"),
+      email: f.get("email"),
+      password: f.get("password"),
+      plan: f.get("plan"),
+      months: Number(f.get("months")),
+    });
+    addMember.reset();
+    addMember.querySelector('[name="months"]').value = "12";
+    if (addMemberMsg) {
+      addMemberMsg.textContent = "Lid toegevoegd.";
+      addMemberMsg.hidden = false;
+    }
+    await laad();
+  } catch (ex) {
+    if (addMemberMsg) {
+      addMemberMsg.textContent = ex.message;
+      addMemberMsg.hidden = false;
+    }
+  }
+});

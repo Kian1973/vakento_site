@@ -1,100 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lidmaatschap | Vakento</title>
-  <meta name="description" content="Kies Vakento Pro voor €29 of Pro+ voor €39 per maand excl. btw. Pro+ bevat een eigen @vakento.nl-mailadres met een beveiligde mailbox van 2 GB.">
-  <link rel="canonical" href="https://vakento.nl/prijzen.html">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/vakento.css?v=beter1">
-  <link rel="stylesheet" href="css/vakento-public.css?v=2">
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex,follow">
+  <link rel="canonical" href="https://vakento.nl/#lidworden">
+  <meta http-equiv="refresh" content="0;url=/#lidworden">
+  <title>Doorsturen | Vakento</title>
 </head>
 <body>
-  <header>
-    <div class="wrap site-top">
-      <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
-      <nav class="nav">
-        <a href="index.html">Home</a>
-        <a href="index.html#groothandel">Groothandel</a>
-        <a href="account.html">Account</a>
-      </nav>
-      <a class="btn" href="#account">Lid worden</a>
-    </div>
-  </header>
-
-  <section class="wrap hero" style="grid-template-columns:1fr">
-    <div>
-      <p class="kicker">Pro of Pro+ · 3 dagen gratis</p>
-      <h1>Kies het abonnement dat bij je bedrijf past.</h1>
-      <p class="lede">Beide abonnementen geven toegang tot de complete Vakento-werkplaats en 5 GB cloud. Pro+ voegt een eigen @vakento.nl-mailadres met 2 GB beveiligde mailbox toe.</p>
-    </div>
-  </section>
-
-  <section class="section" id="inhoud">
-    <div class="wrap">
-      <p class="kicker">Inbegrepen bij Pro en Pro+</p>
-      <h2>Dit kan Vakento. Dit zit erin.</h2>
-      <p class="muted lev-intro">Bord, papier, ploeg, geld, groothandel, AI, klantportaal en 5 GB cloud. Met Pro+ krijg je daarnaast professionele Vakento-mail.</p>
-      <div class="grid-3" id="pakket" style="margin-top:22px"></div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap grid-3" style="align-items:start">
-      <article class="card">
-        <p class="kicker">Pro · 3 dagen gratis</p>
-        <h2>€29 / maand</h2>
-        <p class="muted">De complete Vakento-werkplaats met AI, klantportaal en 5 GB cloud.</p>
-        <p>✓ Alle Vakento-functies<br>✓ 5 GB cloud<br>✓ Extra cloud bij te kopen</p>
-        <button class="btn" type="button" data-buy="werkplaats">Kies Pro</button>
-      </article>
-      <article class="card" style="border:2px solid var(--accent,#ff6b35)">
-        <p class="kicker">Pro+ · meest compleet</p>
-        <h2>€39 / maand</h2>
-        <p class="muted">Alles van Pro, plus een professioneel e-mailadres en beveiligde mailbox.</p>
-        <p>✓ Eigen naam@vakento.nl<br>✓ 2 GB mailbox<br>✓ Verzenden en ontvangen<br>✓ Webmail, telefoon en Outlook<br>✓ Spam-, phishing- en virusscan</p>
-        <button class="btn" type="button" data-buy="proplus">Kies Pro+</button>
-      </article>
-      <article class="card">
-        <p class="kicker">Extra cloud</p>
-        <h2>Kleine stukken</h2>
-        <p class="muted">Niet 50 GB in één keer. Alleen wat je nodig hebt, bovenop je 5 GB.</p>
-        <p style="margin-top:12px"><button class="btn btn-ghost" type="button" data-buy="cloud1">+1 GB · €1,50</button></p>
-        <p style="margin-top:12px"><button class="btn btn-ghost" type="button" data-buy="cloud5">+5 GB · €5</button></p>
-        <p style="margin-top:12px"><button class="btn btn-ghost" type="button" data-buy="cloud10">+10 GB · €9</button></p>
-      </article>
-      <article class="card" id="account">
-        <p class="kicker">Lid worden</p>
-        <h2>3 dagen gratis, daarna betalen.</h2>
-        <form class="stack" data-register>
-          <label>Bedrijf / naam<input name="name" required placeholder="Jouw zaak"></label>
-          <label>E-mail<input name="email" type="email" required></label>
-          <label>Wachtwoord<input name="password" type="password" minlength="8" required></label>
-          <button class="btn" type="submit">Start 3 dagen gratis</button>
-          <p class="warn" data-err hidden></p>
-        </form>
-        <form class="stack" id="inloggen" data-login style="margin-top:18px; scroll-margin-top:100px">
-          <p class="kicker">Al lid</p>
-          <label>E-mail<input name="email" type="email" required></label>
-          <label>Wachtwoord<input name="password" type="password" required></label>
-          <button class="btn btn-ghost" type="submit">Inloggen</button>
-          <p class="warn" data-err hidden></p>
-        </form>
-      </article>
-    </div>
-  </section>
-
-  <footer>
-    <div class="wrap foot">
-      <p>Prijzen excl. btw. iDEAL via Mollie.</p>
-      <p><a href="account.html">Jouw cloud</a> · <a href="cookies.html">Cookies</a></p>
-    </div>
-  </footer>
-  <script type="module" src="js/pakket.js?v=cloud1"></script>
-  <script type="module" src="js/pay.js?v=mollie1"></script>
-  <script src="js/cookies.js?v=cookie1"></script>
+  <p>Je wordt doorgestuurd naar <a href="/#lidworden">Lid worden</a>.</p>
+  <script>location.replace("/#lidworden");</script>
 </body>
 </html>

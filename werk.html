@@ -11,6 +11,61 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/vakento.css?v=cloud1">
+  <style>
+    .account-icon-btn{
+      position:relative;
+      width:46px;
+      height:46px;
+      flex:0 0 46px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(18,24,38,.35);
+      border-radius:11px;
+      background:#fff;
+      color:#314458;
+      text-decoration:none;
+      transition:background .15s ease,border-color .15s ease,transform .15s ease;
+    }
+    .account-icon-btn:hover,
+    .account-icon-btn:focus-visible{
+      background:#f7f9fb;
+      border-color:#314458;
+      transform:translateY(-1px);
+      outline:none;
+    }
+    .account-icon-btn svg{
+      width:24px;
+      height:24px;
+      display:block;
+    }
+    .account-icon-btn .account-tooltip{
+      position:absolute;
+      top:calc(100% + 10px);
+      right:0;
+      z-index:60;
+      padding:7px 10px;
+      border-radius:8px;
+      background:#121826;
+      color:#fff;
+      font-size:.78rem;
+      font-weight:600;
+      line-height:1;
+      white-space:nowrap;
+      opacity:0;
+      visibility:hidden;
+      transform:translateY(-4px);
+      transition:opacity .15s ease,transform .15s ease,visibility .15s ease;
+      pointer-events:none;
+      box-shadow:0 8px 24px rgba(18,24,38,.18);
+    }
+    .account-icon-btn:hover .account-tooltip,
+    .account-icon-btn:focus-visible .account-tooltip{
+      opacity:1;
+      visibility:visible;
+      transform:translateY(0);
+    }
+  </style>
 </head>
 <body class="app-body">
   <header class="app-bar">

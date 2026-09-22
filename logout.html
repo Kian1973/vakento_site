@@ -14,7 +14,7 @@
       <p class="kicker">Vakento</p>
       <h1>Je wordt uitgelogd…</h1>
       <p class="muted" data-msg>Even bezig.</p>
-      <p><a class="btn btn-ghost" href="/account.html">Naar inloggen</a></p>
+      <p><a class="btn btn-ghost" href="/account.html?uitgelogd=1">Naar inloggen</a></p>
     </section>
   </main>
   <script>
@@ -63,8 +63,21 @@
       });
       const data = await check.json().catch(() => ({}));
       if (data && data.email) {
-        if (msg) msg.textContent = "De sessie op de server is nog actief. Probeer opnieuw of sluit de app volledig.";
-        return;
+        if (msg) msg.textContent = "De sessie is nog actief. Nogmaals uitloggen…";
+        try {
+          await fetch("/api/logout?t=" + Date.now(), {
+            method: "POST",
+            credentials: "include",
+            cache: "no-store",
+            keepalive: true,
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
+              "Pragma": "no-cache"
+            },
+            body: "{}"
+          });
+        } catch (_) {}
       }
     } catch (_) {}
 

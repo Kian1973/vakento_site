@@ -48,7 +48,7 @@ export function viewStam(data) {
     <div class="list">
       ${data.artikelen
         .map(
-          (a) => `<article class="item"><strong>${a.naam}</strong><span>${a.eenheid} · ${euro(a.prijs)}${a.leverancier ? " · " + a.leverancier : ""}</span>
+          (a) => `<article class="item"><strong>${a.naam}</strong><span>${a.eenheid} · ${euro(a.prijs)} · ${Number(a.btw || 21)}% btw${a.leverancier ? " · " + a.leverancier : ""}</span>
           <button class="btn btn-ghost" data-regel="${a.id}">Op offerte</button></article>`
         )
         .join("")}
@@ -186,7 +186,7 @@ export function bindKantoor(root, { data, persist, toast }) {
   root.querySelector("[data-act='artikel']")?.addEventListener("click", () => {
     const naam = prompt("Artikel");
     if (!naam) return;
-    data.artikelen.push({ id: "a" + Date.now(), naam, eenheid: "st", prijs: Number(prompt("Prijs") || 0) });
+    const prijs = Number(prompt("Prijs excl. btw") || 0);\r\n    const gekozen = Number(prompt("BTW tarief: 21 = standaard, 9 = verlaagd indien toegestaan, 0 = 0%", "21") || 21);\r\n    const btw = [0, 9, 21].includes(gekozen) ? gekozen : 21;\r\n    data.artikelen.push({ id: "a" + Date.now(), naam, eenheid: "st", prijs, btw });
     persist();
   });
   root.querySelector("form[data-lev-filter]")?.addEventListener("submit", (e) => {
@@ -202,7 +202,7 @@ export function bindKantoor(root, { data, persist, toast }) {
     if (!lev) return;
     lev.artikelen.forEach(([art, eenheid, prijs]) => {
       if (data.artikelen.some((x) => x.naam === art && x.leverancier === lev.naam)) return;
-      data.artikelen.push({ id: "a" + Date.now() + Math.random(), naam: art, eenheid, prijs, leverancier: lev.naam });
+      data.artikelen.push({ id: "a" + Date.now() + Math.random(), naam: art, eenheid, prijs, btw: 21, leverancier: lev.naam });
     });
     toast(lev.naam + " in stam");
     persist();
@@ -231,7 +231,7 @@ export function bindKantoor(root, { data, persist, toast }) {
       const a = data.artikelen.find((x) => x.id === btn.dataset.regel);
       const o = data.offertes[0];
       if (!o || !a) return;
-      o.regels.push({ tekst: a.naam, bedrag: a.prijs });
+      o.regels.push({ tekst: a.naam, bedrag: a.prijs, btw: Number(a.btw || 21) });
       toast("Op de laatste offerte");
       persist();
     })

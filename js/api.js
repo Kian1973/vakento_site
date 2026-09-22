@@ -10,6 +10,22 @@ export async function api(path, body, method = "POST") {
   return data;
 }
 
+export async function logout() {
+  try {
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+  } catch (_) {}
+  try {
+    sessionStorage.removeItem("vakento.uid");
+    sessionStorage.removeItem("vakento.firm");
+  } catch (_) {}
+}
+
 export async function me() {
   try {
     return await api("/api/me", null, "GET");

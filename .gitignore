@@ -11,3 +11,5 @@ uploads/
 node_modules/
 backups/
 *.backup-*
+test-results/
+playwright-report/

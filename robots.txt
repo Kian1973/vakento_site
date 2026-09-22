@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /account.html
+Disallow: /app.html
+Disallow: /werk.html
+Disallow: /diagnose.html
+Disallow: /logout.html
+Disallow: /betaald.html
+Disallow: /klant.html
+Disallow: /delen.html
 Disallow: /api/
+
+Sitemap: https://vakento.nl/sitemap.xml

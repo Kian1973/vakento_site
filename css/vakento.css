@@ -111,7 +111,7 @@ h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 0.95; max-width: 14ch; 
   color: var(--ink);
 }
 .app-bar .logo { color: var(--ink); font-size: 1.08rem; }
-.app-nav { display: flex; gap: 2px; overflow: visible; flex: 1; align-items: center; }
+.app-nav { display: flex; gap: 2px; overflow: visible; flex: 1; align-items: center; justify-content: flex-start; text-align: left; }
 .app-nav > a, .nav-more > summary {
   color: var(--muted); background: transparent; border: 0; text-decoration: none;
   padding: 8px 12px; border-radius: 10px; white-space: nowrap; cursor: pointer;
@@ -123,11 +123,11 @@ h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 0.95; max-width: 14ch; 
   .app-nav > a[href="#/klussen"],
   .app-nav > a[href="#/uren"] { display: none; }
 }
-.nav-more { position: relative; }
+.nav-more { position: relative; text-align: left; }
 .nav-more > summary { list-style: none; }
 .nav-more > summary::-webkit-details-marker { display: none; }
 .nav-panel {
-  position: absolute; right: 0; top: calc(100% + 8px); z-index: 30;
+  position: absolute; left: 0; right: auto; top: calc(100% + 8px); z-index: 30;
   width: min(420px, 86vw); display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px;
   background: #fff; border: 1px solid var(--line); border-radius: 16px;
   padding: 14px 16px; box-shadow: 0 18px 40px rgba(19,22,28,.12);
@@ -135,7 +135,7 @@ h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 0.95; max-width: 14ch; 
 .nav-panel p { font-size: 0.72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); grid-column: 1 / -1; margin-top: 6px; }
 .nav-panel p:first-child { margin-top: 0; }
 .nav-panel a {
-  color: var(--ink); text-decoration: none; padding: 8px 8px; border-radius: 8px; font-size: 0.92rem;
+  color: var(--ink); text-decoration: none; padding: 8px 8px; border-radius: 8px; font-size: 0.92rem; text-align: left;
 }
 .nav-panel a:hover, .nav-panel a.active { background: var(--bg); }
 .stage { width: calc(100% - 32px); max-width: none; margin: 18px auto 96px; }

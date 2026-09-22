@@ -347,10 +347,13 @@ function bookTotals() {
   const salesEx = bookRound(sales.reduce((s,x)=>s+x.c.ex,0));
   const salesVat = bookRound(sales.reduce((s,x)=>s+x.c.vat,0));
   const purchaseEx = bookRound(purchases.reduce((s,x)=>s+x.c.net,0));
+  const purchaseGross = bookRound(purchases.reduce((s,x)=>s+x.c.gross,0));
   const inputVat = bookRound(purchases.reduce((s,x)=>s+(x.c.deductible?x.c.vat:0),0));
+  const spendAfterVat = bookRound(purchaseGross-inputVat);
+  const receiptCount = purchases.filter(({x})=>x.bestand).length;
   const open = bookRound(sales.filter(x=>x.f.status==="open").reduce((s,x)=>s+x.c.incl,0));
   const review = purchases.filter(({x,c})=>c.rate===null || !x.categorie || x.btwAftrekbaar==null).length;
-  return {year,quarter,sales,purchases,salesEx,salesVat,purchaseEx,inputVat,result:bookRound(salesEx-purchaseEx),vatDue:bookRound(salesVat-inputVat),open,review};
+  return {year,quarter,sales,purchases,salesEx,salesVat,purchaseEx,purchaseGross,inputVat,spendAfterVat,receiptCount,result:bookRound(salesEx-purchaseEx),vatDue:bookRound(salesVat-inputVat),open,review};
 }
 function bookCsv(rows) {
   const cell = v => '"' + String(v ?? "").replace(/"/g,'""') + '"';
@@ -387,21 +390,43 @@ function bookPackageFiles() {
     if(x.btwAftrekbaar==null) checks.push(["Inkoop",ref,"BTW-aftrek nog beoordelen"]);
   });
   const period = t.quarter==="all" ? String(t.year) : t.year+"-Q"+t.quarter;
+  const summary = `<!doctype html><html lang="nl"><head><meta charset="utf-8"><title>Vakento overzicht ${period}</title>
+  <style>body{font:16px Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 24px;color:#172033}h1{margin-bottom:8px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{border:1px solid #d8dee8;border-radius:12px;padding:16px}.card b{display:block;font-size:1.6rem;margin-top:6px}small{color:#687386}</style></head><body>
+  <h1>Vakento boekhoudoverzicht ${period}</h1>
+  <p>Samenvatting van verkoop, uitgaven en btw voor de gekozen periode.</p>
+  <div class="grid">
+    <div class="card">Totaal uitgegeven incl. btw<b>${bookMoney(t.purchaseGross)}</b></div>
+    <div class="card">BTW terug te vragen*<b>${bookMoney(t.inputVat)}</b></div>
+    <div class="card">Uitgaven na aftrek btw<b>${bookMoney(t.spendAfterVat)}</b></div>
+    <div class="card">Omzet excl. btw<b>${bookMoney(t.salesEx)}</b></div>
+    <div class="card">BTW op verkoop<b>${bookMoney(t.salesVat)}</b></div>
+    <div class="card">Indicatief btw-saldo<b>${bookMoney(t.vatDue)}</b></div>
+  </div>
+  <p><small>* Alleen boekingen die in Vakento als btw-aftrekbaar zijn gemarkeerd. De boekhouder controleert de uiteindelijke fiscale aftrekbaarheid.</small></p>
+  <p>Originele gescande bonnen staan, voor zover beschikbaar, in de map <strong>07-bonnen</strong> in dit ZIP-bestand.</p>
+  </body></html>`;
   const readme = `Vakento boekhouderspakket ${period}
 
 Inhoud:
+- 00-overzicht.html
 - verkoopboek.csv
 - inkoopboek.csv
 - btw-overzicht.csv
 - openstaande-posten.csv
 - controlepunten.csv
 - data-backup.json
+- 07-bonnen/ (originele gescande bonnen, indien aanwezig)
+
+Totaal uitgegeven incl. btw: ${bookMoney(t.purchaseGross)}
+BTW terug te vragen volgens Vakento: ${bookMoney(t.inputVat)}
+Uitgaven na btw-teruggaaf: ${bookMoney(t.spendAfterVat)}
 
 Dit pakket is voorbereid voor de boekhouder. Laat de boekhouder altijd rubricering, fiscale correcties, privégebruik, investeringen/afschrijvingen en btw-aangifte controleren.`;
   return {
     period,
     files:{
       "00-LEESMIJ.txt":readme,
+      "00-overzicht.html":summary,
       "01-verkoopboek.csv":bookCsv(sales),
       "02-inkoopboek.csv":bookCsv(purchases),
       "03-btw-overzicht.csv":bookCsv(vat),
@@ -411,6 +436,30 @@ Dit pakket is voorbereid voor de boekhouder. Laat de boekhouder altijd rubriceri
     }
   };
 }
+async function addReceiptFilesToZip(zip, totals) {
+  const used = new Set();
+  let added = 0;
+  for (const {x} of totals.purchases || []) {
+    if (!x?.bestand || !x?.cloudPad) continue;
+    const pad = [x.cloudPad, x.bestand].filter(Boolean).join("/");
+    if (!pad || used.has(pad)) continue;
+    used.add(pad);
+    try {
+      const res = await fetch("/api/cloud/bestand?pad=" + encodeURIComponent(pad), {
+        method:"GET",
+        credentials:"include",
+        cache:"no-store"
+      });
+      if (!res.ok) continue;
+      const blob = await res.blob();
+      const safe = String(x.bestand).replace(/[\\/:*?"<>|]/g, "_");
+      zip.file("07-bonnen/" + safe, blob);
+      added += 1;
+    } catch (_) {}
+  }
+  return added;
+}
+
 function viewBoekhouding() {
   data.boekhouding ||= { jaar:new Date().getFullYear(), kwartaal:"all" };
   const t = bookTotals();
@@ -435,16 +484,46 @@ function viewBoekhouding() {
     </form>
 
     <div class="stat-grid">
+      <div class="stat"><span>Totaal uitgegeven incl. btw</span><b>${bookMoney(t.purchaseGross)}</b></div>
+      <div class="stat"><span>BTW terug te vragen*</span><b class="ok">${bookMoney(t.inputVat)}</b></div>
+      <div class="stat"><span>Uitgaven na btw-teruggaaf</span><b>${bookMoney(t.spendAfterVat)}</b></div>
+      <div class="stat"><span>Gescande bonnen</span><b>${t.receiptCount}</b></div>
       <div class="stat"><span>Omzet excl.</span><b>${bookMoney(t.salesEx)}</b></div>
       <div class="stat"><span>Kosten excl.</span><b>${bookMoney(t.purchaseEx)}</b></div>
       <div class="stat"><span>Resultaat*</span><b>${bookMoney(t.result)}</b></div>
       <div class="stat"><span>BTW verkoop</span><b>${bookMoney(t.salesVat)}</b></div>
-      <div class="stat"><span>Voorbelasting</span><b>${bookMoney(t.inputVat)}</b></div>
       <div class="stat"><span>BTW-saldo*</span><b>${bookMoney(t.vatDue)}</b></div>
       <div class="stat"><span>Open te ontvangen</span><b>${bookMoney(t.open)}</b></div>
       <div class="stat"><span>Controlepunten</span><b class="${t.review?"warn":"ok"}">${t.review}</b></div>
     </div>
-    <p class="muted">* Indicatief. De boekhouder controleert fiscale correcties, privégebruik, investeringen, afschrijvingen en aftrekbaarheid.</p>
+    <p class="muted">* BTW terug te vragen telt alleen boekingen mee die je als <strong>btw aftrekbaar</strong> hebt gemarkeerd. De boekhouder controleert de uiteindelijke fiscale aftrekbaarheid.</p>
+
+    <section class="card" style="margin-top:18px">
+      <div class="row">
+        <div><p class="kicker">Bonnen</p><h2>Gescande aankoopbonnen</h2><p class="muted">Open de originele bon en geef aan of de btw volgens jou zakelijk aftrekbaar is.</p></div>
+        <a class="btn" href="/app.html#bon">Nieuwe bon scannen</a>
+      </div>
+      <div class="list" style="margin-top:12px">
+        ${t.purchases.filter(({x})=>x.bestand).length
+          ? t.purchases.filter(({x})=>x.bestand).map(({x,c})=>{
+              const fullPad = [x.cloudPad,x.bestand].filter(Boolean).join("/");
+              return `<article class="item">
+                <div><strong>${esc(x.leverancier||"Bon")}</strong><span>${esc(x.dag||x.datum||"")} · ${bookMoney(c.gross)} incl. btw · btw ${bookMoney(c.vat)}</span></div>
+                <div class="actions">
+                  ${fullPad ? `<a class="btn btn-ghost" target="_blank" rel="noopener" href="/api/cloud/bestand?pad=${encodeURIComponent(fullPad)}">Open bon</a>` : ""}
+                  <label>BTW aftrekbaar
+                    <select data-book-deductible="${esc(x.id||"")}">
+                      <option value="" ${x.btwAftrekbaar==null?"selected":""}>Nog beoordelen</option>
+                      <option value="1" ${x.btwAftrekbaar===true?"selected":""}>Ja</option>
+                      <option value="0" ${x.btwAftrekbaar===false?"selected":""}>Nee</option>
+                    </select>
+                  </label>
+                </div>
+              </article>`;
+            }).join("")
+          : '<article class="item"><strong>Nog geen gescande bonnen</strong><span>Scan je eerste bon met de Vakento-app.</span></article>'}
+      </div>
+    </section>
 
     <section class="card" style="margin-top:18px">
       <p class="kicker">Nieuwe inkoopboeking</p><h2>Kosten vastleggen</h2>
@@ -465,8 +544,8 @@ function viewBoekhouding() {
     </tbody></table></div>
 
     <h2 style="margin-top:22px">Inkoopboek</h2>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Datum</th><th>Leverancier</th><th>Categorie</th><th>Excl.</th><th>BTW</th><th>Incl.</th><th>Controle</th></tr></thead><tbody>
-      ${t.purchases.map(({x,c})=>`<tr><td>${esc(x.dag||x.datum||"")}</td><td>${esc(x.leverancier||"")}</td><td>${esc(x.categorie||"4999")}</td><td>${bookMoney(c.net)}</td><td>${c.rate==null?"?":c.rate+"%"} · ${bookMoney(c.vat)}</td><td>${bookMoney(c.gross)}</td><td class="${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"warn":"ok"}">${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"Nakijken":"Compleet"}</td></tr>`).join("") || '<tr><td colspan="7">Geen inkoopboekingen.</td></tr>'}
+    <div class="table-wrap"><table class="table"><thead><tr><th>Datum</th><th>Leverancier</th><th>Categorie</th><th>Excl.</th><th>BTW</th><th>Incl.</th><th>BTW aftrek</th><th>Controle</th></tr></thead><tbody>
+      ${t.purchases.map(({x,c})=>`<tr><td>${esc(x.dag||x.datum||"")}</td><td>${esc(x.leverancier||"")}</td><td>${esc(x.categorie||"4999")}</td><td>${bookMoney(c.net)}</td><td>${c.rate==null?"?":c.rate+"%"} · ${bookMoney(c.vat)}</td><td>${bookMoney(c.gross)}</td><td><select data-book-deductible="${esc(x.id||"")}"><option value="" ${x.btwAftrekbaar==null?"selected":""}>Nog beoordelen</option><option value="1" ${x.btwAftrekbaar===true?"selected":""}>Ja</option><option value="0" ${x.btwAftrekbaar===false?"selected":""}>Nee</option></select></td><td class="${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"warn":"ok"}">${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"Nakijken":"Compleet"}</td></tr>`).join("") || '<tr><td colspan="8">Geen inkoopboekingen.</td></tr>'}
     </tbody></table></div>
   `;
 }
@@ -1107,18 +1186,33 @@ function bind(root) {
     persist();
   });
 
+  root.querySelectorAll("[data-book-deductible]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const row = (data.inkoop || []).find((x) => String(x.id) === String(select.dataset.bookDeductible));
+      if (!row) return;
+      row.btwAftrekbaar = select.value === "" ? null : select.value === "1";
+      toast(select.value === "1" ? "BTW gemarkeerd als aftrekbaar" : select.value === "0" ? "BTW gemarkeerd als niet aftrekbaar" : "BTW-aftrek staat op beoordelen");
+      persist();
+    });
+  });
+
   root.querySelector("[data-book-export]")?.addEventListener("click", async () => {
     const pack = bookPackageFiles();
     if (window.JSZip) {
       const zip = new window.JSZip();
       Object.entries(pack.files).forEach(([name,content])=>zip.file(name,content));
+      const totals = bookTotals();
+      const receiptCount = await addReceiptFilesToZip(zip, totals);
+      zip.file("07-bonnen/LEESMIJ.txt", receiptCount
+        ? receiptCount + " originele gescande bon(nen) toegevoegd."
+        : "Voor deze periode zijn geen originele gescande bonbestanden gevonden.");
       const blob = await zip.generateAsync({type:"blob"});
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "Vakento-boekhouderspakket-"+pack.period+".zip";
       a.click();
       setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-      toast("Boekhouderspakket is klaar");
+      toast("Boekhouderspakket is klaar, inclusief " + receiptCount + " originele bon(nen)");
     } else {
       downloadBookBlob(pack.files["01-verkoopboek.csv"],"Vakento-"+pack.period+"-verkoopboek.csv");
       toast("ZIP-module niet geladen; verkoopboek los gedownload");

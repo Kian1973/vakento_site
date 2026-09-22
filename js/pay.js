@@ -35,7 +35,7 @@ async function afterAuth() {
     location.replace("werk.html");
     return;
   }
-  location.replace("prijzen.html#inloggen");
+  location.replace("/#inloggen");
 }
 
 async function bindAuth(form, mode) {
@@ -80,7 +80,7 @@ if (box) {
   const user = await me();
   if (!user.email) {
     if (/account\.html$/i.test(location.pathname)) {
-      location.replace("prijzen.html#account");
+      location.replace("/#lidworden");
     } else {
       box.innerHTML = "<p class='muted'>Nog niet ingelogd.</p>";
     }
@@ -117,7 +117,7 @@ if (box) {
       const uid = user.id;
       await api("/api/stop", {});
       wisLokaal(uid);
-      location.href = "prijzen.html";
+      location.href = "/#lidworden";
     });
   }
 }

@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/vakento.css?v=btw2">
+  <link rel="stylesheet" href="css/vakento.css?v=menu-left1">
   <style>
     .account-icon-btn{
       position:relative;
@@ -75,6 +75,26 @@
       opacity:1;
       visibility:visible;
       transform:translateY(0);
+    }
+    /* Werkplaatsmenu consequent links uitlijnen */
+    .app-bar{
+      justify-content:flex-start;
+    }
+    .app-nav{
+      justify-content:flex-start !important;
+      text-align:left !important;
+      margin-left:0;
+    }
+    .app-nav > a,
+    .nav-more,
+    .nav-more > summary,
+    .nav-panel,
+    .nav-panel a{
+      text-align:left !important;
+    }
+    .nav-panel{
+      left:0 !important;
+      right:auto !important;
     }
   </style>
 </head>

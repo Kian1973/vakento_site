@@ -59,16 +59,24 @@ async function login(page) {
   await login.locator('input[name="password"]').fill(PASSWORD);
   await login.locator('button[type="submit"]').click();
 
+  const loginError = login.locator('[data-err]');
+  const two = page.locator('[data-login-2fa]');
+
   await Promise.race([
-    page.waitForURL(/\/werk\.html(?:$|#|\?)/, { timeout: 8_000 }).catch(() => null),
-    page.locator('[data-login-2fa]').waitFor({ state: 'visible', timeout: 8_000 }).catch(() => null),
+    page.waitForURL(/\/werk\.html(?:$|#|\?)/, { timeout: 12_000 }).catch(() => null),
+    two.waitFor({ state: 'visible', timeout: 12_000 }).catch(() => null),
+    loginError.waitFor({ state: 'visible', timeout: 12_000 }).catch(() => null),
   ]);
 
-  if (await page.locator('[data-login-2fa]').isVisible().catch(() => false)) {
+  if (await loginError.isVisible().catch(() => false)) {
+    const msg = (await loginError.innerText().catch(() => '')).trim();
+    throw new Error('Vakento login mislukt: ' + (msg || 'onbekende loginfout'));
+  }
+
+  if (await two.isVisible().catch(() => false)) {
     if (!TOTP_SECRET) {
-      throw new Error('Dit testaccount gebruikt 2FA. Zet VAKENTO_TEST_TOTP_SECRET op de Base32-sleutel van het testaccount.');
+      throw new Error('Vakento vraagt bij dit testaccount daadwerkelijk om 2FA, maar er is geen testsleutel ingesteld.');
     }
-    const two = page.locator('[data-login-2fa]');
     await two.locator('input[name="code"]').fill(totp(TOTP_SECRET));
     await two.locator('button[type="submit"]').click();
   }

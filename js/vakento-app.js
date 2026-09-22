@@ -10,11 +10,22 @@ if (!user?.email || !user?.paid) {
 }
 
 const logoutButton = $("[data-logout]");
-logoutButton?.addEventListener("click", async () => {
+logoutButton?.addEventListener("click", async (event) => {
+  event.preventDefault();
   logoutButton.disabled = true;
   logoutButton.textContent = "Uitloggen…";
-  await logout();
-  location.replace("/account.html?uitgelogd=1");
+  try {
+    await logout();
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((key) => key.startsWith("vakento-app-")).map((key) => caches.delete(key)));
+    }
+    location.replace("/account.html?uitgelogd=1&t=" + Date.now());
+  } catch (err) {
+    logoutButton.disabled = false;
+    logoutButton.textContent = "Uitloggen";
+    alert(err.message || "Uitloggen is niet gelukt.");
+  }
 });
 
 function onlineState() {

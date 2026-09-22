@@ -1,4 +1,4 @@
-const CACHE = "vakento-app-v15";
+const CACHE = "vakento-app-v16";
 const SHELL = [
   "/manifest.webmanifest",
   "/app.html",

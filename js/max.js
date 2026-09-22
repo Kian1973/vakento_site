@@ -39,11 +39,11 @@
       link: "Open Bon scannen"
     },
     {
-      keys: ["boekhouder", "csv", "export", "boekhouding export", "accountant", "boekhoudpakket"],
-      title: "Export voor de boekhouder",
-      answer: "Vakento kan administratieve gegevens als CSV exporteren. Denk aan facturen, inkopen en gescande bonnen. Het doel is een leesbaar bestand dat de boekhouder verder kan verwerken.",
-      href: "/werk.html#/geld",
-      link: "Open Financieel overzicht"
+      keys: ["boekhouder", "csv", "export", "boekhouding export", "accountant", "boekhoudpakket", "boekhouderspakket", "btw overzicht", "inkoopboek", "verkoopboek", "open posten"],
+      title: "Boekhouding en boekhouderspakket",
+      answer: "In Boekhouding bundelt Vakento verkoopfacturen, inkoop en gescande bonnen, btw 9% en 21%, openstaande posten en controlepunten. Met één knop maak je een ZIP met verkoopboek, inkoopboek, btw-overzicht, openstaande posten, controlepunten en een data-back-up voor je boekhouder.",
+      href: "/werk.html#/boekhouding",
+      link: "Open Boekhouding"
     },
     {
       keys: ["cloud", "bestand", "bestanden", "opslag", "map", "mappen", "document"],

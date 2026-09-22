@@ -58,14 +58,14 @@
         <div><p class="kicker">Boekhouding</p><h2>Bon scannen</h2></div>
         <span class="app-badge">Camera</span>
       </div>
-      <p class="muted">Maak een foto van een kassabon of factuur. Vakento bewaart hem automatisch per jaar en maand.</p>
+      <p class="muted">Maak een foto van een kassabon. Vakento leest leverancier, datum, totaalbedrag, btw en betaalwijze automatisch en slaat alles direct op in de boekhouding.</p>
 
       <form class="app-form" data-receipt-form>
         <input type="file" accept="image/*,application/pdf" capture="environment" data-receipt-file hidden required>
         <button class="camera-pick" type="button" data-take-receipt>
           <span>📷</span>
-          <strong>Open camera / kies bon</strong>
-          <small>Vakento vraagt zo nodig eerst cameratoestemming</small>
+          <strong>Scan bon automatisch</strong>
+          <small>Foto maken → uitlezen → direct opslaan</small>
         </button>
         <div class="app-preview" data-receipt-preview hidden></div>
 
@@ -95,7 +95,7 @@
           </select>
         </label>
         <label>Notitie<input name="note" maxlength="160" placeholder="Bijv. verf voor project Jansen"></label>
-        <button class="btn app-big-btn" type="submit">Bon opslaan in Cloud</button>
+        <button class="btn app-big-btn" type="submit">Gegevens corrigeren en opnieuw opslaan</button>
         <p class="app-status" data-receipt-status hidden></p>
       </form>
 
@@ -147,7 +147,8 @@
     <a href="/account.html">Account</a>
   </nav>
 
-  <script type="module" src="/js/vakento-app.js?v=app2"></script>
-  <script src="/js/install-app.js?v=app2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script type="module" src="/js/vakento-app.js?v=app3"></script>
+  <script src="/js/install-app.js?v=app3"></script>
 </body>
 </html>

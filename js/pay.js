@@ -213,7 +213,8 @@ document.querySelector("[data-mailbox-create]")?.addEventListener("submit", asyn
   try {
     const out = await api("/api/mailbox/create", { localpart });
     if (msg) {
-      msg.textContent = "Aangemaakt: " + (out.email || (localpart + "@vakento.nl"));
+      msg.textContent = "Aangemaakt: " + (out.email || (localpart + "@vakento.nl")) +
+        (out.password ? " · Bewaar dit mailboxwachtwoord nu: " + out.password : "");
       msg.hidden = false;
     }
   } catch (ex) {

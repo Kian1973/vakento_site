@@ -62,6 +62,114 @@ async function uploadBlob(blob, pad, name) {
   if (!res.ok) throw new Error(out.error || "Upload mislukt");
   return out;
 }
+
+async function readCloudText(pad) {
+  const res = await fetch("/api/cloud/bestand?pad=" + encodeURIComponent(pad), {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+    headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
+  });
+  if (!res.ok) throw new Error("Bestand kon niet worden gelezen");
+  return res.text();
+}
+
+function nlMoney(value) {
+  const n = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n.toFixed(2).replace(".", ",") : "";
+}
+
+function csvCell(value) {
+  const s = String(value ?? "").replace(/"/g, '""');
+  return '"' + s + '"';
+}
+
+async function buildBookkeeperExport(year, month) {
+  const bonPad = await ensureFolder(`Boekhouding/${year}/${month}/Bonnen`);
+  const exportPad = await ensureFolder(`Boekhouding/${year}/${month}/Export boekhouder`);
+  const listing = await listFolder(bonPad);
+  const metas = [];
+
+  for (const item of (listing.items || [])) {
+    if (item.soort !== "bestand" || !String(item.name || "").toLowerCase().endsWith(".json")) continue;
+    try {
+      const raw = await readCloudText(item.pad);
+      const meta = JSON.parse(raw);
+      metas.push(meta);
+    } catch (_) {}
+  }
+
+  metas.sort((a, b) => String(a.datum || "").localeCompare(String(b.datum || "")));
+
+  const csvHeaders = [
+    "Datum",
+    "Leverancier",
+    "Omschrijving",
+    "Bedrag excl. btw",
+    "BTW %",
+    "BTW bedrag",
+    "Bedrag incl. btw",
+    "Betaalwijze",
+    "Bonbestand",
+    "Notitie"
+  ];
+  const csvRows = metas.map((m) => [
+    m.datum || "",
+    m.leverancier || "",
+    "Inkoopbon",
+    nlMoney(m.bedragExclBtw),
+    m.btw || "",
+    nlMoney(m.btwBedrag),
+    nlMoney(m.bedragInclBtw),
+    m.betaaldMet || "",
+    m.bestand || "",
+    m.notitie || ""
+  ]);
+
+  const csv = "\uFEFF" + [csvHeaders, ...csvRows]
+    .map((row) => row.map(csvCell).join(";"))
+    .join("\r\n");
+
+  const sum = (key) => metas.reduce((t, m) => {
+    const n = Number(String(m[key] ?? "").replace(",", "."));
+    return t + (Number.isFinite(n) ? n : 0);
+  }, 0);
+
+  const escHtml = (v) => String(v ?? "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const rowsHtml = metas.map((m) => `
+    <tr>
+      <td>${escHtml(m.datum || "")}</td>
+      <td>${escHtml(m.leverancier || "")}</td>
+      <td class="num">€ ${nlMoney(m.bedragExclBtw) || "0,00"}</td>
+      <td class="num">${escHtml(m.btw || "")}%</td>
+      <td class="num">€ ${nlMoney(m.btwBedrag) || "0,00"}</td>
+      <td class="num">€ ${nlMoney(m.bedragInclBtw) || "0,00"}</td>
+      <td>${escHtml(m.betaaldMet || "")}</td>
+      <td>${escHtml(m.bestand || "")}</td>
+    </tr>`).join("");
+
+  const html = `<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><title>Boekhouder overzicht ${year}-${month}</title>
+<style>
+body{font-family:Arial,sans-serif;margin:28px;color:#222}h1{margin-bottom:4px}p{color:#555}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{border:1px solid #ccc;padding:7px;text-align:left}
+th{background:#f3f3f3}.num{text-align:right;white-space:nowrap}tfoot td{font-weight:bold;background:#fafafa}
+@media print{body{margin:10mm}table{font-size:10px}}
+</style></head><body>
+<h1>Boekhouder-overzicht ${year}-${month}</h1>
+<p>Originele bonnen staan in Boekhouding → ${year} → ${month} → Bonnen.</p>
+<table><thead><tr><th>Datum</th><th>Leverancier</th><th>Excl. btw</th><th>BTW %</th><th>BTW</th><th>Incl. btw</th><th>Betaald met</th><th>Bonbestand</th></tr></thead>
+<tbody>${rowsHtml}</tbody>
+<tfoot><tr><td colspan="2">Totaal</td><td class="num">€ ${nlMoney(sum("bedragExclBtw"))}</td><td></td><td class="num">€ ${nlMoney(sum("btwBedrag"))}</td><td class="num">€ ${nlMoney(sum("bedragInclBtw"))}</td><td colspan="2"></td></tr></tfoot>
+</table></body></html>`;
+
+  await uploadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), exportPad, `inkoopboek-${year}-${month}.csv`);
+  await uploadBlob(new Blob([html], { type: "text/html;charset=utf-8" }), exportPad, `boekhouder-overzicht-${year}-${month}.html`);
+
+  return { exportPad, count: metas.length };
+}
 async function prepareImage(file) {
   if (!file.type?.startsWith("image/")) return file;
   try {
@@ -287,7 +395,14 @@ async function saveReceipt(file, extra = {}, automatic = false) {
   if (extra.ocrText) {
     await uploadBlob(new Blob([extra.ocrText], {type:"text/plain;charset=utf-8"}), pad, name.replace(/\.[^.]+$/, ".txt"));
   }
-  status(msg, automatic ? "Klaar. Bon gelezen en automatisch opgeslagen." : "Bon opgeslagen in de boekhoudmap.");
+
+  try {
+    await buildBookkeeperExport(year, month);
+  } catch (_) {}
+
+  status(msg, automatic
+    ? "Klaar. Bon + berekeningen opgeslagen en boekhouder-overzicht bijgewerkt."
+    : "Bon opgeslagen en boekhouder-overzicht bijgewerkt.");
   addRecent("Bon · " + supplier, pad);
   return { pad, name, meta };
 }

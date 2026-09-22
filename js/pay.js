@@ -108,12 +108,8 @@ if (box || loginView || accountView) {
       ${user.paid ? '<p><a class="btn" href="werk.html">Naar de werkplaats</a></p>' : ""}
       ${user.trial ? '<p><button class="btn" type="button" data-buy-now>Betalen, werkplaats houden</button></p>' : ""}
       ${user.admin ? '<p><a class="btn" href="admin.html">Admin: alles zien</a></p>' : ""}
-      <p><button class="btn btn-ghost" type="button" data-out>Uitloggen</button></p>
+      <p><a class="btn btn-ghost" href="/logout.html?v=2">Uitloggen</a></p>
       ${user.admin ? "" : '<p><button class="btn btn-ghost" type="button" data-stop>Stoppen en account wissen</button></p>'}`;
-    box.querySelector("[data-out]")?.addEventListener("click", async () => {
-      await api("/api/logout", {});
-      location.reload();
-    });
     box.querySelector("[data-buy-now]")?.addEventListener("click", async () => {
       try {
         await pay("werkplaats");

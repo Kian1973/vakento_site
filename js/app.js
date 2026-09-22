@@ -1182,7 +1182,8 @@ function bind(root) {
       const out = await api("/api/mailbox/create", { localpart });
       if (msg) {
         msg.hidden = false;
-        msg.textContent = "Aangemaakt: " + (out.email || (localpart + "@vakento.nl"));
+        msg.textContent = "Aangemaakt: " + (out.email || (localpart + "@vakento.nl")) +
+          (out.password ? " · Bewaar dit mailboxwachtwoord nu: " + out.password : "");
       }
       toast("E-mailadres aangemaakt");
     } catch (ex) {

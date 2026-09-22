@@ -32,10 +32,10 @@ async function pay(sku) {
 async function afterAuth() {
   const user = await me();
   if (user.paid) {
-    location.href = "werk.html";
+    location.replace("werk.html");
     return;
   }
-  location.href = "prijzen.html#account";
+  location.replace("prijzen.html#account");
 }
 
 async function bindAuth(form, mode) {
@@ -79,7 +79,11 @@ const box = $("[data-me]");
 if (box) {
   const user = await me();
   if (!user.email) {
-    box.innerHTML = "<p class='muted'>Nog niet ingelogd.</p>";
+    if (/account\.html$/i.test(location.pathname)) {
+      location.replace("prijzen.html#account");
+    } else {
+      box.innerHTML = "<p class='muted'>Nog niet ingelogd.</p>";
+    }
   } else {
     const pct = user.quotaBytes ? Math.min(100, Math.round((user.usedBytes / user.quotaBytes) * 100)) : 0;
     const stand = user.trial

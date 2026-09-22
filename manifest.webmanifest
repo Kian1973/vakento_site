@@ -1,8 +1,8 @@
 {
   "name": "Vakento",
   "short_name": "Vakento",
-  "description": "Bonnen scannen, werkfoto's opslaan en je Vakento-werkplaats openen.",
-  "start_url": "/app.html",
+  "description": "Bonnen automatisch lezen en opslaan, werkfoto's bewaren en je Vakento-werkplaats openen.",
+  "start_url": "/app.html?v=4",
   "scope": "/",
   "display": "standalone",
   "background_color": "#eef2f7",

@@ -76,15 +76,17 @@ bindAuth($("[data-register]"), "register");
 bindAuth($("[data-login]"), "login");
 
 const box = $("[data-me]");
-if (box) {
+const loginView = $("[data-login-view]");
+const accountView = $("[data-account-view]");
+if (box || loginView || accountView) {
   const user = await me();
   if (!user.email) {
-    if (/account\.html$/i.test(location.pathname)) {
-      location.replace("/#abonnementen");
-    } else {
-      box.innerHTML = "<p class='muted'>Nog niet ingelogd.</p>";
-    }
+    if (loginView) loginView.hidden = false;
+    if (accountView) accountView.hidden = true;
+    if (box) box.innerHTML = "<p class='muted'>Nog niet ingelogd.</p>";
   } else {
+    if (loginView) loginView.hidden = true;
+    if (accountView) accountView.hidden = false;
     const pct = user.quotaBytes ? Math.min(100, Math.round((user.usedBytes / user.quotaBytes) * 100)) : 0;
     const stand = user.trial
       ? "Gratis tot " + dag(user.paidUntil) + ". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan."

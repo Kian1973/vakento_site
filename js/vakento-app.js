@@ -1,4 +1,4 @@
-import { api, me } from "./api.js";
+import { api, me, logout } from "./api.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const user = await me();
@@ -8,6 +8,14 @@ if (!user?.email || !user?.paid) {
 } else {
   $("[data-app-user]").textContent = user.name || user.email || "Vakento";
 }
+
+const logoutButton = $("[data-logout]");
+logoutButton?.addEventListener("click", async () => {
+  logoutButton.disabled = true;
+  logoutButton.textContent = "Uitloggen…";
+  await logout();
+  location.replace("/account.html?uitgelogd=1");
+});
 
 function onlineState() {
   const el = $("[data-online]");
@@ -219,10 +227,3 @@ $("[data-share-books]")?.addEventListener("click", async () => {
   }
 });
 
-
-$("[data-logout]")?.addEventListener("click", async () => {
-  try {
-    await api("/api/logout", {});
-  } catch (_) {}
-  location.replace("/account.html");
-});

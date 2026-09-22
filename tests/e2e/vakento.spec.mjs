@@ -127,9 +127,10 @@ test.describe('Vakento publieke controle', () => {
 });
 
 test.describe('Vakento volledige gebruikersflow', () => {
+  test.skip(!EMAIL || !PASSWORD || !ALLOW_WRITE,
+    'Volledige schrijftest vereist VAKENTO_TEST_EMAIL, VAKENTO_TEST_PASSWORD en VAKENTO_ALLOW_WRITE_TESTS=1.');
+
   test('contact -> klus -> portal -> uren -> factuur -> cloud -> app -> AI -> uitloggen @full', async ({ page, browser }) => {
-    test.skip(!EMAIL || !PASSWORD, 'Stel VAKENTO_TEST_EMAIL en VAKENTO_TEST_PASSWORD in voor de volledige test.');
-    test.skip(!ALLOW_WRITE, 'Zet VAKENTO_ALLOW_WRITE_TESTS=1 om testdata te mogen aanmaken en daarna op te ruimen.');
 
     const runId = `AUTO-${Date.now()}`;
     const contactName = `${runId} Klant`;

@@ -28,7 +28,11 @@ try {
   ]);
 
   if (await page.locator('[data-login-2fa]').isVisible().catch(() => false)) {
-    if (!code) throw new Error('Vakento vraagt 2FA maar er is geen eenmalige code meegegeven.');
+    if (!code) {
+      console.error('VAKENTO_2FA_REQUIRED');
+      process.exitCode = 42;
+      return;
+    }
     const form = page.locator('[data-login-2fa]');
     const trust = form.locator('input[name="trustDevice"]');
     if (await trust.count()) await trust.check();

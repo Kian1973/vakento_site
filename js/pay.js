@@ -197,35 +197,6 @@ forgotForm?.addEventListener("submit", async (e) => {
 });
 
 
-document.querySelector("[data-mailbox-create]")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = e.currentTarget;
-  const msg = form.querySelector("[data-mailbox-msg]");
-  const localpart = String(new FormData(form).get("localpart") || "").trim().toLowerCase();
-  if (msg) msg.hidden = true;
-  if (!/^[a-z0-9._-]{2,40}$/.test(localpart)) {
-    if (msg) {
-      msg.textContent = "Kies 2 tot 40 letters, cijfers, punten, streepjes of underscores.";
-      msg.hidden = false;
-    }
-    return;
-  }
-  try {
-    const out = await api("/api/mailbox/create", { localpart });
-    if (msg) {
-      msg.textContent = "Aangemaakt: " + (out.email || (localpart + "@vakento.nl")) +
-        (out.password ? " · Bewaar dit mailboxwachtwoord nu: " + out.password : "");
-      msg.hidden = false;
-    }
-  } catch (ex) {
-    if (msg) {
-      msg.textContent = ex.message || "E-mailadres aanmaken is niet gelukt.";
-      msg.hidden = false;
-    }
-  }
-});
-
-
 const login2fa = document.querySelector("[data-login-2fa]");
 login2fa?.addEventListener("submit", async (e) => {
   e.preventDefault();

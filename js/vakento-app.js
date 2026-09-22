@@ -9,24 +9,7 @@ if (!user?.email || !user?.paid) {
   $("[data-app-user]").textContent = user.name || user.email || "Vakento";
 }
 
-const logoutButton = $("[data-logout]");
-logoutButton?.addEventListener("click", async (event) => {
-  event.preventDefault();
-  logoutButton.disabled = true;
-  logoutButton.textContent = "Uitloggen…";
-  try {
-    await logout();
-    if ("caches" in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.filter((key) => key.startsWith("vakento-app-")).map((key) => caches.delete(key)));
-    }
-    location.replace("/account.html?uitgelogd=1&t=" + Date.now());
-  } catch (err) {
-    logoutButton.disabled = false;
-    logoutButton.textContent = "Uitloggen";
-    alert(err.message || "Uitloggen is niet gelukt.");
-  }
-});
+// Uitloggen loopt via /logout.html, zodat het ook werkt als deze module of PWA-cache problemen heeft.
 
 function onlineState() {
   const el = $("[data-online]");
@@ -38,37 +21,8 @@ onlineState();
 addEventListener("online", onlineState);
 addEventListener("offline", onlineState);
 
-const cameraState = $("[data-camera-state]");
-async function cameraPermissionState() {
-  try {
-    if (!navigator.permissions?.query) return;
-    const p = await navigator.permissions.query({ name: "camera" });
-    if (cameraState) cameraState.textContent = p.state === "granted" ? "Toestemming gegeven." : p.state === "denied" ? "Camera geblokkeerd in de telefoon/browser." : "Toestemming wordt gevraagd zodra je de camera opent.";
-    p.onchange = cameraPermissionState;
-  } catch (_) {}
-}
-
-async function requestCameraPermission() {
-  if (!navigator.mediaDevices?.getUserMedia) {
-    if (cameraState) cameraState.textContent = "Deze browser kan cameratoestemming niet vooraf aanvragen. Gebruik de cameraknop hieronder.";
-    return true;
-  }
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: "environment" } },
-      audio: false,
-    });
-    stream.getTracks().forEach((track) => track.stop());
-    if (cameraState) cameraState.textContent = "Camera toegestaan.";
-    return true;
-  } catch (err) {
-    if (cameraState) cameraState.textContent = "Geen cameratoegang. Kies 'Sta toe' of geef Vakento cameratoegang in de instellingen van je telefoon.";
-    return false;
-  }
-}
-
-$("[data-camera-permission]")?.addEventListener("click", requestCameraPermission);
-cameraPermissionState();
+// De mobiele camera wordt rechtstreeks via <input capture> geopend.
+// Hierdoor vraagt Vakento niet zelf bij iedere scan opnieuw om cameratoestemming.
 
 function safePart(s) {
   return String(s || "").trim().replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, " ").slice(0, 80) || "Onbekend";
@@ -300,13 +254,11 @@ async function saveReceipt(file, extra = {}, automatic = false) {
 const receiptFile = $("[data-receipt-file]");
 const photoFile = $("[data-photo-file]");
 
-$("[data-take-receipt]")?.addEventListener("click", async () => {
-  const ok = await requestCameraPermission();
-  if (ok) receiptFile?.click();
+$("[data-take-receipt]")?.addEventListener("click", () => {
+  receiptFile?.click();
 });
-$("[data-take-photo]")?.addEventListener("click", async () => {
-  const ok = await requestCameraPermission();
-  if (ok) photoFile?.click();
+$("[data-take-photo]")?.addEventListener("click", () => {
+  photoFile?.click();
 });
 
 receiptFile?.addEventListener("change", async () => {

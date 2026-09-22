@@ -138,7 +138,7 @@ h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 0.95; max-width: 14ch; 
   color: var(--ink); text-decoration: none; padding: 8px 8px; border-radius: 8px; font-size: 0.92rem;
 }
 .nav-panel a:hover, .nav-panel a.active { background: var(--bg); }
-.stage { width: min(1240px, calc(100% - 24px)); margin: 18px auto 96px; }
+.stage { width: calc(100% - 32px); max-width: none; margin: 18px auto 96px; }
 .row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .pills { display: flex; gap: 8px; flex-wrap: wrap; }
 .pill {
@@ -488,4 +488,70 @@ input, select, textarea {
   .contact-grid .wide { grid-column:auto; }
   .contact-form { padding:16px; }
   .contacts-db-state { align-items:flex-start; flex-direction:column; }
+}
+
+
+/* Volledig scherm werkplaats */
+@media (min-width: 1100px) {
+  .stage { width: calc(100% - 48px); }
+  .app-bar { padding-left:24px; padding-right:24px; }
+}
+
+.start-full {
+  display:grid;
+  gap:24px;
+  align-items:stretch;
+}
+.start-full-intro,
+.start-full-form {
+  min-width:0;
+}
+.start-full-intro {
+  padding:18px 8px 12px 0;
+}
+.start-full-intro h1 {
+  max-width:12ch;
+}
+.start-full-lead {
+  margin-top:18px;
+  max-width:62ch;
+  font-size:1.08rem;
+}
+.start-full-points {
+  display:grid;
+  gap:10px;
+  margin-top:24px;
+}
+.start-full-points > div {
+  display:grid;
+  gap:3px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.55);
+}
+.start-full-points span {
+  color:var(--muted);
+  font-size:.92rem;
+}
+.start-full-form {
+  width:100%;
+  max-width:none;
+  padding:24px;
+}
+.start-full-form h2 {
+  margin-bottom:4px;
+}
+.start-full-links {
+  margin-top:24px;
+}
+
+@media (min-width: 980px) {
+  .start-full {
+    grid-template-columns:minmax(0,1.15fr) minmax(420px,.85fr);
+    gap:40px;
+  }
+  .start-full-form {
+    align-self:start;
+  }
 }

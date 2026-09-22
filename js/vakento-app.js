@@ -116,6 +116,35 @@ function parseMoney(raw) {
   return Number.isFinite(n) ? n.toFixed(2) : "";
 }
 
+function vatFromInclusive(grossRaw, rateRaw) {
+  const gross = Number(parseMoney(grossRaw));
+  const rate = Number(rateRaw);
+  if (!Number.isFinite(gross) || !Number.isFinite(rate) || rate < 0) {
+    return { gross: "", net: "", vatAmount: "" };
+  }
+  if (rate === 0) {
+    return { gross: gross.toFixed(2), net: gross.toFixed(2), vatAmount: "0.00" };
+  }
+  const net = gross / (1 + rate / 100);
+  const vatAmount = gross - net;
+  return {
+    gross: gross.toFixed(2),
+    net: net.toFixed(2),
+    vatAmount: vatAmount.toFixed(2)
+  };
+}
+
+function updateVatPreview() {
+  if (!receiptForm) return;
+  const gross = receiptForm.elements.amount?.value || "";
+  const rate = receiptForm.elements.vat?.value || "";
+  const calc = vatFromInclusive(gross, rate);
+  const netEl = $("[data-net-amount]");
+  const vatEl = $("[data-vat-amount]");
+  if (netEl) netEl.textContent = calc.net ? "€ " + calc.net.replace(".", ",") : "—";
+  if (vatEl) vatEl.textContent = calc.vatAmount ? "€ " + calc.vatAmount.replace(".", ",") : "—";
+}
+
 function amountMatches(line) {
   const hits = String(line || "").match(/\b\d{1,6}(?:[.,]\d{2})\b/g) || [];
   return hits.map(parseMoney).filter(Boolean);
@@ -174,11 +203,16 @@ function parseReceiptText(text) {
   else if (/(visa|mastercard|creditcard)/i.test(clean)) paidWith = "Creditcard";
   else if (/(contant|cash)/i.test(clean)) paidWith = "Contant";
 
+  const vat = vatRates.length === 1 ? vatRates[0] : "";
+  const calc = vatFromInclusive(amount, vat);
+
   return {
     date,
     supplier,
     amount,
-    vat: vatRates.length === 1 ? vatRates[0] : "",
+    vat,
+    amountExclVat: calc.net,
+    vatAmount: calc.vatAmount,
     vatRates,
     vatRows,
     paidWith,
@@ -210,6 +244,7 @@ function fillReceiptForm(data = {}) {
   if (data.amount) receiptForm.elements.amount.value = String(data.amount).replace(".", ",");
   if (data.vat) receiptForm.elements.vat.value = data.vat;
   if (data.paidWith) receiptForm.elements.paidWith.value = data.paidWith;
+  updateVatPreview();
 }
 
 async function saveReceipt(file, extra = {}, automatic = false) {
@@ -228,11 +263,17 @@ async function saveReceipt(file, extra = {}, automatic = false) {
   const body = file.type === "application/pdf" ? file : await prepareImage(file);
   await uploadBlob(body, pad, name);
 
+  const gross = extra.amount || f.get("amount") || "";
+  const rate = extra.vat || f.get("vat") || "";
+  const calc = vatFromInclusive(gross, rate);
   const meta = {
     datum: dateValue,
     leverancier: extra.supplier || f.get("supplier") || "",
-    bedragInclBtw: extra.amount || f.get("amount") || "",
-    btw: extra.vat || f.get("vat") || "",
+    bedragInclBtw: calc.gross || gross,
+    bedragExclBtw: extra.amountExclVat || calc.net || "",
+    btwBedrag: extra.vatAmount || calc.vatAmount || "",
+    btw: rate,
+    btwIsInbegrepen: true,
     btwTarieven: extra.vatRates || [],
     btwRegels: extra.vatRows || [],
     betaaldMet: extra.paidWith || f.get("paidWith") || "",
@@ -281,6 +322,9 @@ photoFile?.addEventListener("change", () => showPreview(photoFile.files?.[0], $(
 const receiptForm = $("[data-receipt-form]");
 if (receiptForm) {
   receiptForm.elements.date.value = new Date().toISOString().slice(0,10);
+  receiptForm.elements.amount?.addEventListener("input", updateVatPreview);
+  receiptForm.elements.vat?.addEventListener("change", updateVatPreview);
+  updateVatPreview();
   receiptForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = $("[data-receipt-status]");

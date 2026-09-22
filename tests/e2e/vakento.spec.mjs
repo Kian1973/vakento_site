@@ -1,11 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { createHmac } from 'node:crypto';
+import { existsSync } from 'node:fs';
 
 const BASE_URL = process.env.VAKENTO_BASE_URL || 'https://vakento.nl';
 const EMAIL = process.env.VAKENTO_TEST_EMAIL || '';
 const PASSWORD = process.env.VAKENTO_TEST_PASSWORD || '';
 const TOTP_SECRET = process.env.VAKENTO_TEST_TOTP_SECRET || '';
 const ALLOW_WRITE = process.env.VAKENTO_ALLOW_WRITE_TESTS === '1';
+const HAS_AUTH_STATE = existsSync('.auth/vakento.json');
 
 function base32Decode(input) {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -36,6 +38,20 @@ function totp(secret, now = Date.now()) {
 }
 
 async function login(page) {
+  if (HAS_AUTH_STATE) {
+    const me = await page.context().request.get(new URL('/api/me', BASE_URL).href);
+    const user = await me.json().catch(() => ({}));
+    if (user?.email && user?.paid) {
+      await page.goto('/werk.html', { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('#stage')).toBeVisible();
+      await expect(page.locator('#stage')).not.toContainText('Vakento kon dit onderdeel niet laden');
+      return;
+    }
+    if (!EMAIL || !PASSWORD) {
+      throw new Error('De bewaarde vertrouwde testsessie is verlopen. Voer bootstrap-vakento-auth.sh opnieuw uit.');
+    }
+  }
+
   await page.goto('/account.html', { waitUntil: 'domcontentloaded' });
   const login = page.locator('[data-login]');
   await expect(login).toBeVisible();
@@ -127,8 +143,8 @@ test.describe('Vakento publieke controle', () => {
 });
 
 test.describe('Vakento volledige gebruikersflow', () => {
-  test.skip(!EMAIL || !PASSWORD || !ALLOW_WRITE,
-    'Volledige schrijftest vereist VAKENTO_TEST_EMAIL, VAKENTO_TEST_PASSWORD en VAKENTO_ALLOW_WRITE_TESTS=1.');
+  test.skip(!ALLOW_WRITE || (!HAS_AUTH_STATE && (!EMAIL || !PASSWORD)),
+    'Volledige schrijftest vereist VAKENTO_ALLOW_WRITE_TESTS=1 en een bewaarde testsessie of testlogin.');
 
   test('contact -> klus -> portal -> uren -> factuur -> cloud -> app -> AI -> uitloggen @full', async ({ page, browser }) => {
 

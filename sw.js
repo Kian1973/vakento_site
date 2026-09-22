@@ -1,4 +1,4 @@
-const CACHE = "vakento-app-v2";
+const CACHE = "vakento-app-v3";
 const SHELL = ["/app.html","/css/vakento.css","/css/vakento-app.css","/js/vakento-app.js","/js/api.js","/assets/vakento-app-icon.svg"];
 self.addEventListener("install", (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(()=>{})));
 self.addEventListener("activate", (e) => e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k)=>k!==CACHE).map((k)=>caches.delete(k))))));

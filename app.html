@@ -31,9 +31,9 @@
 
   <main class="mobile-app-shell">
     <section class="app-welcome">
-      <p class="kicker">Vakento op je telefoon</p>
-      <h1>Camera open. Klaar.</h1>
-      <p class="muted">Bonnen direct naar de boekhouding en werkfoto's meteen in de juiste Cloud-map.</p>
+      <p class="kicker">Vakento <span data-plan-name>Pro</span></p>
+      <h1>Alles van je abonnement bij de hand.</h1>
+      <p class="muted" data-plan-description>Werk, administratie, bonnen, cloud en slimme ondersteuning vanaf je telefoon.</p>
     </section>
 
     <section class="app-camera-permission">
@@ -43,14 +43,27 @@
       </div>
     </section>
 
-    <nav class="app-quick-grid" aria-label="Snelle acties">
-      <a href="#bon" class="app-quick app-quick-primary"><span>▣</span><strong>Bon scannen</strong><small>Naar boekhouding</small></a>
-      <a href="#werkfoto" class="app-quick app-quick-primary"><span>◎</span><strong>Werkfoto</strong><small>Naar juiste klusmap</small></a>
-      <a href="/werk.html#/" class="app-quick"><span>✓</span><strong>Vandaag</strong><small>Wat moet er gebeuren</small></a>
-      <a href="/werk.html#/bord" class="app-quick"><span>▦</span><strong>Planning</strong><small>Wie waar staat</small></a>
-      <a href="/werk.html#/uren" class="app-quick"><span>◷</span><strong>Uren</strong><small>Snel registreren</small></a>
-      <a href="/werk.html#/cloud" class="app-quick"><span>☁</span><strong>Cloud</strong><small>Alle bestanden</small></a>
-    </nav>
+    <section class="app-panel">
+      <div class="app-panel-head">
+        <div><p class="kicker">Hoofdmenu</p><h2>Belangrijkste onderdelen</h2></div>
+        <span class="app-badge" data-plan-badge>Pro</span>
+      </div>
+      <nav class="app-quick-grid" aria-label="Vakento hoofdmenu">
+        <a href="/werk.html#/" class="app-quick"><span>✓</span><strong>Vandaag</strong><small>Dagoverzicht</small></a>
+        <a href="/werk.html#/bord" class="app-quick"><span>▦</span><strong>Planning</strong><small>Werk & ploeg</small></a>
+        <a href="/werk.html#/klussen" class="app-quick"><span>▤</span><strong>Klussen</strong><small>Alle dossiers</small></a>
+        <a href="/werk.html#/papier" class="app-quick"><span>€</span><strong>Offertes & facturen</strong><small>Papierwerk</small></a>
+        <a href="/werk.html#/uren" class="app-quick"><span>◷</span><strong>Uren</strong><small>Registreren</small></a>
+        <a href="#bon" class="app-quick app-quick-primary"><span>▣</span><strong>Bon scannen</strong><small>Automatisch uitlezen</small></a>
+        <a href="#werkfoto" class="app-quick app-quick-primary"><span>◎</span><strong>Werkfoto's</strong><small>Naar klusmap</small></a>
+        <a href="/werk.html#/cloud" class="app-quick"><span>☁</span><strong>Cloud</strong><small>5 GB opslag</small></a>
+        <a href="/werk.html#/winst" class="app-quick"><span>↗</span><strong>Winst</strong><small>Omzet & kosten</small></a>
+        <a href="/werk.html#/slim" class="app-quick"><span>✦</span><strong>AI-assistent</strong><small>Slimmer werken</small></a>
+        <a href="/werk.html#/post" class="app-quick" data-proplus-only hidden><span>✉</span><strong>E-mail</strong><small>Pro+ mailbox</small></a>
+        <a href="/account.html" class="app-quick"><span>●</span><strong>Account</strong><small>Abonnement & app</small></a>
+      </nav>
+      <p class="muted" data-proplus-note hidden style="margin-top:12px">Pro+ bevat alles van Pro plus een eigen @vakento.nl e-mailadres, 2 GB mailbox en beveiligde mail.</p>
+    </section>
 
     <section class="app-panel" id="bon">
       <div class="app-panel-head">
@@ -156,7 +169,7 @@
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script type="module" src="/js/vakento-app.js?v=app9"></script>
+  <script type="module" src="/js/vakento-app.js?v=app10"></script>
   <script src="/js/install-app.js?v=app6"></script>
 </body>
 </html>

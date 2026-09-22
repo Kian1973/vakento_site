@@ -96,24 +96,43 @@ function isLeeg() {
 
 function viewStart() {
   return `
-    <div class="row">
-      <div>
+    <section class="start-full">
+      <div class="start-full-intro">
         <p class="kicker">Eerste keer</p>
-        <h1>Zet je zaak erin. Daarna het werk.</h1>
-        <p class="muted">Naam, plaats, eerste klant en eerste klus. Dat is genoeg om te beginnen.</p>
+        <h1>Zet je zaak erin.<br>Daarna het werk.</h1>
+        <p class="muted start-full-lead">Vul één keer de basis in. Daarna gebruik je Vakento over het hele scherm voor klanten, planning, administratie en werk.</p>
+
+        <div class="start-full-points">
+          <div><strong>Alles op één plek</strong><span>Klanten, opdrachten, uren, bonnen en bestanden.</span></div>
+          <div><strong>Telefoon + laptop</strong><span>Overal dezelfde Vakento-werkplaats.</span></div>
+          <div><strong>Snel beginnen</strong><span>Alleen je zaak, plaats en eerste opdracht zijn genoeg.</span></div>
+        </div>
       </div>
-    </div>
-    <form class="card stack" data-start style="max-width:560px">
-      <label>Jouw zaak<input name="firm" required value="${data.firm || ""}" placeholder="Schildersbedrijf Jansen"></label>
-      <label>Plaats<input name="place" required placeholder="Winterswijk"></label>
-      <label>Eerste klant<input name="klant" required placeholder="Bakkerij De Knip"></label>
-      <label>Eerste klus<input name="klus" required placeholder="Groepenkast / schilderwerk gevel"></label>
-      <button class="btn" type="submit">Werkplaats openen</button>
-    </form>
-    <div class="start-grid" style="margin-top:22px">
-      <a class="card" href="#/papier"><p class="kicker">Papier</p><h3>Briefpapier</h3><p class="muted">Logo erop, daarna offertes.</p></a>
-      <a class="card" href="#/stam"><p class="kicker">Stam</p><h3>Groothandel</h3><p class="muted">Richtprijzen in je artikelen.</p></a>
-      <a class="card" href="#/brein"><p class="kicker">AI</p><h3>Brein</h3><p class="muted">Offerte uit één zin.</p></a>
+
+      <form class="card stack start-full-form" data-start>
+        <p class="kicker">Bedrijfsgegevens</p>
+        <h2>Maak je werkplaats klaar</h2>
+        <label>Jouw zaak
+          <input name="firm" required value="${data.firm || ""}" placeholder="Jouw bedrijfsnaam">
+        </label>
+        <label>Plaats
+          <input name="place" required placeholder="Bijvoorbeeld Winterswijk">
+        </label>
+        <label>Eerste klant
+          <input name="klant" required placeholder="Naam klant of bedrijf">
+        </label>
+        <label>Eerste opdracht
+          <input name="klus" required placeholder="Bijvoorbeeld onderhoud, advies of project">
+        </label>
+        <button class="btn" type="submit">Werkplaats openen</button>
+      </form>
+    </section>
+
+    <div class="start-grid start-full-links">
+      <a class="card" href="#/contacten"><p class="kicker">Relaties</p><h3>Contacten</h3><p class="muted">Klanten en leveranciers centraal bewaren.</p></a>
+      <a class="card" href="#/papier"><p class="kicker">Administratie</p><h3>Offertes & facturen</h3><p class="muted">Van aanvraag naar betaling.</p></a>
+      <a class="card" href="#/cloud"><p class="kicker">Cloud</p><h3>Bestanden</h3><p class="muted">Documenten en foto's bij elkaar.</p></a>
+      <a class="card" href="#/slim"><p class="kicker">AI</p><h3>Slim werken</h3><p class="muted">Laat Vakento werk uit handen nemen.</p></a>
     </div>`;
 }
 

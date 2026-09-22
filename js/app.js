@@ -61,6 +61,7 @@ const routes = {
   "#/inkoop": () => viewInkoop(data),
   "#/stam": () => viewStam(data),
   "#/geld": () => viewGeld(data),
+  "#/boekhouding": viewBoekhouding,
   "#/calculatie": () => viewCalc(data),
   "#/taken": () => viewTaken(data),
   "#/post": viewPost,
@@ -177,7 +178,8 @@ function viewVandaag() {
         <a class="card" href="#/contacten"><p class="kicker">Relaties</p><h3>Contacten</h3><p class="muted">${data.klanten.length} klanten & leveranciers</p></a>
         <a class="card" href="#/papier"><p class="kicker">Papier</p><h3>Offertes & facturen</h3><p class="muted">${data.offertes.length} offertes</p></a>
         <a class="card" href="#/uren"><p class="kicker">Tijd</p><h3>Uren</h3><p class="muted">Snel registreren</p></a>
-        <a class="card" href="/app.html#bon"><p class="kicker">Boekhouding</p><h3>Bonnen scannen</h3><p class="muted">Lezen, btw, export</p></a>
+        <a class="card" href="#/boekhouding"><p class="kicker">Boekhouding</p><h3>Boekhouding</h3><p class="muted">Verkoop, inkoop, btw en boekhouder-export</p></a>
+        <a class="card" href="/app.html#bon"><p class="kicker">Bonnen</p><h3>Bonnen scannen</h3><p class="muted">Lezen, btw en opslaan</p></a>
         <a class="card" href="#/cloud"><p class="kicker">Cloud</p><h3>Bestanden</h3><p class="muted">5 GB opslag</p></a>
         <a class="card" href="#/winst"><p class="kicker">Financiën</p><h3>Winst</h3><p class="muted">Omzet en kosten</p></a>
         <a class="card" href="#/slim"><p class="kicker">AI</p><h3>Slim werken</h3><p class="muted">AI-assistent</p></a>
@@ -299,6 +301,177 @@ function btwOverzicht(regels) {
     btw21,
     incl: basis9 + basis21 + btw9 + btw21,
   };
+}
+
+
+function bookNum(v) {
+  const x = Number(String(v ?? "").replace(",", "."));
+  return Number.isFinite(x) ? x : 0;
+}
+function bookRound(v) {
+  return Math.round((bookNum(v) + Number.EPSILON) * 100) / 100;
+}
+function bookMoney(v) {
+  return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(bookRound(v));
+}
+function invoiceBookCalc(f) {
+  const regels = (f.regels?.length ? f.regels : [{ tekst: f.titel, bedrag: f.bedrag, btw: f.btw || 21 }])
+    .map(r => ({ bedrag: bookNum(r.bedrag), btw: [0,9,21].includes(Number(r.btw)) ? Number(r.btw) : 21 }));
+  const ex9 = bookRound(regels.filter(r=>r.btw===9).reduce((s,r)=>s+r.bedrag,0));
+  const ex21 = bookRound(regels.filter(r=>r.btw===21).reduce((s,r)=>s+r.bedrag,0));
+  const ex0 = bookRound(regels.filter(r=>r.btw===0).reduce((s,r)=>s+r.bedrag,0));
+  const vat9 = bookRound(ex9*.09);
+  const vat21 = bookRound(ex21*.21);
+  return { ex9, ex21, ex0, vat9, vat21, ex:bookRound(ex9+ex21+ex0), vat:bookRound(vat9+vat21), incl:bookRound(ex9+ex21+ex0+vat9+vat21) };
+}
+function purchaseBookCalc(x) {
+  const rate = [0,9,21].includes(Number(x.btw)) ? Number(x.btw) : null;
+  let gross = bookNum(x.bedragInclBtw || x.bedrag);
+  let net = bookNum(x.bedragExclBtw);
+  let vat = bookNum(x.btwBedrag);
+  if (!net && gross && rate !== null) net = rate ? bookRound(gross/(1+rate/100)) : gross;
+  if (!vat && gross && net) vat = bookRound(gross-net);
+  if (!gross && net) gross = bookRound(net+vat);
+  return { gross:bookRound(gross), net:bookRound(net), vat:bookRound(vat), rate, deductible:x.btwAftrekbaar === true, category:x.categorie || "4999" };
+}
+function bookPeriod(date, year, quarter) {
+  const d = String(date || "");
+  if (!d.startsWith(String(year))) return false;
+  if (quarter === "all") return true;
+  const m = Number(d.slice(5,7));
+  return Math.ceil(m/3) === Number(quarter);
+}
+function bookTotals() {
+  data.boekhouding ||= { jaar:new Date().getFullYear(), kwartaal:"all" };
+  const year = Number(data.boekhouding.jaar || new Date().getFullYear());
+  const quarter = String(data.boekhouding.kwartaal || "all");
+  const sales = (data.facturen||[]).filter(f=>bookPeriod(f.dag,year,quarter)).map(f=>({f,c:invoiceBookCalc(f)}));
+  const purchases = (data.inkoop||[]).filter(x=>bookPeriod(x.dag||x.datum,year,quarter)).map(x=>({x,c:purchaseBookCalc(x)}));
+  const salesEx = bookRound(sales.reduce((s,x)=>s+x.c.ex,0));
+  const salesVat = bookRound(sales.reduce((s,x)=>s+x.c.vat,0));
+  const purchaseEx = bookRound(purchases.reduce((s,x)=>s+x.c.net,0));
+  const inputVat = bookRound(purchases.reduce((s,x)=>s+(x.c.deductible?x.c.vat:0),0));
+  const open = bookRound(sales.filter(x=>x.f.status==="open").reduce((s,x)=>s+x.c.incl,0));
+  const review = purchases.filter(({x,c})=>c.rate===null || !x.categorie || x.btwAftrekbaar==null).length;
+  return {year,quarter,sales,purchases,salesEx,salesVat,purchaseEx,inputVat,result:bookRound(salesEx-purchaseEx),vatDue:bookRound(salesVat-inputVat),open,review};
+}
+function bookCsv(rows) {
+  const cell = v => '"' + String(v ?? "").replace(/"/g,'""') + '"';
+  return "\uFEFF" + rows.map(r=>r.map(cell).join(";")).join("\r\n");
+}
+function downloadBookBlob(content, name, type="text/csv;charset=utf-8") {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content],{type}));
+  a.download = name;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function bookPackageFiles() {
+  const t = bookTotals();
+  const sales = [["Datum","Factuurnummer","Klant","Omschrijving","Excl 9%","BTW 9%","Excl 21%","BTW 21%","Excl 0%","Totaal excl","Totaal btw","Totaal incl","Status","Betaald op"]];
+  t.sales.forEach(({f,c})=>sales.push([f.dag||"",f.nr||"",klant(data,f.klant)?.name||"",f.titel||"",c.ex9,c.vat9,c.ex21,c.vat21,c.ex0,c.ex,c.vat,c.incl,f.status||"",f.betaaldOp||""]));
+  const purchases = [["Datum","Leverancier","Omschrijving","Categorie","Excl btw","BTW %","BTW bedrag","BTW aftrekbaar","Incl btw","Betaalwijze","Status","Bonbestand"]];
+  t.purchases.forEach(({x,c})=>purchases.push([x.dag||x.datum||"",x.leverancier||"",x.tekst||x.notitie||"",x.categorie||"4999",c.net,c.rate??"",c.vat,x.btwAftrekbaar===true?"ja":x.btwAftrekbaar===false?"nee":"controle",c.gross,x.betaaldMet||x.betaalwijze||"",x.status||"betaald",x.bestand||""]));
+  const vat = [["Onderdeel","Grondslag","BTW"],
+    ["Verkoop 9%",bookRound(t.sales.reduce((s,x)=>s+x.c.ex9,0)),bookRound(t.sales.reduce((s,x)=>s+x.c.vat9,0))],
+    ["Verkoop 21%",bookRound(t.sales.reduce((s,x)=>s+x.c.ex21,0)),bookRound(t.sales.reduce((s,x)=>s+x.c.vat21,0))],
+    ["Verkoop 0%",bookRound(t.sales.reduce((s,x)=>s+x.c.ex0,0)),0],
+    ["Voorbelasting aftrekbaar","",t.inputVat],
+    ["Indicatief BTW-saldo","",t.vatDue]
+  ];
+  const open = [["Soort","Datum","Nummer","Relatie","Bedrag incl","Status"]];
+  t.sales.filter(x=>x.f.status==="open").forEach(({f,c})=>open.push(["Verkoop",f.dag||"",f.nr||"",klant(data,f.klant)?.name||"",c.incl,"open"]));
+  t.purchases.filter(x=>x.x.status==="open").forEach(({x,c})=>open.push(["Inkoop",x.dag||x.datum||"",x.factuurnr||x.id,x.leverancier||"",c.gross,"open"]));
+  const checks = [["Soort","Referentie","Controlepunt"]];
+  t.purchases.forEach(({x,c})=>{
+    const ref=x.id||x.bestand||"inkoop";
+    if(c.rate===null) checks.push(["Inkoop",ref,"BTW-tarief ontbreekt"]);
+    if(!x.categorie) checks.push(["Inkoop",ref,"Categorie ontbreekt"]);
+    if(x.btwAftrekbaar==null) checks.push(["Inkoop",ref,"BTW-aftrek nog beoordelen"]);
+  });
+  const period = t.quarter==="all" ? String(t.year) : t.year+"-Q"+t.quarter;
+  const readme = `Vakento boekhouderspakket ${period}
+
+Inhoud:
+- verkoopboek.csv
+- inkoopboek.csv
+- btw-overzicht.csv
+- openstaande-posten.csv
+- controlepunten.csv
+- data-backup.json
+
+Dit pakket is voorbereid voor de boekhouder. Laat de boekhouder altijd rubricering, fiscale correcties, privégebruik, investeringen/afschrijvingen en btw-aangifte controleren.`;
+  return {
+    period,
+    files:{
+      "00-LEESMIJ.txt":readme,
+      "01-verkoopboek.csv":bookCsv(sales),
+      "02-inkoopboek.csv":bookCsv(purchases),
+      "03-btw-overzicht.csv":bookCsv(vat),
+      "04-openstaande-posten.csv":bookCsv(open),
+      "05-controlepunten.csv":bookCsv(checks),
+      "06-data-backup.json":JSON.stringify({exportedAt:new Date().toISOString(),period:{year:t.year,quarter:t.quarter},data},null,2)
+    }
+  };
+}
+function viewBoekhouding() {
+  data.boekhouding ||= { jaar:new Date().getFullYear(), kwartaal:"all" };
+  const t = bookTotals();
+  const years = [...new Set([new Date().getFullYear(),...(data.facturen||[]).map(x=>Number(String(x.dag||"").slice(0,4))).filter(Boolean),...(data.inkoop||[]).map(x=>Number(String(x.dag||x.datum||"").slice(0,4))).filter(Boolean)])].sort((a,b)=>b-a);
+  return `
+    <div class="row"><div><p class="kicker">Boekhouding</p><h1>Klaar voor je boekhouder.</h1>
+    <p class="muted">Verkoop, inkoop, btw en open posten in één overzicht.</p></div>
+    <div class="actions"><a class="btn btn-ghost" href="/app.html#bon">Bon scannen</a><button class="btn" data-book-export>Boekhouderspakket ZIP</button></div></div>
+
+    <form class="card stack" data-book-filter style="margin-bottom:18px">
+      <div class="grid-2">
+        <label>Jaar<select name="year">${years.map(y=>`<option value="${y}" ${Number(y)===Number(t.year)?"selected":""}>${y}</option>`).join("")}</select></label>
+        <label>Periode<select name="quarter">
+          <option value="all" ${t.quarter==="all"?"selected":""}>Heel jaar</option>
+          <option value="1" ${t.quarter==="1"?"selected":""}>Kwartaal 1</option>
+          <option value="2" ${t.quarter==="2"?"selected":""}>Kwartaal 2</option>
+          <option value="3" ${t.quarter==="3"?"selected":""}>Kwartaal 3</option>
+          <option value="4" ${t.quarter==="4"?"selected":""}>Kwartaal 4</option>
+        </select></label>
+      </div>
+      <button class="btn btn-ghost" type="submit">Toon periode</button>
+    </form>
+
+    <div class="stat-grid">
+      <div class="stat"><span>Omzet excl.</span><b>${bookMoney(t.salesEx)}</b></div>
+      <div class="stat"><span>Kosten excl.</span><b>${bookMoney(t.purchaseEx)}</b></div>
+      <div class="stat"><span>Resultaat*</span><b>${bookMoney(t.result)}</b></div>
+      <div class="stat"><span>BTW verkoop</span><b>${bookMoney(t.salesVat)}</b></div>
+      <div class="stat"><span>Voorbelasting</span><b>${bookMoney(t.inputVat)}</b></div>
+      <div class="stat"><span>BTW-saldo*</span><b>${bookMoney(t.vatDue)}</b></div>
+      <div class="stat"><span>Open te ontvangen</span><b>${bookMoney(t.open)}</b></div>
+      <div class="stat"><span>Controlepunten</span><b class="${t.review?"warn":"ok"}">${t.review}</b></div>
+    </div>
+    <p class="muted">* Indicatief. De boekhouder controleert fiscale correcties, privégebruik, investeringen, afschrijvingen en aftrekbaarheid.</p>
+
+    <section class="card" style="margin-top:18px">
+      <p class="kicker">Nieuwe inkoopboeking</p><h2>Kosten vastleggen</h2>
+      <form class="stack" data-book-purchase>
+        <div class="grid-2"><label>Datum<input name="date" type="date" value="${iso(new Date())}" required></label><label>Leverancier<input name="supplier" required></label></div>
+        <label>Omschrijving<input name="text"></label>
+        <div class="grid-2"><label>Bedrag incl. btw<input name="gross" type="number" step=".01" min="0" required></label><label>BTW<select name="vat"><option value="21">21%</option><option value="9">9%</option><option value="0">0%</option></select></label></div>
+        <label>Categorie<select name="category"><option value="4000">4000 · Inkoop materialen</option><option value="4100">4100 · Uitbesteed werk</option><option value="4200">4200 · Gereedschap en klein materiaal</option><option value="4300">4300 · Auto en vervoer</option><option value="4500">4500 · Kantoor en administratie</option><option value="4600">4600 · Telefoon, internet en software</option><option value="4700">4700 · Reclame en verkoop</option><option value="4800">4800 · Verzekeringen en bankkosten</option><option value="4900">4900 · Overige bedrijfskosten</option><option value="4999" selected>4999 · Te rubriceren</option></select></label>
+        <div class="grid-2"><label>Betaalwijze<select name="paidWith"><option>Bank</option><option>Pin / betaalpas</option><option>Creditcard</option><option>Contant</option></select></label><label>Status<select name="status"><option value="betaald">Betaald</option><option value="open">Nog te betalen</option></select></label></div>
+        <label style="display:flex;gap:9px;align-items:flex-start"><input type="checkbox" name="deductible" value="1"><span><strong>BTW aftrekbaar</strong><br><span class="muted">Alleen aanvinken als je zeker weet dat deze btw zakelijk aftrekbaar is.</span></span></label>
+        <button class="btn" type="submit">Boeking bewaren</button>
+      </form>
+    </section>
+
+    <h2 style="margin-top:22px">Verkoopboek</h2>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Datum</th><th>Nr</th><th>Klant</th><th>Excl.</th><th>BTW</th><th>Incl.</th><th>Status</th></tr></thead><tbody>
+      ${t.sales.map(({f,c})=>`<tr><td>${esc(f.dag||"")}</td><td>${esc(f.nr||"")}</td><td>${esc(klant(data,f.klant)?.name||"")}</td><td>${bookMoney(c.ex)}</td><td>${bookMoney(c.vat)}</td><td>${bookMoney(c.incl)}</td><td>${esc(f.status||"")}</td></tr>`).join("") || '<tr><td colspan="7">Geen verkoopfacturen.</td></tr>'}
+    </tbody></table></div>
+
+    <h2 style="margin-top:22px">Inkoopboek</h2>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Datum</th><th>Leverancier</th><th>Categorie</th><th>Excl.</th><th>BTW</th><th>Incl.</th><th>Controle</th></tr></thead><tbody>
+      ${t.purchases.map(({x,c})=>`<tr><td>${esc(x.dag||x.datum||"")}</td><td>${esc(x.leverancier||"")}</td><td>${esc(x.categorie||"4999")}</td><td>${bookMoney(c.net)}</td><td>${c.rate==null?"?":c.rate+"%"} · ${bookMoney(c.vat)}</td><td>${bookMoney(c.gross)}</td><td class="${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"warn":"ok"}">${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"Nakijken":"Compleet"}</td></tr>`).join("") || '<tr><td colspan="7">Geen inkoopboekingen.</td></tr>'}
+    </tbody></table></div>
+  `;
 }
 
 function viewPapier() {
@@ -930,6 +1103,59 @@ function bind(root) {
       openPapier(htmlOfferte(data, o));
     })
   );
+  root.querySelector("[data-book-filter]")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    data.boekhouding = { jaar:Number(f.get("year")), kwartaal:String(f.get("quarter")||"all") };
+    persist();
+  });
+
+  root.querySelector("[data-book-purchase]")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const gross = bookNum(f.get("gross"));
+    const rate = Number(f.get("vat"));
+    const net = rate ? bookRound(gross/(1+rate/100)) : gross;
+    const vat = bookRound(gross-net);
+    data.inkoop ||= [];
+    data.inkoop.unshift({
+      id:"bk"+Date.now(),
+      dag:String(f.get("date")),
+      leverancier:String(f.get("supplier")||"").trim(),
+      tekst:String(f.get("text")||"").trim(),
+      bedrag:gross,
+      bedragInclBtw:gross,
+      bedragExclBtw:net,
+      btwBedrag:vat,
+      btw:rate,
+      btwAftrekbaar:f.get("deductible")==="1",
+      categorie:String(f.get("category")||"4999"),
+      betaaldMet:String(f.get("paidWith")||"Bank"),
+      status:String(f.get("status")||"betaald"),
+      bron:"handmatig"
+    });
+    toast("Inkoopboeking bewaard");
+    persist();
+  });
+
+  root.querySelector("[data-book-export]")?.addEventListener("click", async () => {
+    const pack = bookPackageFiles();
+    if (window.JSZip) {
+      const zip = new window.JSZip();
+      Object.entries(pack.files).forEach(([name,content])=>zip.file(name,content));
+      const blob = await zip.generateAsync({type:"blob"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "Vakento-boekhouderspakket-"+pack.period+".zip";
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+      toast("Boekhouderspakket is klaar");
+    } else {
+      downloadBookBlob(pack.files["01-verkoopboek.csv"],"Vakento-"+pack.period+"-verkoopboek.csv");
+      toast("ZIP-module niet geladen; verkoopboek los gedownload");
+    }
+  });
+
   root.querySelector("form[data-mailbox-create]")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target;

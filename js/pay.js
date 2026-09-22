@@ -230,12 +230,17 @@ login2fa?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const err = login2fa.querySelector("[data-2fa-login-err]");
   if (err) err.hidden = true;
-  const code = String(new FormData(login2fa).get("code") || "").trim();
+  const formData = new FormData(login2fa);
+  const code = String(formData.get("code") || "").trim();
+  const trustDevice = formData.get("trustDevice") === "1";
   try {
     await api("/api/login/2fa", {
       email: pending2fa?.email || "",
       challenge: pending2fa?.challenge || "",
       code,
+      trustDevice,
+      trustDays: trustDevice ? 30 : 0,
+      client: /app\.html$/i.test(location.pathname) || window.matchMedia?.("(display-mode: standalone)")?.matches ? "app" : "browser",
     });
     pending2fa = null;
     await afterAuth();

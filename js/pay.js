@@ -51,9 +51,6 @@ async function bindAuth(form, mode) {
         email: f.get("email"),
         password: f.get("password"),
       });
-      if (mode === "login" && out?.requires2fa) {
-        throw new Error("Tweestapsverificatie is niet beschikbaar in Vakento.");
-      }
 
       await afterAuth();
     } catch (ex) {

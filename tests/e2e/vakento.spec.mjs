@@ -1,41 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { createHmac } from 'node:crypto';
 import { existsSync } from 'node:fs';
 
 const BASE_URL = process.env.VAKENTO_BASE_URL || 'https://vakento.nl';
 const EMAIL = process.env.VAKENTO_TEST_EMAIL || '';
 const PASSWORD = process.env.VAKENTO_TEST_PASSWORD || '';
-const TOTP_SECRET = process.env.VAKENTO_TEST_TOTP_SECRET || '';
 const ALLOW_WRITE = process.env.VAKENTO_ALLOW_WRITE_TESTS === '1';
 const HAS_AUTH_STATE = existsSync('.auth/vakento.json');
 
-function base32Decode(input) {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  const clean = String(input || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
-  let bits = '';
-  for (const ch of clean) {
-    const value = alphabet.indexOf(ch);
-    if (value < 0) continue;
-    bits += value.toString(2).padStart(5, '0');
-  }
-  const out = [];
-  for (let i = 0; i + 8 <= bits.length; i += 8) out.push(parseInt(bits.slice(i, i + 8), 2));
-  return Buffer.from(out);
-}
-
-function totp(secret, now = Date.now()) {
-  const key = base32Decode(secret);
-  const counter = Math.floor(now / 1000 / 30);
-  const msg = Buffer.alloc(8);
-  msg.writeBigUInt64BE(BigInt(counter));
-  const hmac = createHmac('sha1', key).update(msg).digest();
-  const offset = hmac[hmac.length - 1] & 0x0f;
-  const code = ((hmac[offset] & 0x7f) << 24)
-    | ((hmac[offset + 1] & 0xff) << 16)
-    | ((hmac[offset + 2] & 0xff) << 8)
-    | (hmac[offset + 3] & 0xff);
-  return String(code % 1_000_000).padStart(6, '0');
-}
 
 async function login(page) {
   if (HAS_AUTH_STATE) {
@@ -60,11 +31,9 @@ async function login(page) {
   await login.locator('button[type="submit"]').click();
 
   const loginError = login.locator('[data-err]');
-  const two = page.locator('[data-login-2fa]');
 
   await Promise.race([
     page.waitForURL(/\/werk\.html(?:$|#|\?)/, { timeout: 12_000 }).catch(() => null),
-    two.waitFor({ state: 'visible', timeout: 12_000 }).catch(() => null),
     loginError.waitFor({ state: 'visible', timeout: 12_000 }).catch(() => null),
   ]);
 
@@ -73,16 +42,7 @@ async function login(page) {
     throw new Error('Vakento login mislukt: ' + (msg || 'onbekende loginfout'));
   }
 
-  if (await two.isVisible().catch(() => false)) {
-    if (!TOTP_SECRET) {
-      throw new Error('Vakento vraagt bij dit testaccount daadwerkelijk om 2FA, maar er is geen testsleutel ingesteld.');
-    }
-    await two.locator('input[name="code"]').fill(totp(TOTP_SECRET));
-    await two.locator('button[type="submit"]').click();
-  }
-
-  await page.waitForURL(/\/werk\.html(?:$|#|\?)/, { timeout: 15_000 });
-  await expect(page.locator('#stage')).toBeVisible();
+  await page.waitForURL(/\/werk\.html(?:$|#|\?)/, { timeout: 15_000 });  await expect(page.locator('#stage')).toBeVisible();
   await expect(page.locator('#stage')).not.toContainText('Vakento kon dit onderdeel niet laden');
 }
 

@@ -35,7 +35,7 @@ async function afterAuth() {
     location.replace("werk.html");
     return;
   }
-  location.replace("prijzen.html#account");
+  location.replace("prijzen.html#inloggen");
 }
 
 async function bindAuth(form, mode) {

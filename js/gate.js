@@ -20,9 +20,15 @@ try {
     await import("./app.js?v=contacten1");
   }
 } catch (err) {
-  const stage = document.getElementById("stage");
-  if (stage) {
-    stage.innerHTML =
-      "<p class='warn'>De werkplaats laadde niet. Vernieuw de pagina of log opnieuw in.</p>";
+  window.VakentoHeal?.report?.(err, { kind: "gate-load" });
+  const msg = String(err?.message || err || "");
+  if (/dynamically imported module|loading chunk|failed to fetch|import/i.test(msg)) {
+    window.VakentoHeal?.recover?.(msg);
+  } else {
+    const stage = document.getElementById("stage");
+    if (stage) {
+      stage.innerHTML =
+        "<div class='card'><p class='warn'>Vakento kon dit onderdeel niet laden.</p><p class='muted'>De fout is opgeslagen in Systeemcontrole.</p><p><a class='btn' href='/diagnose.html'>Open Systeemcontrole</a></p></div>";
+    }
   }
 }

@@ -414,6 +414,41 @@ async function saveReceipt(file, extra = {}, automatic = false) {
     await buildBookkeeperExport(year, month);
   } catch (_) {}
 
+  // Spiegel de gescande bon ook naar de lokale Vakento-boekhouding.
+  try {
+    const uid = sessionStorage.getItem("vakento.uid") || "";
+    const key = uid ? "vakento.v3." + uid : "vakento.v3";
+    const raw = localStorage.getItem(key);
+    const local = raw ? JSON.parse(raw) : null;
+    if (local) {
+      local.inkoop ||= [];
+      const receiptId = "scan-" + dateValue + "-" + supplier + "-" + name;
+      if (!local.inkoop.some((x) => x.scanId === receiptId || x.bestand === name)) {
+        local.inkoop.unshift({
+          id: "scan" + Date.now(),
+          scanId: receiptId,
+          dag: dateValue,
+          leverancier: extra.supplier || f.get("supplier") || "",
+          tekst: f.get("note") || "Gescande inkoopbon",
+          bedrag: Number(calc.gross || gross || 0),
+          bedragInclBtw: Number(calc.gross || gross || 0),
+          bedragExclBtw: Number(extra.amountExclVat || calc.net || 0),
+          btwBedrag: Number(extra.vatAmount || calc.vatAmount || 0),
+          btw: rate === "" ? null : Number(rate),
+          btwAftrekbaar: null,
+          categorie: "",
+          betaaldMet: extra.paidWith || f.get("paidWith") || "",
+          status: "betaald",
+          bestand: name,
+          cloudPad: pad,
+          bron: "bon-scan",
+          automatischGelezen: Boolean(extra.ocrText)
+        });
+        localStorage.setItem(key, JSON.stringify(local));
+      }
+    }
+  } catch (_) {}
+
   status(msg, automatic
     ? "Klaar. Bon + berekeningen opgeslagen en boekhouder-overzicht bijgewerkt."
     : "Bon opgeslagen en boekhouder-overzicht bijgewerkt.");

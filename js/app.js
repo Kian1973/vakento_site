@@ -26,7 +26,7 @@ import {
   viewCalc,
   viewTaken,
   bindKantoor,
-} from "./kantoor.js?v=btw1";
+} from "./kantoor.js?v=btw2";
 import {
   papierVan,
   previewBrief,

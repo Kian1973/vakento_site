@@ -197,7 +197,31 @@ export function bindContacten(root, { data, toast }) {
     try {
       const out = await api("/api/contacts", null, "GET");
       const rows = out.contacts || out.contacten || [];
-      data.klanten = rows.map(normalize);
+      const remote = rows.map(normalize);
+      const local = (data.klanten || []).map(normalize);
+
+      // Eerste synchronisatie: staat de server nog leeg maar zijn er lokaal al
+      // contacten, zet die dan eerst veilig over naar de centrale database.
+      if (!remote.length && local.length) {
+        const migrated = [];
+        for (const contact of local) {
+          const payload = { ...contact };
+          delete payload.id;
+          try {
+            const saved = await api("/api/contacts", payload, "POST");
+            migrated.push(normalize(saved.contact || saved));
+          } catch (_) {}
+        }
+        if (migrated.length) {
+          data.klanten = migrated;
+          cache();
+          renderRows();
+          setState(migrated.length + " bestaande contacten naar de Vakento database overgezet.");
+          return;
+        }
+      }
+
+      data.klanten = remote;
       cache();
       renderRows();
       setState(data.klanten.length + " contacten veilig opgeslagen in Vakento.");

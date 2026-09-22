@@ -64,7 +64,6 @@ const routes = {
   "#/boekhouding": viewBoekhouding,
   "#/calculatie": () => viewCalc(data),
   "#/taken": () => viewTaken(data),
-  "#/post": viewPost,
   "#/cloud": viewCloud,
   "#/slim": () => viewSlim(data),
 };
@@ -183,8 +182,7 @@ function viewVandaag() {
         <a class="card" href="#/cloud"><p class="kicker">Cloud</p><h3>Bestanden</h3><p class="muted">5 GB opslag</p></a>
         <a class="card" href="#/winst"><p class="kicker">Financiën</p><h3>Winst</h3><p class="muted">Omzet en kosten</p></a>
         <a class="card" href="#/slim"><p class="kicker">AI</p><h3>Slim werken</h3><p class="muted">AI-assistent</p></a>
-        <a class="card" href="#/post"><p class="kicker">Pro+</p><h3>E-mail</h3><p class="muted">Eigen mailbox bij Pro+</p></a>
-        <a class="card" href="/account.html"><p class="kicker">Account</p><h3>Abonnement</h3><p class="muted">Pro / Pro+ en app</p></a>
+        <a class="card" href="/account.html"><p class="kicker">Account</p><h3>Abonnement</h3><p class="muted">Abonnement en app</p></a>
       </div>
     </div>
     <div class="stat-grid">
@@ -700,42 +698,6 @@ function viewBrein() {
     <div class="card" id="brein-out" hidden style="margin-top:12px;white-space:pre-wrap"></div>`;
 }
 
-function viewPost() {
-  const p = papierVan(data);
-  return `
-    <div class="row"><div><p class="kicker">Post</p><h1>Jouw eigen Vakento e-mail.</h1>
-      <p class="muted">Pro: maak je eigen naam@vakento.nl. Pro+ voegt 2 GB mailbox, webmail, Outlook/telefoon en extra mailbeveiliging toe.</p></div></div>
-    <form class="card stack" data-mailbox-create style="margin-bottom:18px">
-      <p class="kicker">Eigen adres</p>
-      <h3>Maak je @vakento.nl adres</h3>
-      <label>Gewenste naam
-        <div style="display:flex;align-items:center;gap:8px">
-          <input name="localpart" required maxlength="80" placeholder="kian of kian@vakento.nl" style="flex:1">
-          <strong>@vakento.nl</strong>
-        </div>
-      </label>
-      <p class="muted">Je mag alleen <strong>kian</strong> invullen; als je <strong>kian@vakento.nl</strong> invult, haalt Vakento het domein automatisch weg.</p>
-      <button class="btn" type="submit">E-mailadres aanmaken</button>
-      <p class="muted" data-mailbox-msg hidden></p>
-    </form>
-    <form class="card stack" data-mail>
-      <label>Aan<input name="to" type="email" required placeholder="klant@bedrijf.nl"></label>
-      <label>Onderwerp<input name="subject" required value="Offerte ${data.firm || ""}"></label>
-      <label>Tekst<textarea name="text" rows="8" required>Beste,
-
-Hierbij onze offerte.
-
-Met vriendelijke groet,
-${data.firm || ""}
-${p.tel || ""}
-</textarea></label>
-      <button class="btn" type="submit">Verstuur</button>
-      <p class="warn" data-err hidden></p>
-    </form>
-    <h2 style="margin-top:22px">Ontvangen op hallo@vakento.nl</h2>
-    <div class="list" id="inbox"><p class="muted">Laden…</p></div>`;
-}
-
 function acceptOffer(id) {
   const o = data.offertes.find((x) => x.id === id);
   if (!o) return;
@@ -1165,77 +1127,6 @@ function bind(root) {
     }
   });
 
-  root.querySelector("form[data-mailbox-create]")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const msg = form.querySelector("[data-mailbox-msg]");
-    let localpart = String(new FormData(form).get("localpart") || "").trim().toLowerCase();
-    if (localpart.endsWith("@vakento.nl")) localpart = localpart.slice(0, -"@vakento.nl".length);
-    if (localpart.includes("@") || !/^[a-z0-9._-]{2,40}$/.test(localpart)) {
-      if (msg) {
-        msg.hidden = false;
-        msg.textContent = "Gebruik alleen een naam zoals kian of kian@vakento.nl.";
-      }
-      return;
-    }
-    try {
-      const out = await api("/api/mailbox/create", { localpart });
-      if (msg) {
-        msg.hidden = false;
-        msg.textContent = "Aangemaakt: " + (out.email || (localpart + "@vakento.nl")) +
-          (out.password ? " · Bewaar dit mailboxwachtwoord nu: " + out.password : "");
-      }
-      toast("E-mailadres aangemaakt");
-    } catch (ex) {
-      if (msg) {
-        msg.hidden = false;
-        msg.textContent = Number(ex.status) === 404
-          ? "De mailboxfunctie staat nog niet op de Vakento-server. Deze moet eerst worden geïnstalleerd."
-          : (ex.message || "Aanmaken is niet gelukt.");
-      } else toast(ex.message);
-    }
-  });
-
-  root.querySelector("form[data-mail]")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const err = form.querySelector("[data-err]");
-    if (err) err.hidden = true;
-    const f = new FormData(form);
-    try {
-      await api("/api/mail/stuur", {
-        to: f.get("to"),
-        subject: f.get("subject"),
-        text: f.get("text"),
-        fromName: data.firm,
-        replyTo: papierVan(data).mail,
-      });
-      toast("Mail verstuurd");
-    } catch (ex) {
-      if (err) {
-        err.hidden = false;
-        err.textContent = ex.message;
-      } else toast(ex.message);
-    }
-  });
-  const inbox = root.querySelector("#inbox");
-  if (inbox) {
-    api("/api/mail/inbox", null, "GET")
-      .then((res) => {
-        const rows = res.berichten || [];
-        inbox.innerHTML = rows.length
-          ? rows
-              .map(
-                (b) =>
-                  `<article class="item"><strong>${esc(b.onderwerp || "(geen onderwerp)")}</strong><span>${esc(b.van)} · ${esc(b.datum)}</span><span>${esc((b.tekst || "").slice(0, 400))}</span></article>`
-              )
-              .join("")
-          : `<p class="muted">Nog geen ontvangen berichten op ${esc(res.van || "hallo@vakento.nl")}.</p>`;
-      })
-      .catch((ex) => {
-        inbox.innerHTML = `<p class="warn">${esc(ex.message)}</p>`;
-      });
-  }
   bindPapier(root, { data, persist, toast });
   bindKantoor(root, { data, persist, toast });
   bindSlim(root, { data, persist, toast });

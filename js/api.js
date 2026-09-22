@@ -2,7 +2,12 @@ export async function api(path, body, method = "POST") {
   const res = await fetch(path, {
     method,
     credentials: "include",
-    headers: body ? { "Content-Type": "application/json" } : undefined,
+    cache: "no-store",
+    headers: {
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache",
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
@@ -11,18 +16,26 @@ export async function api(path, body, method = "POST") {
 }
 
 export async function logout() {
-  try {
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include",
-      cache: "no-store",
-      headers: { "Content-Type": "application/json" },
-      body: "{}",
-    });
-  } catch (_) {}
+  const res = await fetch("/api/logout", {
+    method: "POST",
+    credentials: "include",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache",
+    },
+    body: "{}",
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Uitloggen is niet gelukt.");
+  }
   try {
     sessionStorage.removeItem("vakento.uid");
     sessionStorage.removeItem("vakento.firm");
+    localStorage.removeItem("vakento.uid");
+    localStorage.removeItem("vakento.firm");
   } catch (_) {}
 }
 

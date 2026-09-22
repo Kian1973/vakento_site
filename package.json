@@ -1,0 +1,14 @@
+{
+  "name": "vakento-site-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:full": "playwright test --grep @full",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

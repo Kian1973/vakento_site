@@ -9,19 +9,14 @@ if (!user?.email || !user?.paid) {
   $("[data-app-user]").textContent = user.name || user.email || "Vakento";
 }
 
-const rawPlan = String(
-  user.plan || user.pakket || user.package || user.sku || user.subscription || user.abonnement || ""
-).toLowerCase();
-const isProPlus = rawPlan.includes("proplus") || rawPlan.includes("pro+") || rawPlan.includes("pro-plus") || rawPlan.includes("plus");
-const planName = isProPlus ? "Pro+" : "Pro";
+const planName = "Pro";
 $("[data-plan-name]") && ($("[data-plan-name]").textContent = planName);
 $("[data-plan-badge]") && ($("[data-plan-badge]").textContent = planName);
-$("[data-plan-description]") && ($("[data-plan-description]").textContent = isProPlus
-  ? "Alles van Pro plus je eigen beveiligde Vakento-mailbox."
-  : "Werk, administratie, bonnen, cloud en slimme ondersteuning vanaf je telefoon.");
-document.querySelectorAll("[data-proplus-only]").forEach((el) => { el.hidden = !isProPlus; });
+$("[data-plan-description]") && ($("[data-plan-description]").textContent =
+  "Werk, administratie, bonnen, cloud en slimme ondersteuning vanaf je telefoon.");
+document.querySelectorAll("[data-proplus-only]").forEach((el) => { el.hidden = true; });
 const proPlusNote = $("[data-proplus-note]");
-if (proPlusNote) proPlusNote.hidden = !isProPlus;
+if (proPlusNote) proPlusNote.hidden = true;
 
 // Uitloggen loopt via /logout.html, zodat het ook werkt als deze module of PWA-cache problemen heeft.
 

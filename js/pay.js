@@ -38,18 +38,35 @@ async function afterAuth() {
   location.replace("/#inloggen");
 }
 
+let pending2fa = null;
+
 async function bindAuth(form, mode) {
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const err = form.querySelector("[data-err]");
-    err.hidden = true;
+    if (err) err.hidden = true;
     const f = new FormData(form);
     try {
-      await api(mode === "login" ? "/api/login" : "/api/register", {
+      const out = await api(mode === "login" ? "/api/login" : "/api/register", {
         name: f.get("name"),
         email: f.get("email"),
         password: f.get("password"),
       });
+
+      if (mode === "login" && out?.requires2fa) {
+        pending2fa = {
+          email: String(f.get("email") || ""),
+          challenge: out.challenge || "",
+        };
+        form.hidden = true;
+        const two = document.querySelector("[data-login-2fa]");
+        if (two) {
+          two.hidden = false;
+          two.querySelector('[name="code"]')?.focus();
+        }
+        return;
+      }
+
       await afterAuth();
     } catch (ex) {
       showErr(err, ex.message);
@@ -206,3 +223,103 @@ document.querySelector("[data-mailbox-create]")?.addEventListener("submit", asyn
     }
   }
 });
+
+
+const login2fa = document.querySelector("[data-login-2fa]");
+login2fa?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = login2fa.querySelector("[data-2fa-login-err]");
+  if (err) err.hidden = true;
+  const code = String(new FormData(login2fa).get("code") || "").trim();
+  try {
+    await api("/api/login/2fa", {
+      email: pending2fa?.email || "",
+      challenge: pending2fa?.challenge || "",
+      code,
+    });
+    pending2fa = null;
+    await afterAuth();
+  } catch (ex) {
+    showErr(err, ex.message || "Verificatiecode is niet geldig.");
+  }
+});
+
+document.querySelector("[data-login-2fa-cancel]")?.addEventListener("click", () => {
+  pending2fa = null;
+  if (login2fa) login2fa.hidden = true;
+  const form = document.querySelector("[data-login]");
+  if (form) form.hidden = false;
+});
+
+async function refresh2faStatus() {
+  const box = document.querySelector("[data-2fa-status]");
+  if (!box) return;
+  try {
+    const out = await api("/api/2fa/status", null, "GET");
+    if (out.enabled) {
+      box.innerHTML = '<p class="ok"><strong>2FA is ingeschakeld.</strong> Je account gebruikt Google Authenticator.</p><button class="btn btn-ghost" type="button" data-2fa-disable>2FA uitschakelen</button>';
+      box.querySelector("[data-2fa-disable]")?.addEventListener("click", async () => {
+        const code = prompt("Open Google Authenticator en vul de 6-cijferige code in om 2FA uit te schakelen.");
+        if (!code) return;
+        try {
+          await api("/api/2fa/disable", { code });
+          location.reload();
+        } catch (ex) {
+          alert(ex.message || "2FA uitschakelen is niet gelukt.");
+        }
+      });
+    } else {
+      box.innerHTML = '<p class="warn"><strong>2FA staat nog uit.</strong> Schakel Google Authenticator in voor extra beveiliging.</p><button class="btn" type="button" data-2fa-start>Google Authenticator instellen</button>';
+      box.querySelector("[data-2fa-start]")?.addEventListener("click", async () => {
+        try {
+          const out = await api("/api/2fa/setup", {});
+          document.querySelector("[data-2fa-secret]").textContent = out.secret || "";
+          document.querySelector("[data-2fa-label]").textContent = out.label || "Vakento";
+          document.querySelector("[data-2fa-setup]").hidden = false;
+        } catch (ex) {
+          alert(ex.message || "2FA instellen is niet gelukt.");
+        }
+      });
+    }
+  } catch (ex) {
+    box.innerHTML = '<p class="warn">Beveiligingsstatus kon niet worden geladen.</p>';
+  }
+}
+
+document.querySelector("[data-2fa-copy]")?.addEventListener("click", async () => {
+  const secret = document.querySelector("[data-2fa-secret]")?.textContent || "";
+  if (secret) await navigator.clipboard.writeText(secret);
+});
+
+document.querySelector("[data-2fa-setup-cancel]")?.addEventListener("click", () => {
+  const el = document.querySelector("[data-2fa-setup]");
+  if (el) el.hidden = true;
+});
+
+document.querySelector("[data-2fa-enable]")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const err = form.querySelector("[data-2fa-enable-err]");
+  if (err) err.hidden = true;
+  const code = String(new FormData(form).get("code") || "").trim();
+  try {
+    const out = await api("/api/2fa/enable", { code });
+    const codes = out.recoveryCodes || [];
+    document.querySelector("[data-2fa-setup]").hidden = true;
+    const rec = document.querySelector("[data-2fa-recovery]");
+    if (rec) {
+      rec.hidden = false;
+      rec.querySelector("[data-2fa-recovery-codes]").textContent = codes.join("\n");
+    }
+    refresh2faStatus();
+  } catch (ex) {
+    showErr(err, ex.message || "De verificatiecode is niet geldig.");
+  }
+});
+
+document.querySelector("[data-2fa-copy-recovery]")?.addEventListener("click", async () => {
+  const text = document.querySelector("[data-2fa-recovery-codes]")?.textContent || "";
+  if (text) await navigator.clipboard.writeText(text);
+});
+
+refresh2faStatus();

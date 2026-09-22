@@ -708,7 +708,13 @@ function viewPost() {
     <form class="card stack" data-mailbox-create style="margin-bottom:18px">
       <p class="kicker">Eigen adres</p>
       <h3>Maak je @vakento.nl adres</h3>
-      <label>Gewenste naam<input name="localpart" required maxlength="40" pattern="[a-zA-Z0-9._-]+" placeholder="jouwnaam"></label>
+      <label>Gewenste naam
+        <div style="display:flex;align-items:center;gap:8px">
+          <input name="localpart" required maxlength="80" placeholder="kian of kian@vakento.nl" style="flex:1">
+          <strong>@vakento.nl</strong>
+        </div>
+      </label>
+      <p class="muted">Je mag alleen <strong>kian</strong> invullen; als je <strong>kian@vakento.nl</strong> invult, haalt Vakento het domein automatisch weg.</p>
       <button class="btn" type="submit">E-mailadres aanmaken</button>
       <p class="muted" data-mailbox-msg hidden></p>
     </form>
@@ -1163,8 +1169,15 @@ function bind(root) {
     e.preventDefault();
     const form = e.target;
     const msg = form.querySelector("[data-mailbox-msg]");
-    const localpart = String(new FormData(form).get("localpart") || "").trim().toLowerCase();
-    if (!localpart) return;
+    let localpart = String(new FormData(form).get("localpart") || "").trim().toLowerCase();
+    if (localpart.endsWith("@vakento.nl")) localpart = localpart.slice(0, -"@vakento.nl".length);
+    if (localpart.includes("@") || !/^[a-z0-9._-]{2,40}$/.test(localpart)) {
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = "Gebruik alleen een naam zoals kian of kian@vakento.nl.";
+      }
+      return;
+    }
     try {
       const out = await api("/api/mailbox/create", { localpart });
       if (msg) {
@@ -1175,7 +1188,9 @@ function bind(root) {
     } catch (ex) {
       if (msg) {
         msg.hidden = false;
-        msg.textContent = ex.message || "Aanmaken is niet gelukt.";
+        msg.textContent = Number(ex.status) === 404
+          ? "De mailboxfunctie staat nog niet op de Vakento-server. Deze moet eerst worden geïnstalleerd."
+          : (ex.message || "Aanmaken is niet gelukt.");
       } else toast(ex.message);
     }
   });

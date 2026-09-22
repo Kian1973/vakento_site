@@ -80,7 +80,7 @@ if (box) {
   const user = await me();
   if (!user.email) {
     if (/account\.html$/i.test(location.pathname)) {
-      location.replace("/#lidworden");
+      location.replace("/#abonnementen");
     } else {
       box.innerHTML = "<p class='muted'>Nog niet ingelogd.</p>";
     }
@@ -117,7 +117,7 @@ if (box) {
       const uid = user.id;
       await api("/api/stop", {});
       wisLokaal(uid);
-      location.href = "/#lidworden";
+      location.href = "/#abonnementen";
     });
   }
 }

@@ -38,7 +38,7 @@ import {
   openPapier,
 } from "./papier.js?v=open1";
 import { api } from "./api.js";
-import { viewCloud, mountCloud } from "./cloud.js?v=cloud1";
+import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);

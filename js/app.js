@@ -40,7 +40,7 @@ import {
 import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
-import { viewContacten, bindContacten } from "./contacten.js?v=1";
+import { viewContacten, bindContacten } from "./contacten.js?v=2";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();

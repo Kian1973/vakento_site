@@ -40,6 +40,7 @@ import {
 import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
+import { viewContacten, bindContacten } from "./contacten.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();
@@ -49,6 +50,7 @@ const routes = {
   "#/": viewVandaag,
   "#/bord": viewBord,
   "#/klussen": viewKlussen,
+  "#/contacten": () => viewContacten(data),
   "#/papier": viewPapier,
   "#/uren": viewUren,
   "#/ploeg": viewPloeg,
@@ -153,6 +155,7 @@ function viewVandaag() {
         <a class="card" href="#/"><p class="kicker">Vandaag</p><h3>Dagoverzicht</h3><p class="muted">Wat moet er gebeuren</p></a>
         <a class="card" href="#/bord"><p class="kicker">Planning</p><h3>Weekbord</h3><p class="muted">Wie staat waar</p></a>
         <a class="card" href="#/klussen"><p class="kicker">Werk</p><h3>Klussen</h3><p class="muted">${data.klussen.length} dossiers</p></a>
+        <a class="card" href="#/contacten"><p class="kicker">Relaties</p><h3>Contacten</h3><p class="muted">${data.klanten.length} klanten & leveranciers</p></a>
         <a class="card" href="#/papier"><p class="kicker">Papier</p><h3>Offertes & facturen</h3><p class="muted">${data.offertes.length} offertes</p></a>
         <a class="card" href="#/uren"><p class="kicker">Tijd</p><h3>Uren</h3><p class="muted">Snel registreren</p></a>
         <a class="card" href="/app.html#bon"><p class="kicker">Boekhouding</p><h3>Bonnen scannen</h3><p class="muted">Lezen, btw, export</p></a>
@@ -865,6 +868,7 @@ function bind(root) {
   bindPapier(root, { data, persist, toast });
   bindKantoor(root, { data, persist, toast });
   bindSlim(root, { data, persist, toast });
+  bindContacten(root, { data, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);
 }

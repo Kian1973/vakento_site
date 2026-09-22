@@ -186,7 +186,10 @@ export function bindKantoor(root, { data, persist, toast }) {
   root.querySelector("[data-act='artikel']")?.addEventListener("click", () => {
     const naam = prompt("Artikel");
     if (!naam) return;
-    const prijs = Number(prompt("Prijs excl. btw") || 0);\r\n    const gekozen = Number(prompt("BTW tarief: 21 = standaard, 9 = verlaagd indien toegestaan, 0 = 0%", "21") || 21);\r\n    const btw = [0, 9, 21].includes(gekozen) ? gekozen : 21;\r\n    data.artikelen.push({ id: "a" + Date.now(), naam, eenheid: "st", prijs, btw });
+    const prijs = Number(prompt("Prijs excl. btw") || 0);
+    const gekozen = Number(prompt("BTW tarief: 21 = standaard, 9 = verlaagd indien toegestaan, 0 = 0%", "21") || 21);
+    const btw = [0, 9, 21].includes(gekozen) ? gekozen : 21;
+    data.artikelen.push({ id: "a" + Date.now(), naam, eenheid: "st", prijs, btw });
     persist();
   });
   root.querySelector("form[data-lev-filter]")?.addEventListener("submit", (e) => {

@@ -279,7 +279,26 @@ function viewKlussen() {
 }
 
 function som(regels) {
-  return regels.reduce((a, r) => a + r.bedrag, 0);
+  return (regels || []).reduce((a, r) => a + Number(r.bedrag || 0), 0);
+}
+
+function btwOverzicht(regels) {
+  const rows = (regels || []).map((r) => ({
+    bedrag: Number(r.bedrag || 0),
+    btw: [9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21,
+  }));
+  const basis9 = rows.filter((r) => r.btw === 9).reduce((a, r) => a + r.bedrag, 0);
+  const basis21 = rows.filter((r) => r.btw === 21).reduce((a, r) => a + r.bedrag, 0);
+  const btw9 = basis9 * 0.09;
+  const btw21 = basis21 * 0.21;
+  return {
+    excl: basis9 + basis21,
+    basis9,
+    basis21,
+    btw9,
+    btw21,
+    incl: basis9 + basis21 + btw9 + btw21,
+  };
 }
 
 function viewPapier() {
@@ -336,14 +355,50 @@ function viewPapier() {
     <h2 style="margin-top:22px">Offertes</h2>
     <div class="list" style="margin:10px 0 24px">
       ${data.offertes
-        .map(
-          (o) => `<article class="item"><strong>${o.nr} · ${o.titel}</strong>
-          <span>${klant(data, o.klant).name} · ${o.status} · ${euro(som(o.regels))}</span>
-          <div class="actions">
-            <button class="btn btn-ghost" data-print="offerte|${o.id}">Briefpapier</button>
-            ${o.status !== "akkoord" ? `<button class="btn" data-ok="${o.id}">Zet op akkoord</button>` : `<button class="btn btn-ghost" data-doc="bevestiging|${o.id}">Opdrachtbevestiging</button><button class="btn btn-ghost" data-doc="pakbon|${o.id}">Pakbon</button>`}
-          </div></article>`
-        )
+        .map((o) => {
+          const btw = btwOverzicht(o.regels);
+          return `<article class="item offer-vat-card">
+            <div class="row offer-vat-head">
+              <div>
+                <strong>${o.nr} · ${o.titel}</strong>
+                <span class="muted">${klant(data, o.klant).name} · ${o.status}</span>
+              </div>
+              <div class="offer-vat-total">
+                <small>Incl. btw</small>
+                <strong>${euro(btw.incl)}</strong>
+              </div>
+            </div>
+
+            <div class="offer-vat-lines">
+              ${(o.regels || []).map((r, index) => {
+                const tarief = [9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21;
+                return `<div class="offer-vat-line">
+                  <div>
+                    <strong>${esc(r.tekst || "Regel")}</strong>
+                    <span class="muted">${euro(Number(r.bedrag || 0))} excl. btw</span>
+                  </div>
+                  <label>BTW
+                    <select data-offerte-btw="${o.id}|${index}">
+                      <option value="9" ${tarief === 9 ? "selected" : ""}>9%</option>
+                      <option value="21" ${tarief === 21 ? "selected" : ""}>21%</option>
+                    </select>
+                  </label>
+                </div>`;
+              }).join("")}
+            </div>
+
+            <div class="offer-vat-summary">
+              ${btw.basis9 ? `<span>9%: ${euro(btw.basis9)} + ${euro(btw.btw9)} btw</span>` : ""}
+              ${btw.basis21 ? `<span>21%: ${euro(btw.basis21)} + ${euro(btw.btw21)} btw</span>` : ""}
+              <strong>Excl. btw ${euro(btw.excl)}</strong>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-ghost" data-print="offerte|${o.id}">Briefpapier</button>
+              ${o.status !== "akkoord" ? `<button class="btn" data-ok="${o.id}">Zet op akkoord</button>` : `<button class="btn btn-ghost" data-doc="bevestiging|${o.id}">Opdrachtbevestiging</button><button class="btn btn-ghost" data-doc="pakbon|${o.id}">Pakbon</button>`}
+            </div>
+          </article>`;
+        })
         .join("")}
     </div>
     <h2>Facturen</h2>
@@ -642,6 +697,28 @@ function bind(root) {
     toast("Offerte klaar");
     persist();
   });
+  root.querySelectorAll("[data-offerte-btw]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const [offerteId, indexRaw] = String(select.dataset.offerteBtw || "").split("|");
+      const index = Number(indexRaw);
+      const offerte = data.offertes.find((o) => o.id === offerteId);
+      const regel = offerte?.regels?.[index];
+      if (!regel) return;
+      regel.btw = Number(select.value) === 9 ? 9 : 21;
+
+      // Nieuwe/open facturen van dezelfde klus bijwerken als ze al bestaan.
+      data.facturen
+        .filter((f) => f.klus && f.klus === offerte.klus && f.status === "open")
+        .forEach((f) => {
+          f.regels = offerte.regels.map((r) => ({ ...r }));
+          f.bedrag = som(f.regels);
+        });
+
+      toast("BTW aangepast naar " + regel.btw + "%");
+      persist();
+    });
+  });
+
   root.querySelector("[data-act='ai-bon']")?.addEventListener("click", async () => {
     const form = root.querySelector("form[data-bon]");
     const klusId = new FormData(form).get("klus");
@@ -744,6 +821,7 @@ function bind(root) {
         id: "f" + Date.now(),
         nr: "FAC-" + (880 + data.facturen.length),
         klant: k.klant,
+        klus: k.id,
         titel: k.title,
         bedrag: k.begroot,
         regels,

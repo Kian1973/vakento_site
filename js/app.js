@@ -338,6 +338,90 @@ function bookPeriod(date, year, quarter) {
   const m = Number(d.slice(5,7));
   return Math.ceil(m/3) === Number(quarter);
 }
+async function syncScannedReceiptsFromCloud(year) {
+  const y = String(year || new Date().getFullYear());
+  data.inkoop ||= [];
+  let changed = false;
+
+  for (let month = 1; month <= 12; month++) {
+    const m = String(month).padStart(2, "0");
+    const folder = `Boekhouding/${y}/${m}/Bonnen`;
+    let listing;
+    try {
+      listing = await api("/api/cloud?pad=" + encodeURIComponent(folder), null, "GET");
+    } catch (_) {
+      continue;
+    }
+
+    for (const item of (listing.items || [])) {
+      if (item.soort !== "bestand" || !String(item.name || "").toLowerCase().endsWith(".json")) continue;
+      try {
+        const res = await fetch("/api/cloud/bestand?pad=" + encodeURIComponent(item.pad), {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          headers: { "Cache-Control":"no-cache", "Pragma":"no-cache" }
+        });
+        if (!res.ok) continue;
+        const meta = await res.json();
+        const bestand = String(meta.bestand || item.name.replace(/\.json$/i, ".jpg"));
+        const scanKey = "cloud:" + folder + "/" + bestand;
+        const existing = data.inkoop.find((x) => x.scanId === scanKey || (x.bestand === bestand && x.cloudPad === folder));
+
+        const gross = bookNum(meta.bedragInclBtw);
+        const net = bookNum(meta.bedragExclBtw);
+        const vatAmount = bookNum(meta.btwBedrag);
+        const rate = [0,9,21].includes(Number(meta.btw)) ? Number(meta.btw) : null;
+
+        if (existing) {
+          // Werk scaninformatie bij, maar behoud handmatig gekozen categorie en btw-aftrek.
+          const before = JSON.stringify(existing);
+          existing.dag = meta.datum || existing.dag || "";
+          existing.leverancier = meta.leverancier || existing.leverancier || "";
+          existing.tekst = meta.notitie || existing.tekst || "Gescande inkoopbon";
+          existing.bedrag = gross || existing.bedrag || 0;
+          existing.bedragInclBtw = gross || existing.bedragInclBtw || 0;
+          existing.bedragExclBtw = net || existing.bedragExclBtw || 0;
+          existing.btwBedrag = vatAmount || existing.btwBedrag || 0;
+          existing.btw = rate === null ? existing.btw ?? null : rate;
+          existing.betaaldMet = meta.betaaldMet || existing.betaaldMet || "";
+          existing.bestand = bestand;
+          existing.cloudPad = folder;
+          existing.bron = "bon-scan";
+          existing.automatischGelezen = Boolean(meta.automatischGelezen);
+          existing.scanId = scanKey;
+          if (JSON.stringify(existing) !== before) changed = true;
+          continue;
+        }
+
+        data.inkoop.unshift({
+          id: "cloudscan-" + y + m + "-" + String(item.name).replace(/[^a-zA-Z0-9]/g, "").slice(0, 30),
+          scanId: scanKey,
+          dag: meta.datum || "",
+          leverancier: meta.leverancier || "",
+          tekst: meta.notitie || "Gescande inkoopbon",
+          bedrag: gross,
+          bedragInclBtw: gross,
+          bedragExclBtw: net,
+          btwBedrag: vatAmount,
+          btw: rate,
+          btwAftrekbaar: null,
+          categorie: "",
+          betaaldMet: meta.betaaldMet || "",
+          status: "betaald",
+          bestand,
+          cloudPad: folder,
+          bron: "bon-scan",
+          automatischGelezen: Boolean(meta.automatischGelezen)
+        });
+        changed = true;
+      } catch (_) {}
+    }
+  }
+
+  return changed;
+}
+
 function bookTotals() {
   data.boekhouding ||= { jaar:new Date().getFullYear(), kwartaal:"all" };
   const year = Number(data.boekhouding.jaar || new Date().getFullYear());
@@ -348,12 +432,14 @@ function bookTotals() {
   const salesVat = bookRound(sales.reduce((s,x)=>s+x.c.vat,0));
   const purchaseEx = bookRound(purchases.reduce((s,x)=>s+x.c.net,0));
   const purchaseGross = bookRound(purchases.reduce((s,x)=>s+x.c.gross,0));
+  const purchaseVatAll = bookRound(purchases.reduce((s,x)=>s+x.c.vat,0));
   const inputVat = bookRound(purchases.reduce((s,x)=>s+(x.c.deductible?x.c.vat:0),0));
+  const unreviewedVat = bookRound(purchases.reduce((s,x)=>s+(x.x.btwAftrekbaar==null?x.c.vat:0),0));
   const spendAfterVat = bookRound(purchaseGross-inputVat);
   const receiptCount = purchases.filter(({x})=>x.bestand).length;
   const open = bookRound(sales.filter(x=>x.f.status==="open").reduce((s,x)=>s+x.c.incl,0));
   const review = purchases.filter(({x,c})=>c.rate===null || !x.categorie || x.btwAftrekbaar==null).length;
-  return {year,quarter,sales,purchases,salesEx,salesVat,purchaseEx,purchaseGross,inputVat,spendAfterVat,receiptCount,result:bookRound(salesEx-purchaseEx),vatDue:bookRound(salesVat-inputVat),open,review};
+  return {year,quarter,sales,purchases,salesEx,salesVat,purchaseEx,purchaseGross,purchaseVatAll,inputVat,unreviewedVat,spendAfterVat,receiptCount,result:bookRound(salesEx-purchaseEx),vatDue:bookRound(salesVat-inputVat),open,review};
 }
 function bookCsv(rows) {
   const cell = v => '"' + String(v ?? "").replace(/"/g,'""') + '"';
@@ -467,7 +553,8 @@ function viewBoekhouding() {
   return `
     <div class="row"><div><p class="kicker">Boekhouding</p><h1>Klaar voor je boekhouder.</h1>
     <p class="muted">Verkoop, inkoop, btw en open posten in één overzicht.</p></div>
-    <div class="actions"><a class="btn btn-ghost" href="/app.html#bon">Bon scannen</a><button class="btn" data-book-export>Boekhouderspakket ZIP</button></div></div>
+    <div class="actions"><a class="btn btn-ghost" href="/app.html#bon">Bon scannen</a><button class="btn btn-ghost" type="button" data-book-sync>Bonnen uit Cloud laden</button><button class="btn" data-book-export>Boekhouderspakket ZIP</button></div></div>
+    <p class="muted" data-book-sync-status>Gescande bonnen uit de Vakento Cloud worden automatisch bijgewerkt.</p>
 
     <form class="card stack" data-book-filter style="margin-bottom:18px">
       <div class="grid-2">
@@ -484,9 +571,11 @@ function viewBoekhouding() {
     </form>
 
     <div class="stat-grid">
-      <div class="stat"><span>Totaal uitgegeven incl. btw</span><b>${bookMoney(t.purchaseGross)}</b></div>
+      <div class="stat"><span>Totaal aankopen incl. btw</span><b>${bookMoney(t.purchaseGross)}</b></div>
+      <div class="stat"><span>BTW op aankopen</span><b>${bookMoney(t.purchaseVatAll)}</b></div>
       <div class="stat"><span>BTW terug te vragen*</span><b class="ok">${bookMoney(t.inputVat)}</b></div>
-      <div class="stat"><span>Uitgaven na btw-teruggaaf</span><b>${bookMoney(t.spendAfterVat)}</b></div>
+      <div class="stat"><span>BTW nog beoordelen</span><b class="${t.unreviewedVat ? "warn" : "ok"}">${bookMoney(t.unreviewedVat)}</b></div>
+      <div class="stat"><span>Uitgaven na bevestigde btw-teruggaaf</span><b>${bookMoney(t.spendAfterVat)}</b></div>
       <div class="stat"><span>Gescande bonnen</span><b>${t.receiptCount}</b></div>
       <div class="stat"><span>Omzet excl.</span><b>${bookMoney(t.salesEx)}</b></div>
       <div class="stat"><span>Kosten excl.</span><b>${bookMoney(t.purchaseEx)}</b></div>
@@ -1185,6 +1274,45 @@ function bind(root) {
     toast("Inkoopboeking bewaard");
     persist();
   });
+
+  async function runBookSync(showToast = false) {
+    const syncBtn = root.querySelector("[data-book-sync]");
+    const syncStatus = root.querySelector("[data-book-sync-status]");
+    if (!syncBtn && !syncStatus) return;
+    if (syncBtn) syncBtn.disabled = true;
+    if (syncStatus) syncStatus.textContent = "Bonnen uit Cloud laden…";
+    try {
+      const year = Number(data.boekhouding?.jaar || new Date().getFullYear());
+      const changed = await syncScannedReceiptsFromCloud(year);
+      if (syncStatus) syncStatus.textContent = changed
+        ? "Nieuwe of gewijzigde bonnen uit Cloud geladen."
+        : "Bonnen zijn bijgewerkt.";
+      if (changed) {
+        save(data);
+        if (showToast) toast("Bonnen uit Cloud geladen");
+        setTimeout(() => render(), 50);
+      } else if (showToast) {
+        toast("Bonnen zijn al bijgewerkt");
+      }
+    } catch (ex) {
+      if (syncStatus) syncStatus.textContent = "Bonnen laden is niet gelukt: " + (ex.message || ex);
+      if (showToast) toast("Bonnen laden mislukt");
+    } finally {
+      if (syncBtn) syncBtn.disabled = false;
+    }
+  }
+
+  root.querySelector("[data-book-sync]")?.addEventListener("click", () => runBookSync(true));
+
+  if (location.hash.startsWith("#/boekhouding")) {
+    const year = Number(data.boekhouding?.jaar || new Date().getFullYear());
+    const autoKey = "vakento.book.sync." + year;
+    const last = Number(sessionStorage.getItem(autoKey) || 0);
+    if (Date.now() - last > 30000) {
+      sessionStorage.setItem(autoKey, String(Date.now()));
+      setTimeout(() => runBookSync(false), 20);
+    }
+  }
 
   root.querySelectorAll("[data-book-deductible]").forEach((select) => {
     select.addEventListener("change", () => {

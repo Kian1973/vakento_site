@@ -442,8 +442,15 @@ function viewBrein() {
 function viewPost() {
   const p = papierVan(data);
   return `
-    <div class="row"><div><p class="kicker">Post</p><h1>Versturen en ontvangen via Vakento.</h1>
-      <p class="muted">Uitgaand vanaf hallo@vakento.nl. Antwoord komt op het adres in je briefpapier of je account.</p></div></div>
+    <div class="row"><div><p class="kicker">Post</p><h1>Jouw eigen Vakento e-mail.</h1>
+      <p class="muted">Pro: maak je eigen naam@vakento.nl. Pro+ voegt 2 GB mailbox, webmail, Outlook/telefoon en extra mailbeveiliging toe.</p></div></div>
+    <form class="card stack" data-mailbox-create style="margin-bottom:18px">
+      <p class="kicker">Eigen adres</p>
+      <h3>Maak je @vakento.nl adres</h3>
+      <label>Gewenste naam<input name="localpart" required maxlength="40" pattern="[a-zA-Z0-9._-]+" placeholder="jouwnaam"></label>
+      <button class="btn" type="submit">E-mailadres aanmaken</button>
+      <p class="muted" data-mailbox-msg hidden></p>
+    </form>
     <form class="card stack" data-mail>
       <label>Aan<input name="to" type="email" required placeholder="klant@bedrijf.nl"></label>
       <label>Onderwerp<input name="subject" required value="Offerte ${data.firm || ""}"></label>
@@ -794,6 +801,27 @@ function bind(root) {
       openPapier(htmlOfferte(data, o));
     })
   );
+  root.querySelector("form[data-mailbox-create]")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const msg = form.querySelector("[data-mailbox-msg]");
+    const localpart = String(new FormData(form).get("localpart") || "").trim().toLowerCase();
+    if (!localpart) return;
+    try {
+      const out = await api("/api/mailbox/create", { localpart });
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = "Aangemaakt: " + (out.email || (localpart + "@vakento.nl"));
+      }
+      toast("E-mailadres aangemaakt");
+    } catch (ex) {
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = ex.message || "Aanmaken is niet gelukt.";
+      } else toast(ex.message);
+    }
+  });
+
   root.querySelector("form[data-mail]")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target;

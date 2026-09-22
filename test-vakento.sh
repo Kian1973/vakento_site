@@ -14,10 +14,8 @@ if [ ! -d node_modules/@playwright/test ]; then
   npm install
 fi
 
-if [ ! -d "$HOME/.cache/ms-playwright" ]; then
-  echo "Chromium voor Playwright installeren..."
-  npx playwright install chromium
-fi
+echo "Chromium en Linux-afhankelijkheden voor Playwright controleren..."
+npx playwright install --with-deps chromium
 
 if [ -n "${VAKENTO_TEST_EMAIL:-}" ] && [ -n "${VAKENTO_TEST_PASSWORD:-}" ] && [ "${VAKENTO_ALLOW_WRITE_TESTS:-0}" = "1" ]; then
   echo "Volledige Vakento gebruikerstest wordt uitgevoerd."

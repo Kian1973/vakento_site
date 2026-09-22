@@ -75,6 +75,13 @@ document.querySelectorAll("[data-buy]").forEach((btn) => {
 bindAuth($("[data-register]"), "register");
 bindAuth($("[data-login]"), "login");
 
+const accountLoginOnly = /account\.html$/i.test(location.pathname) && !document.querySelector("[data-me]");
+if (accountLoginOnly) {
+  const user = await me();
+  if (user?.email && user?.paid) location.replace("werk.html");
+}
+
+
 const box = $("[data-me]");
 const loginView = $("[data-login-view]");
 const accountView = $("[data-account-view]");

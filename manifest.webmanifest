@@ -15,5 +15,8 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }

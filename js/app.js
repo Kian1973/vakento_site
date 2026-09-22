@@ -146,11 +146,22 @@ function viewVandaag() {
         <button class="btn btn-ghost" data-act="bon">Werkbon</button>
       </div>
     </div>
-    <div class="start-grid" style="margin-bottom:18px">
-      <a class="card" href="#/klussen"><p class="kicker">Werk</p><h3>Klussen</h3><p class="muted">${data.klussen.length} in het dossier</p></a>
-      <a class="card" href="#/papier"><p class="kicker">Papier</p><h3>Offerte</h3><p class="muted">${data.offertes.length} offertes</p></a>
-      <a class="card" href="#/uren"><p class="kicker">Ploeg</p><h3>Uren</h3><p class="muted">Boek vanaf de klus</p></a>
-      <a class="card" href="#/cloud"><p class="kicker">Cloud</p><h3>Mappen</h3><p class="muted">Open overal ter wereld</p></a>
+    <div class="card" style="margin-bottom:18px">
+      <p class="kicker">Hoofdmenu abonnement</p>
+      <h2 style="margin:4px 0 12px">Belangrijkste onderdelen</h2>
+      <div class="start-grid">
+        <a class="card" href="#/"><p class="kicker">Vandaag</p><h3>Dagoverzicht</h3><p class="muted">Wat moet er gebeuren</p></a>
+        <a class="card" href="#/bord"><p class="kicker">Planning</p><h3>Weekbord</h3><p class="muted">Wie staat waar</p></a>
+        <a class="card" href="#/klussen"><p class="kicker">Werk</p><h3>Klussen</h3><p class="muted">${data.klussen.length} dossiers</p></a>
+        <a class="card" href="#/papier"><p class="kicker">Papier</p><h3>Offertes & facturen</h3><p class="muted">${data.offertes.length} offertes</p></a>
+        <a class="card" href="#/uren"><p class="kicker">Tijd</p><h3>Uren</h3><p class="muted">Snel registreren</p></a>
+        <a class="card" href="/app.html#bon"><p class="kicker">Boekhouding</p><h3>Bonnen scannen</h3><p class="muted">Lezen, btw, export</p></a>
+        <a class="card" href="#/cloud"><p class="kicker">Cloud</p><h3>Bestanden</h3><p class="muted">5 GB opslag</p></a>
+        <a class="card" href="#/winst"><p class="kicker">Financiën</p><h3>Winst</h3><p class="muted">Omzet en kosten</p></a>
+        <a class="card" href="#/slim"><p class="kicker">AI</p><h3>Slim werken</h3><p class="muted">AI-assistent</p></a>
+        <a class="card" href="#/post"><p class="kicker">Pro+</p><h3>E-mail</h3><p class="muted">Eigen mailbox bij Pro+</p></a>
+        <a class="card" href="/account.html"><p class="kicker">Account</p><h3>Abonnement</h3><p class="muted">Pro / Pro+ en app</p></a>
+      </div>
     </div>
     <div class="stat-grid">
       <div class="stat"><span class="muted">Op pad</span><b>${inzet.length}</b></div>

@@ -347,3 +347,104 @@ input, select, textarea {
 .photo-log img { width:100%; height:120px; object-fit:cover; display:block; }
 .photo-log figcaption { padding:8px; font-size:.8rem; color:var(--muted); }
 @media (max-width:760px) { .smart-grid { grid-template-columns:1fr; } .smart-wide { grid-column:auto; } .smart-actions { grid-template-columns:1fr; } }
+
+
+/* Cloud galerij */
+.cloud-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: 14px;
+}
+.cloud-tile {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.cloud-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(30,90,166,.3);
+  box-shadow: 0 12px 28px rgba(18,24,38,.09);
+}
+.cloud-tile-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cloud-preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #edf3f9;
+  color: var(--moss);
+  border-bottom: 1px solid var(--line);
+}
+.cloud-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cloud-folder-preview svg,
+.cloud-file-preview svg {
+  width: 62px;
+  height: 62px;
+}
+.cloud-file-preview {
+  position: relative;
+}
+.cloud-file-preview span {
+  position: absolute;
+  bottom: 14px;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--muted);
+}
+.cloud-tile-meta {
+  display: grid;
+  gap: 2px;
+  padding: 11px 12px 13px;
+  padding-right: 54px;
+}
+.cloud-tile-meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .92rem;
+}
+.cloud-tile-meta small {
+  color: var(--muted);
+  font-size: .76rem;
+}
+.cloud-tile-delete {
+  position: absolute;
+  right: 9px;
+  bottom: 10px;
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: .72rem;
+  cursor: pointer;
+}
+.cloud-tile-delete:hover {
+  background: rgba(194,65,12,.08);
+  color: var(--warn);
+}
+@media (max-width: 560px) {
+  .cloud-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .cloud-tile-meta { padding: 9px 9px 11px; padding-right: 44px; }
+  .cloud-tile-delete { right: 6px; bottom: 8px; padding: 5px 6px; }
+}

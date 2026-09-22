@@ -17,7 +17,7 @@ try {
         "Gratis tot " + tot + ". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan. <a href=\"account.html\">Betalen</a>";
       document.querySelector(".app-bar")?.insertAdjacentElement("afterend", note);
     }
-    await import("./app.js?v=cloud1");
+    await import("./app.js?v=post2");
   }
 } catch (err) {
   const stage = document.getElementById("stage");

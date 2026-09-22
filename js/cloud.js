@@ -64,6 +64,40 @@ function maat(n) {
   return gb(x) + " GB";
 }
 
+function ext(name) {
+  const m = String(name || "").toLowerCase().match(/\.([a-z0-9]+)$/);
+  return m ? m[1] : "";
+}
+
+function isAfbeelding(name) {
+  return ["jpg", "jpeg", "png", "webp", "gif", "avif", "bmp", "svg"].includes(ext(name));
+}
+
+function preview(it) {
+  if (it.soort === "map") {
+    return `<div class="cloud-preview cloud-folder-preview" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none">
+        <path d="M7 17a6 6 0 0 1 6-6h14l6 7h18a6 6 0 0 1 6 6v25a6 6 0 0 1-6 6H13a6 6 0 0 1-6-6V17Z" fill="currentColor" opacity=".16"/>
+        <path d="M7 24h50v25a6 6 0 0 1-6 6H13a6 6 0 0 1-6-6V24Z" fill="currentColor" opacity=".32"/>
+      </svg>
+    </div>`;
+  }
+  if (isAfbeelding(it.name)) {
+    const src = "/api/cloud/bestand?pad=" + encodeURIComponent(it.pad);
+    return `<div class="cloud-preview cloud-image-preview">
+      <img src="${src}" alt="" loading="lazy">
+    </div>`;
+  }
+  const soort = ext(it.name).toUpperCase() || "BESTAND";
+  return `<div class="cloud-preview cloud-file-preview" aria-hidden="true">
+    <svg viewBox="0 0 64 64" fill="none">
+      <path d="M16 6h22l12 12v40H16V6Z" fill="currentColor" opacity=".14"/>
+      <path d="M38 6v14h12" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+    </svg>
+    <span>${esc(soort)}</span>
+  </div>`;
+}
+
 export function viewCloud() {
   return `
     <div class="row">
@@ -107,17 +141,20 @@ export async function mountCloud(root) {
         }
       </div>
     </div>
-    <div class="list" style="margin-top:14px">
+    <div class="cloud-gallery" style="margin-top:14px">
       ${
         data.items.length
           ? data.items
               .map(
-                (it) => `<article class="item cloud-row">
-                  <button type="button" class="cloud-open" data-open="${esc(it.pad)}" data-soort="${it.soort}">
-                    <strong>${it.soort === "map" ? "Map" : "Bestand"} · ${esc(it.name)}</strong>
-                    <span class="muted">${maat(it.bytes)}</span>
+                (it) => `<article class="cloud-tile">
+                  <button type="button" class="cloud-tile-open" data-open="${esc(it.pad)}" data-soort="${it.soort}">
+                    ${preview(it)}
+                    <span class="cloud-tile-meta">
+                      <strong title="${esc(it.name)}">${esc(it.name)}</strong>
+                      <small>${it.soort === "map" ? "Map" : maat(it.bytes)}</small>
+                    </span>
                   </button>
-                  <button type="button" class="btn btn-ghost" data-wis="${esc(it.pad)}" data-naam="${esc(it.name)}">Weg</button>
+                  <button type="button" class="cloud-tile-delete" data-wis="${esc(it.pad)}" data-naam="${esc(it.name)}" aria-label="${esc(it.name)} verwijderen">Weg</button>
                 </article>`
               )
               .join("")

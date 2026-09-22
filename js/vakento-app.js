@@ -14,10 +14,6 @@ $("[data-plan-name]") && ($("[data-plan-name]").textContent = planName);
 $("[data-plan-badge]") && ($("[data-plan-badge]").textContent = planName);
 $("[data-plan-description]") && ($("[data-plan-description]").textContent =
   "Werk, administratie, bonnen, cloud en slimme ondersteuning vanaf je telefoon.");
-document.querySelectorAll("[data-proplus-only]").forEach((el) => { el.hidden = true; });
-const proPlusNote = $("[data-proplus-note]");
-if (proPlusNote) proPlusNote.hidden = true;
-
 // Uitloggen loopt via /logout.html, zodat het ook werkt als deze module of PWA-cache problemen heeft.
 
 function onlineState() {

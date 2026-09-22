@@ -30,11 +30,21 @@
         <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
         <label>Wachtwoord<input name="password" type="password" required autocomplete="current-password"></label>
         <button class="btn" type="submit">Mijn account</button>
+        <button class="btn btn-ghost" type="button" data-forgot-open>Wachtwoord vergeten?</button>
         <p class="warn" data-err hidden></p>
+      </form>
+
+      <form class="stack" data-forgot hidden style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
+        <p class="kicker">Wachtwoord herstellen</p>
+        <p class="muted">Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord te kiezen.</p>
+        <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
+        <button class="btn" type="submit">Herstellink versturen</button>
+        <button class="btn btn-ghost" type="button" data-forgot-cancel>Terug naar inloggen</button>
+        <p class="muted" data-forgot-msg hidden></p>
       </form>
     </section>
   </main>
 
-  <script type="module" src="js/pay.js?v=account3"></script>
+  <script type="module" src="js/pay.js?v=account4"></script>
 </body>
 </html>

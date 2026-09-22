@@ -319,7 +319,18 @@ function viewPapier() {
           ? `<select name="klant">${data.klanten.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}</select>`
           : `<span class="muted"> Nog geen klant. Voeg er eerst één toe.</span>`
       }</label>
-      <label>Opdracht<textarea name="vraag" rows="3" required placeholder="Groepenkast 3-fase bakkerij Aalten, oven extra groep, oude kast eruit"></textarea></label>
+      <label>Opdracht<textarea name="vraag" rows="3" required placeholder="Beschrijf de opdracht"></textarea></label>
+      <label>BTW-categorie
+        <select name="btwCategorie">
+          <option value="standaard21">21% standaard</option>
+          <option value="schilder9">9% schilderwerk woning ouder dan 2 jaar</option>
+          <option value="stukadoor9">9% stukadoorswerk woning ouder dan 2 jaar</option>
+          <option value="behang9">9% behangen woning ouder dan 2 jaar</option>
+          <option value="isolatieMix">Isolatie: arbeid 9%, materiaal 21%</option>
+          <option value="schoonmaak9">9% schoonmaak in woning</option>
+        </select>
+      </label>
+      <p class="muted">Vakento splitst 9% en 21% op de offerte en factuur. Controleer altijd of de werkzaamheden aan de voorwaarden voldoen.</p>
       <button class="btn" type="submit">Maak offerte met AI</button>
     </form>
     <h2 style="margin-top:22px">Offertes</h2>
@@ -584,6 +595,7 @@ function bind(root) {
     const f = new FormData(e.target);
     const vraag = f.get("vraag");
     const klantId = f.get("klant");
+    const btwCategorie = String(f.get("btwCategorie") || "standaard21");
     if (!klantId) {
       toast("Eerst een klant");
       return;
@@ -591,7 +603,18 @@ function bind(root) {
     toast("Calculeren");
     const local = offerteUitTekst(vraag, data.place);
     const out = await verrijkMetServer("offerte", local, { vraag, plaats: data.place });
-    const regels = out.regels || local.regels;
+    const bronRegels = out.regels || local.regels;
+    const regelBtw = (r) => {
+      const tekst = String(r?.tekst || "").toLowerCase();
+      if (btwCategorie === "standaard21") return 21;
+      if (["schilder9", "stukadoor9", "behang9", "schoonmaak9"].includes(btwCategorie)) return 9;
+      if (btwCategorie === "isolatieMix") {
+        const materiaal = /(materiaal|isolatieplaat|isolatiemateriaal|pir|pur|glaswol|steenwol|eps|xps|folie|regelwerk|bevestiging)/i.test(tekst);
+        return materiaal ? 21 : 9;
+      }
+      return 21;
+    };
+    const regels = (bronRegels || []).map((r) => ({ ...r, btw: regelBtw(r) }));
     const kId = "k" + Date.now();
     data.klussen.unshift({
       id: kId,
@@ -614,6 +637,7 @@ function bind(root) {
       status: "verstuurd",
       klus: kId,
       risico: out.risico || local.risico,
+      btwCategorie,
     });
     toast("Offerte klaar");
     persist();
@@ -712,12 +736,17 @@ function bind(root) {
   root.querySelectorAll("[data-factuur]").forEach((btn) =>
     btn.addEventListener("click", () => {
       const k = klus(data, btn.dataset.factuur);
+      const offerte = data.offertes.find((o) => o.klus === k.id);
+      const regels = offerte?.regels?.length
+        ? offerte.regels.map((r) => ({ ...r, btw: [0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21 }))
+        : [{ tekst: k.title, bedrag: k.begroot, btw: 21 }];
       data.facturen.unshift({
         id: "f" + Date.now(),
         nr: "FAC-" + (880 + data.facturen.length),
         klant: k.klant,
         titel: k.title,
         bedrag: k.begroot,
+        regels,
         status: "open",
         dag: iso(new Date()),
       });

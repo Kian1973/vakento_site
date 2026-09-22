@@ -17,11 +17,6 @@ export VAKENTO_ALLOW_WRITE_TESTS=1
 bash test-vakento.sh
 ```
 
-Gebruikt het testaccount Google Authenticator, voeg dan ook de Base32 instelsleutel toe:
-
-```bash
-export VAKENTO_TEST_TOTP_SECRET='BASE32SLEUTEL'
-```
 
 Gebruik hiervoor nooit het persoonlijke beheerdersaccount. De volledige test maakt tijdelijk een TEST-contact, klus, factuur, offerte, uurboeking en cloudmap aan en probeert die na afloop weer op te ruimen.
 
@@ -29,7 +24,7 @@ Gebruik hiervoor nooit het persoonlijke beheerdersaccount. De volledige test maa
 
 - homepage, accountpagina, JavaScript/CSS, manifest en 404
 - oude Vakento-mailbox mag nergens terugkomen
-- inloggen en optioneel 2FA
+- inloggen
 - contact aanmaken en na vernieuwen terugvinden
 - klus aanmaken en bewaren
 - klantportaal openen vanuit een schoon browservenster

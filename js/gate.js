@@ -1,4 +1,4 @@
-import { me, logout } from "./api.js";
+import { me } from "./api.js";
 
 try {
   const user = await me();
@@ -9,13 +9,6 @@ try {
       sessionStorage.setItem("vakento.uid", user.id || "");
       sessionStorage.setItem("vakento.firm", user.name || "");
     } catch (_) {}
-    const logoutButton = document.querySelector("[data-logout]");
-    logoutButton?.addEventListener("click", async () => {
-      logoutButton.disabled = true;
-      logoutButton.textContent = "Uitloggen…";
-      await logout();
-      location.replace("/account.html?uitgelogd=1");
-    });
     if (user.trial && user.paidUntil) {
       const tot = new Date(user.paidUntil).toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
       const note = document.createElement("p");

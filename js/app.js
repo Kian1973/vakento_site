@@ -385,6 +385,10 @@ async function syncScannedReceiptsFromCloud(year) {
           existing.btwBedrag = vatAmount || existing.btwBedrag || 0;
           existing.btw = rate === null ? existing.btw ?? null : rate;
           existing.betaaldMet = meta.betaaldMet || existing.betaaldMet || "";
+          if (!existing.handmatigAangepast) {
+            if (meta.categorie) existing.categorie = meta.categorie;
+            if (typeof meta.btwAftrekbaar === "boolean") existing.btwAftrekbaar = meta.btwAftrekbaar;
+          }
           existing.bestand = bestand;
           existing.cloudPad = folder;
           existing.bron = "bon-scan";
@@ -405,8 +409,8 @@ async function syncScannedReceiptsFromCloud(year) {
           bedragExclBtw: net,
           btwBedrag: vatAmount,
           btw: rate,
-          btwAftrekbaar: null,
-          categorie: "",
+          btwAftrekbaar: typeof meta.btwAftrekbaar === "boolean" ? meta.btwAftrekbaar : null,
+          categorie: meta.categorie || "",
           betaaldMet: meta.betaaldMet || "",
           status: "betaald",
           bestand,
@@ -600,6 +604,7 @@ function viewBoekhouding() {
                 <div><strong>${esc(x.leverancier||"Bon")}</strong><span>${esc(x.dag||x.datum||"")} · ${bookMoney(c.gross)} incl. btw · btw ${bookMoney(c.vat)}</span></div>
                 <div class="actions">
                   ${fullPad ? `<a class="btn btn-ghost" target="_blank" rel="noopener" href="/api/cloud/bestand?pad=${encodeURIComponent(fullPad)}">Open bon</a>` : ""}
+                  <button class="btn btn-ghost" type="button" data-book-edit="${esc(x.id||"")}">Aanpassen</button>
                   <label>BTW aftrekbaar
                     <select data-book-deductible="${esc(x.id||"")}">
                       <option value="" ${x.btwAftrekbaar==null?"selected":""}>Nog beoordelen</option>
@@ -613,6 +618,77 @@ function viewBoekhouding() {
           : '<article class="item"><strong>Nog geen gescande bonnen</strong><span>Scan je eerste bon met de Vakento-app.</span></article>'}
       </div>
     </section>
+
+    <dialog class="contact-dialog" data-book-edit-dialog>
+      <form class="contact-form" data-book-edit-form>
+        <div class="row">
+          <div><p class="kicker">Aankoopbon</p><h2>Bon aanpassen</h2></div>
+          <button class="btn btn-ghost" type="button" data-book-edit-close>Sluiten</button>
+        </div>
+        <input type="hidden" name="id">
+        <div class="grid-2">
+          <label>Datum<input name="date" type="date" required></label>
+          <label>Leverancier<input name="supplier" maxlength="80" required></label>
+        </div>
+        <label>Omschrijving / notitie<input name="text" maxlength="180"></label>
+        <div class="grid-2">
+          <label>Totaal incl. btw<input name="gross" type="number" step=".01" min="0" required></label>
+          <label>BTW-tarief
+            <select name="vat">
+              <option value="">Nog bepalen</option>
+              <option value="21">21%</option>
+              <option value="9">9%</option>
+              <option value="0">0%</option>
+            </select>
+          </label>
+        </div>
+        <label>Categorie
+          <select name="category">
+            <option value="">Nog kiezen</option>
+            <option value="4000">4000 · Inkoop materialen</option>
+            <option value="4100">4100 · Uitbesteed werk</option>
+            <option value="4200">4200 · Gereedschap en klein materiaal</option>
+            <option value="4300">4300 · Auto en vervoer</option>
+            <option value="4500">4500 · Kantoor en administratie</option>
+            <option value="4600">4600 · Telefoon, internet en software</option>
+            <option value="4700">4700 · Reclame en verkoop</option>
+            <option value="4800">4800 · Verzekeringen en bankkosten</option>
+            <option value="4900">4900 · Overige bedrijfskosten</option>
+            <option value="4999">4999 · Te rubriceren</option>
+          </select>
+        </label>
+        <div class="grid-2">
+          <label>Betaald met
+            <select name="paidWith">
+              <option value="">Niet opgegeven</option>
+              <option>Zakelijke rekening</option>
+              <option>Pin / betaalpas</option>
+              <option>Creditcard</option>
+              <option>Contant</option>
+              <option>Privé voorgeschoten</option>
+            </select>
+          </label>
+          <label>BTW aftrekbaar
+            <select name="deductible">
+              <option value="">Nog beoordelen</option>
+              <option value="1">Ja</option>
+              <option value="0">Nee</option>
+            </select>
+          </label>
+        </div>
+        <div class="card" style="padding:12px">
+          <div class="grid-2">
+            <div><span class="muted">Excl. btw</span><strong data-book-edit-net style="display:block">—</strong></div>
+            <div><span class="muted">BTW-bedrag</span><strong data-book-edit-vat style="display:block">—</strong></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit">Wijzigingen bewaren</button>
+          <button class="btn btn-ghost" type="button" data-book-edit-close>Annuleren</button>
+        </div>
+        <p class="muted" data-book-edit-status hidden></p>
+      </form>
+    </dialog>
 
     <section class="card" style="margin-top:18px">
       <p class="kicker">Nieuwe inkoopboeking</p><h2>Kosten vastleggen</h2>
@@ -637,6 +713,48 @@ function viewBoekhouding() {
       ${t.purchases.map(({x,c})=>`<tr><td>${esc(x.dag||x.datum||"")}</td><td>${esc(x.leverancier||"")}</td><td>${esc(x.categorie||"4999")}</td><td>${bookMoney(c.net)}</td><td>${c.rate==null?"?":c.rate+"%"} · ${bookMoney(c.vat)}</td><td>${bookMoney(c.gross)}</td><td><select data-book-deductible="${esc(x.id||"")}"><option value="" ${x.btwAftrekbaar==null?"selected":""}>Nog beoordelen</option><option value="1" ${x.btwAftrekbaar===true?"selected":""}>Ja</option><option value="0" ${x.btwAftrekbaar===false?"selected":""}>Nee</option></select></td><td class="${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"warn":"ok"}">${c.rate===null||!x.categorie||x.btwAftrekbaar==null?"Nakijken":"Compleet"}</td></tr>`).join("") || '<tr><td colspan="8">Geen inkoopboekingen.</td></tr>'}
     </tbody></table></div>
   `;
+}
+
+async function saveReceiptCorrectionToCloud(row) {
+  if (!row?.cloudPad || !row?.bestand) return false;
+  const jsonName = String(row.bestand).replace(/\.[^.]+$/, ".json");
+  const jsonPad = [row.cloudPad, jsonName].filter(Boolean).join("/");
+  let meta = {};
+  try {
+    const res = await fetch("/api/cloud/bestand?pad=" + encodeURIComponent(jsonPad), {
+      method:"GET",
+      credentials:"include",
+      cache:"no-store"
+    });
+    if (res.ok) meta = await res.json();
+  } catch (_) {}
+
+  const calc = purchaseBookCalc(row);
+  meta = {
+    ...meta,
+    datum: row.dag || row.datum || "",
+    leverancier: row.leverancier || "",
+    notitie: row.tekst || row.notitie || "",
+    bedragInclBtw: calc.gross,
+    bedragExclBtw: calc.net,
+    btwBedrag: calc.vat,
+    btw: calc.rate,
+    btwIsInbegrepen: true,
+    betaaldMet: row.betaaldMet || row.betaalwijze || "",
+    categorie: row.categorie || "",
+    btwAftrekbaar: row.btwAftrekbaar,
+    bestand: row.bestand,
+    handmatigAangepast: true,
+    aangepastOp: new Date().toISOString()
+  };
+
+  const q = new URLSearchParams({ pad: row.cloudPad, naam: jsonName });
+  const res = await fetch("/api/cloud/upload?" + q, {
+    method:"POST",
+    credentials:"include",
+    body:new Blob([JSON.stringify(meta, null, 2)], {type:"application/json"})
+  });
+  return res.ok;
 }
 
 function viewPapier() {
@@ -1313,6 +1431,99 @@ function bind(root) {
       setTimeout(() => runBookSync(false), 20);
     }
   }
+
+  const editDialog = root.querySelector("[data-book-edit-dialog]");
+  const editForm = root.querySelector("[data-book-edit-form]");
+
+  function updateBookEditCalc() {
+    if (!editForm) return;
+    const gross = bookNum(editForm.elements.gross?.value);
+    const rateRaw = editForm.elements.vat?.value;
+    const rate = rateRaw === "" ? null : Number(rateRaw);
+    const net = rate === null ? 0 : rate ? bookRound(gross/(1+rate/100)) : gross;
+    const vat = rate === null ? 0 : bookRound(gross-net);
+    const netEl = editForm.querySelector("[data-book-edit-net]");
+    const vatEl = editForm.querySelector("[data-book-edit-vat]");
+    if (netEl) netEl.textContent = rate === null ? "Nog bepalen" : bookMoney(net);
+    if (vatEl) vatEl.textContent = rate === null ? "Nog bepalen" : bookMoney(vat);
+  }
+
+  root.querySelectorAll("[data-book-edit]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const row = (data.inkoop || []).find((x) => String(x.id) === String(btn.dataset.bookEdit));
+      if (!row || !editForm || !editDialog) return;
+      const calc = purchaseBookCalc(row);
+      editForm.elements.id.value = row.id || "";
+      editForm.elements.date.value = row.dag || row.datum || "";
+      editForm.elements.supplier.value = row.leverancier || "";
+      editForm.elements.text.value = row.tekst || row.notitie || "";
+      editForm.elements.gross.value = calc.gross || "";
+      editForm.elements.vat.value = calc.rate === null ? "" : String(calc.rate);
+      editForm.elements.category.value = row.categorie || "";
+      editForm.elements.paidWith.value = row.betaaldMet || row.betaalwijze || "";
+      editForm.elements.deductible.value = row.btwAftrekbaar == null ? "" : row.btwAftrekbaar ? "1" : "0";
+      const status = editForm.querySelector("[data-book-edit-status]");
+      if (status) status.hidden = true;
+      updateBookEditCalc();
+      editDialog.showModal();
+    });
+  });
+
+  root.querySelectorAll("[data-book-edit-close]").forEach((btn) => {
+    btn.addEventListener("click", () => editDialog?.close());
+  });
+
+  editForm?.elements.gross?.addEventListener("input", updateBookEditCalc);
+  editForm?.elements.vat?.addEventListener("change", updateBookEditCalc);
+
+  editForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(editForm);
+    const row = (data.inkoop || []).find((x) => String(x.id) === String(fd.get("id")));
+    if (!row) return;
+
+    const gross = bookNum(fd.get("gross"));
+    const rateRaw = String(fd.get("vat") ?? "");
+    const rate = rateRaw === "" ? null : Number(rateRaw);
+    const net = rate === null ? 0 : rate ? bookRound(gross/(1+rate/100)) : gross;
+    const vat = rate === null ? 0 : bookRound(gross-net);
+
+    row.dag = String(fd.get("date") || "");
+    row.leverancier = String(fd.get("supplier") || "").trim();
+    row.tekst = String(fd.get("text") || "").trim();
+    row.bedrag = gross;
+    row.bedragInclBtw = gross;
+    row.bedragExclBtw = net;
+    row.btwBedrag = vat;
+    row.btw = rate;
+    row.categorie = String(fd.get("category") || "");
+    row.betaaldMet = String(fd.get("paidWith") || "");
+    row.btwAftrekbaar = fd.get("deductible") === "" ? null : fd.get("deductible") === "1";
+    row.handmatigAangepast = true;
+
+    save(data);
+    const status = editForm.querySelector("[data-book-edit-status]");
+    if (status) {
+      status.hidden = false;
+      status.textContent = "Wijzigingen opslaan…";
+    }
+
+    let cloudOk = true;
+    try {
+      cloudOk = await saveReceiptCorrectionToCloud(row);
+    } catch (_) {
+      cloudOk = false;
+    }
+
+    if (status) status.textContent = cloudOk
+      ? "Opgeslagen in Boekhouding en Cloud."
+      : "Opgeslagen in Boekhouding. Cloud bijwerken is niet gelukt.";
+
+    setTimeout(() => {
+      editDialog?.close();
+      render();
+    }, 450);
+  });
 
   root.querySelectorAll("[data-book-deductible]").forEach((select) => {
     select.addEventListener("change", () => {

@@ -817,7 +817,7 @@ function bind(root) {
                   `<article class="item"><strong>${esc(b.onderwerp || "(geen onderwerp)")}</strong><span>${esc(b.van)} · ${esc(b.datum)}</span><span>${esc((b.tekst || "").slice(0, 400))}</span></article>`
               )
               .join("")
-          : `<p class="muted">Nog geen post op ${esc(res.van || "hallo@vakento.nl")}. Zet bij Strato een MX-record naar deze server, anders komt inkomende mail niet aan.</p>`;
+          : `<p class="muted">Nog geen ontvangen berichten op ${esc(res.van || "hallo@vakento.nl")}.</p>`;
       })
       .catch((ex) => {
         inbox.innerHTML = `<p class="warn">${esc(ex.message)}</p>`;

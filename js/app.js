@@ -10,7 +10,7 @@ import {
   iso,
   weekDays,
   addDays,
-} from "./store.js?v=btw1";
+} from "./store.js?v=boek1";
 import {
   offerteUitTekst,
   briefing,
@@ -1008,7 +1008,10 @@ function bind(root) {
   );
   root.querySelectorAll("[data-betaald]").forEach((btn) =>
     btn.addEventListener("click", () => {
-      data.facturen.find((f) => f.id === btn.dataset.betaald).status = "betaald";
+      const factuur = data.facturen.find((f) => f.id === btn.dataset.betaald);
+      if (!factuur) return;
+      factuur.status = "betaald";
+      factuur.betaaldOp = iso(new Date());
       persist();
     })
   );

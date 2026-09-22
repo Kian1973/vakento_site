@@ -143,3 +143,42 @@ if (paidBox) {
     ? `<h1>Betaling binnen. Alles blijft staan.</h1><p>Je cloud: ${gb(user.usedBytes)} / ${gb(user.quotaBytes)} GB.</p><p><a class="btn" href="werk.html">Open de werkplaats</a></p>`
     : `<h1>Even wachten.</h1><p>iDEAL via Mollie is nog niet bevestigd. Ververs over een paar seconden.</p><p><a class="btn" href="account.html">Naar account</a></p>`;
 }
+
+
+const forgotOpen = $("[data-forgot-open]");
+const forgotForm = $("[data-forgot]");
+const forgotCancel = $("[data-forgot-cancel]");
+const loginForm = $("[data-login]");
+
+forgotOpen?.addEventListener("click", () => {
+  if (loginForm) loginForm.hidden = true;
+  if (forgotForm) forgotForm.hidden = false;
+  const loginEmail = loginForm?.querySelector('[name="email"]')?.value || "";
+  const forgotEmail = forgotForm?.querySelector('[name="email"]');
+  if (forgotEmail && loginEmail) forgotEmail.value = loginEmail;
+  forgotEmail?.focus();
+});
+
+forgotCancel?.addEventListener("click", () => {
+  if (forgotForm) forgotForm.hidden = true;
+  if (loginForm) loginForm.hidden = false;
+});
+
+forgotForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = forgotForm.querySelector("[data-forgot-msg]");
+  const f = new FormData(forgotForm);
+  if (msg) msg.hidden = true;
+  try {
+    await api("/api/password/forgot", { email: f.get("email") });
+    if (msg) {
+      msg.textContent = "Als dit e-mailadres bij Vakento bekend is, ontvang je zo een herstellink.";
+      msg.hidden = false;
+    }
+  } catch (ex) {
+    if (msg) {
+      msg.textContent = ex.message || "Herstellink versturen is niet gelukt.";
+      msg.hidden = false;
+    }
+  }
+});

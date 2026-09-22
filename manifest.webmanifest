@@ -1,9 +1,19 @@
 {
   "name": "Vakento",
   "short_name": "Vakento",
-  "start_url": "/werk.html",
+  "description": "Bonnen scannen, werkfoto's opslaan en je Vakento-werkplaats openen.",
+  "start_url": "/app.html",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#eef1ef",
-  "theme_color": "#13161c",
-  "lang": "nl"
+  "background_color": "#eef2f7",
+  "theme_color": "#1e5aa6",
+  "lang": "nl",
+  "icons": [
+    {
+      "src": "/assets/vakento-app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

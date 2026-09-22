@@ -19,11 +19,11 @@
         <a href="#werkwijze">Zo werkt het</a>
         <a href="#assistent">Assistent</a>
         <a href="#voor-wie">Voor wie</a>
-        <a href="#prijs">Prijs</a>
+        <a href="#lidworden">Lid worden</a>
       </nav>
       <div class="nav-actions">
-        <a class="link-btn" href="/prijzen.html#inloggen">Inloggen</a>
-        <a class="button small" href="/prijzen.html">Probeer Vakento</a>
+        <a class="link-btn" href="#inloggen">Inloggen</a>
+        <a class="button small" href="#lidworden">Lid worden</a>
       </div>
     </div>
   </header>
@@ -36,7 +36,7 @@
           <h1>Van aanvraag tot betaling.<br><span>Alles op één plek.</span></h1>
           <p class="hero-lead">Vakento helpt je offertes, planning, uren, klanten, bestanden en overzicht eenvoudig bij elkaar te houden. Minder losse apps. Minder zoeken. Meer tijd voor je werk.</p>
           <div class="hero-actions">
-            <a class="button" href="/prijzen.html">Start met Vakento</a>
+            <a class="button" href="#lidworden">Start met Vakento</a>
             <a class="button ghost" href="#werkwijze">Bekijk hoe het werkt</a>
           </div>
           <div class="hero-points" aria-label="Voordelen">
@@ -176,37 +176,64 @@
       </div>
     </section>
 
-    <section class="section pricing" id="prijs">
-      <div class="shell pricing-grid">
-        <div>
-          <span class="kicker">Twee duidelijke keuzes</span>
-          <h2>Pro of Pro+ met eigen mailbox.</h2>
-          <p>Kies de complete werkplaats of voeg professionele Vakento-mail met 2 GB mailbox en extra beveiliging toe.</p>
+    <section class="section pricing" id="lidworden">
+      <div class="shell">
+        <div class="section-head centered">
+          <span class="kicker">Lid worden · 3 dagen gratis</span>
+          <h2>Kies je abonnement.</h2>
+          <p>De prijzen staan meteen bovenaan. Daarna kun je direct je account aanmaken of inloggen.</p>
         </div>
-        <div class="price-card">
-          <span>Vakento Pro</span>
-          <div class="price"><strong>€29</strong><small>/ maand</small></div>
-          <ul>
-            <li>Offertes en klanten</li>
-            <li>Planning en uren</li>
-            <li>Overzicht en winst</li>
-            <li>Klantportaal</li>
-            <li>5 GB cloud</li>
-            <li>AI-ondersteuning</li>
-          </ul>
-          <a class="button full" href="/prijzen.html">Kies Pro</a>
+
+        <div class="pricing-grid" style="grid-template-columns:repeat(2,minmax(280px,420px));justify-content:center">
+          <div class="price-card">
+            <span>Vakento Pro</span>
+            <div class="price"><strong>€29</strong><small>/ maand excl. btw</small></div>
+            <ul>
+              <li>Complete Vakento-werkplaats</li>
+              <li>Offertes, klanten, planning en uren</li>
+              <li>Winst en overzicht</li>
+              <li>Klantportaal</li>
+              <li>5 GB cloud</li>
+              <li>AI-ondersteuning</li>
+            </ul>
+            <button class="button full" type="button" data-buy="werkplaats">Kies Pro</button>
+          </div>
+          <div class="price-card" style="border:2px solid var(--brand)">
+            <span>Vakento Pro+ · meest compleet</span>
+            <div class="price"><strong>€39</strong><small>/ maand excl. btw</small></div>
+            <ul>
+              <li>Alles van Pro</li>
+              <li>Eigen naam@vakento.nl</li>
+              <li>2 GB beveiligde mailbox</li>
+              <li>Webmail, Outlook en telefoon</li>
+              <li>Spam-, phishing- en virusscan</li>
+            </ul>
+            <button class="button full" type="button" data-buy="proplus">Kies Pro+</button>
+          </div>
         </div>
-        <div class="price-card">
-          <span>Vakento Pro+</span>
-          <div class="price"><strong>€39</strong><small>/ maand</small></div>
-          <ul>
-            <li>Alles van Pro</li>
-            <li>Eigen naam@vakento.nl</li>
-            <li>2 GB mailbox</li>
-            <li>Webmail, Outlook en telefoon</li>
-            <li>Spam-, phishing- en virusscan</li>
-          </ul>
-          <a class="button full" href="/prijzen.html">Kies Pro+</a>
+
+        <div id="account" style="max-width:860px;margin:36px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+          <div class="price-card">
+            <span class="kicker">Lid worden</span>
+            <h3>Start 3 dagen gratis.</h3>
+            <form data-register style="display:grid;gap:12px;margin-top:18px">
+              <label>Bedrijf / naam<input name="name" required placeholder="Jouw zaak" style="width:100%;padding:12px;margin-top:6px"></label>
+              <label>E-mail<input name="email" type="email" required style="width:100%;padding:12px;margin-top:6px"></label>
+              <label>Wachtwoord<input name="password" type="password" minlength="8" required style="width:100%;padding:12px;margin-top:6px"></label>
+              <button class="button full" type="submit">Start 3 dagen gratis</button>
+              <p data-err hidden></p>
+            </form>
+          </div>
+          <div class="price-card" id="inloggen">
+            <span class="kicker">Al lid</span>
+            <h3>Direct naar je eigen Vakento.</h3>
+            <form data-login style="display:grid;gap:12px;margin-top:18px">
+              <label>E-mail<input name="email" type="email" required style="width:100%;padding:12px;margin-top:6px"></label>
+              <label>Wachtwoord<input name="password" type="password" required style="width:100%;padding:12px;margin-top:6px"></label>
+              <button class="button ghost full" type="submit">Inloggen</button>
+              <p data-err hidden></p>
+            </form>
+          </div>
         </div>
       </div>
     </section>
@@ -214,7 +241,7 @@
     <section class="cta">
       <div class="shell cta-inner">
         <div><span class="kicker inverse">Minder administratie. Meer vakwerk.</span><h2>Maak van Vakento je vaste werkplek.</h2></div>
-        <a class="button light" href="/prijzen.html">Start met Vakento</a>
+        <a class="button light" href="#lidworden">Start met Vakento</a>
       </div>
     </section>
   </main>
@@ -223,9 +250,10 @@
     <div class="shell footer-grid">
       <div class="brand footer-brand"><span class="brand-mark">V</span><span>vakento</span></div>
       <p>Praktische bedrijfssoftware voor vakmensen.</p>
-      <div class="footer-links"><a href="/cookies.html">Cookies</a><a href="/prijzen.html">Prijzen</a><a href="/werk.html">Werk</a></div>
+      <div class="footer-links"><a href="/cookies.html">Cookies</a><a href="#lidworden">Lid worden</a><a href="/werk.html">Werk</a></div>
     </div>
   </footer>
+  <script type="module" src="js/pay.js?v=mollie2"></script>
   <script src="assets/vakento-home.js"></script>
 </body>
 </html>

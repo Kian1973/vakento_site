@@ -9,33 +9,32 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .account-login-page{min-height:calc(100vh - 90px);display:grid;place-items:start center;padding:56px 16px}
+    .account-login-card{width:min(520px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px}
+    .account-login-card h1{margin:8px 0 18px;max-width:none;font-size:clamp(2rem,5vw,3rem)}
+  </style>
 </head>
 <body>
   <header>
     <div class="wrap site-top">
       <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
-      <a class="btn" href="/#abonnementen">Lid worden</a>
     </div>
   </header>
-  <section class="wrap" style="padding:32px 0 64px">
-    <p class="kicker">Jouw Vakento-account</p>
-    <h1>Werkplaats, cloud en bij Pro+ je eigen mailbox.</h1>
-    <p class="muted" style="margin-top:10px">Pro bevat de complete werkplaats en 5 GB cloud. Pro+ bevat daarnaast een eigen @vakento.nl-adres met een beveiligde mailbox van 2 GB.</p>
-    <div class="card" data-me style="margin-top:22px"></div>
-    <div class="grid-3" style="margin-top:22px">
-      <article class="card"><p class="kicker">Pro</p><h3>€29 per maand</h3><p class="muted">Complete werkplaats en 5 GB cloud.</p><a class="btn btn-ghost" href="/#abonnementen">Abonnement bekijken</a></article>
-      <article class="card"><p class="kicker">Pro+</p><h3>€39 per maand</h3><p class="muted">Alles van Pro plus naam@vakento.nl, 2 GB mailbox en spam-, phishing- en virusscan.</p><button class="btn" type="button" data-buy="proplus">Pro+ kiezen</button></article>
-      <article class="card"><p class="kicker">Vakento-mail</p><h3>Overal bereikbaar</h3><p class="muted">Webmail, Outlook en telefoon. Verzenden en ontvangen vanuit je eigen inbox.</p><p><a href="https://mail.vakento.nl">Open webmail</a></p></article>
-    </div>
-    <div data-cloud-app style="margin-top:22px"></div>
-    <div class="grid-3" style="margin-top:22px">
-      <article class="card"><h3>+1 GB</h3><p class="muted">€1,50 excl. btw</p><button class="btn" type="button" data-buy="cloud1">Kopen</button></article>
-      <article class="card"><h3>+5 GB</h3><p class="muted">€5 excl. btw</p><button class="btn" type="button" data-buy="cloud5">Kopen</button></article>
-      <article class="card"><h3>+10 GB</h3><p class="muted">€9 excl. btw</p><button class="btn" type="button" data-buy="cloud10">Kopen</button></article>
-    </div>
-  </section>
-  <script type="module" src="js/pay.js?v=account2"></script>
-  <script type="module" src="js/cloud.js?v=cloud1"></script>
-  <script src="js/cookies.js?v=cookie1"></script>
+
+  <main class="account-login-page">
+    <section class="account-login-card">
+      <p class="kicker">Mijn account</p>
+      <h1>Direct naar je eigen Vakento.</h1>
+      <form class="stack" data-login>
+        <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
+        <label>Wachtwoord<input name="password" type="password" required autocomplete="current-password"></label>
+        <button class="btn" type="submit">Mijn account</button>
+        <p class="warn" data-err hidden></p>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="js/pay.js?v=account3"></script>
 </body>
 </html>

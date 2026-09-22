@@ -44,6 +44,18 @@
         <p class="warn" data-err hidden></p>
       </form>
 
+      <form class="stack" data-login-2fa hidden>
+        <p class="kicker">Google Authenticator</p>
+        <h2>Voer je verificatiecode in</h2>
+        <p class="muted">Open Google Authenticator en vul de 6-cijferige code van Vakento in. Een herstelcode mag ook.</p>
+        <label>Verificatiecode
+          <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="32" required placeholder="123456">
+        </label>
+        <button class="btn" type="submit">Veilig inloggen</button>
+        <button class="btn btn-ghost" type="button" data-login-2fa-cancel>Terug</button>
+        <p class="warn" data-2fa-login-err hidden></p>
+      </form>
+
       <form class="stack" data-forgot hidden style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
         <p class="kicker">Wachtwoord herstellen</p>
         <p class="muted">Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord te kiezen.</p>
@@ -58,6 +70,46 @@
       <p class="kicker">Mijn account</p>
       <h1>Je Vakento-account</h1>
       <div data-me><p class="muted">Account laden…</p></div>
+
+      <div class="account-section">
+        <p class="kicker">Beveiliging</p>
+        <div class="account-app-card">
+          <h2>Tweestapsverificatie met Google Authenticator</h2>
+          <p class="muted">Bescherm je Vakento-account met je wachtwoord én een wisselende 6-cijferige code op je telefoon.</p>
+
+          <div data-2fa-status>
+            <p class="muted">Beveiligingsstatus laden…</p>
+          </div>
+
+          <div data-2fa-setup hidden>
+            <div class="stack" style="margin-top:14px">
+              <p><strong>1. Open Google Authenticator</strong><br><span class="muted">Tik op + en kies <em>Instelsleutel invoeren</em>.</span></p>
+              <p><strong>2. Vul deze sleutel in</strong></p>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <code data-2fa-secret style="font-size:1.05rem;padding:10px 12px;background:#f3f6fa;border-radius:10px;word-break:break-all"></code>
+                <button class="btn btn-ghost" type="button" data-2fa-copy>Kopieer sleutel</button>
+              </div>
+              <p class="muted">Accountnaam: <strong data-2fa-label>Vakento</strong><br>Type sleutel: <strong>Op tijd gebaseerd</strong></p>
+
+              <form class="stack" data-2fa-enable>
+                <label>3. Vul de 6-cijferige code in
+                  <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="123456">
+                </label>
+                <button class="btn" type="submit">2FA inschakelen</button>
+                <button class="btn btn-ghost" type="button" data-2fa-setup-cancel>Annuleren</button>
+                <p class="warn" data-2fa-enable-err hidden></p>
+              </form>
+            </div>
+          </div>
+
+          <div data-2fa-recovery hidden style="margin-top:14px">
+            <p class="ok"><strong>Tweestapsverificatie staat aan.</strong></p>
+            <p>Bewaar deze herstelcodes op een veilige plek. Iedere code werkt één keer als je je telefoon niet hebt.</p>
+            <pre data-2fa-recovery-codes style="white-space:pre-wrap;background:#f3f6fa;padding:14px;border-radius:12px"></pre>
+            <button class="btn btn-ghost" type="button" data-2fa-copy-recovery>Kopieer herstelcodes</button>
+          </div>
+        </div>
+      </div>
 
       <div class="account-section">
         <p class="kicker">Eigen Vakento e-mail</p>
@@ -93,7 +145,7 @@
   </main>
 
   <script src="/js/self-heal.js?v=1"></script>
-  <script type="module" src="js/pay.js?v=account8"></script>
+  <script type="module" src="js/pay.js?v=2fa1"></script>
   <script src="/js/install-app.js?v=app3"></script>
   <script src="/js/max.js?v=max1"></script>
 </body>

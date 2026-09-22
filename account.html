@@ -51,6 +51,10 @@
         <label>Verificatiecode
           <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="32" required placeholder="123456">
         </label>
+        <label style="display:flex;align-items:flex-start;gap:10px">
+          <input name="trustDevice" type="checkbox" value="1" checked style="margin-top:3px">
+          <span><strong>Vertrouw dit apparaat 30 dagen</strong><br><span class="muted">Op deze telefoon of computer hoef je dan niet bij elke keer openen opnieuw Google Authenticator te gebruiken.</span></span>
+        </label>
         <button class="btn" type="submit">Veilig inloggen</button>
         <button class="btn btn-ghost" type="button" data-login-2fa-cancel>Terug</button>
         <p class="warn" data-2fa-login-err hidden></p>
@@ -145,7 +149,7 @@
   </main>
 
   <script src="/js/self-heal.js?v=1"></script>
-  <script type="module" src="js/pay.js?v=2fa1"></script>
+  <script type="module" src="js/pay.js?v=2fa2"></script>
   <script src="/js/install-app.js?v=app3"></script>
   <script src="/js/max.js?v=max1"></script>
 </body>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#1e5aa6">
+  <title>Systeemcontrole | Vakento</title>
+  <link rel="stylesheet" href="/css/vakento.css?v=heal1">
+</head>
+<body>
+  <header class="app-bar">
+    <a class="logo" href="/werk.html"><span class="mark">V</span> Vakento</a>
+    <a class="btn btn-ghost" href="/werk.html">Terug</a>
+  </header>
+
+  <main class="stage" style="max-width:900px;margin:0 auto">
+    <div class="row">
+      <div>
+        <p class="kicker">Zelfherstel</p>
+        <h1>Systeemcontrole</h1>
+        <p class="muted">Vakento controleert verbinding, sessie, browseropslag, cache en app-update.</p>
+      </div>
+      <button class="btn" type="button" data-heal>Herstel automatisch</button>
+    </div>
+
+    <div class="stat-grid" data-health>
+      <div class="stat"><span class="muted">Internet</span><b data-h-online>…</b></div>
+      <div class="stat"><span class="muted">Browseropslag</span><b data-h-storage>…</b></div>
+      <div class="stat"><span class="muted">Vakento API</span><b data-h-api>…</b></div>
+      <div class="stat"><span class="muted">App service worker</span><b data-h-sw>…</b></div>
+    </div>
+
+    <section class="card" style="margin-top:18px">
+      <div class="row">
+        <div>
+          <p class="kicker">Diagnose</p>
+          <h2>Laatste fouten</h2>
+          <p class="muted">Maximaal de laatste 50 foutmeldingen op dit apparaat.</p>
+        </div>
+        <button class="btn btn-ghost" type="button" data-clear-log>Log wissen</button>
+      </div>
+      <div class="list" data-log><p class="muted">Foutlog laden…</p></div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <p class="kicker">Wat Vakento zelf probeert</p>
+      <h2>Automatisch herstel</h2>
+      <div class="list">
+        <article class="item"><strong>Tijdelijke API-storing</strong><span>Veilige GET-aanvragen worden automatisch opnieuw geprobeerd.</span></article>
+        <article class="item"><strong>Oude app-cache</strong><span>Cache wordt vernieuwd en de nieuwste service worker wordt opgehaald.</span></article>
+        <article class="item"><strong>Kapotte module of script</strong><span>Vakento probeert één gecontroleerde herstart met een schone cache.</span></article>
+        <article class="item"><strong>Offline</strong><span>Vakento wacht op internet en voorkomt onnodige dubbele acties.</span></article>
+        <article class="item"><strong>Fouten blijven terugkomen</strong><span>Vakento stopt met eindeloos herladen en toont deze diagnosepagina.</span></article>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/self-heal.js?v=1"></script>
+  <script>
+    const $ = (s) => document.querySelector(s);
+
+    function yesNo(v) {
+      return v ? "Goed" : "Probleem";
+    }
+
+    async function refresh() {
+      const h = await window.VakentoHeal.health();
+      $("[data-h-online]").textContent = yesNo(h.online);
+      $("[data-h-storage]").textContent = yesNo(h.storage);
+      $("[data-h-api]").textContent = h.api ? "Goed" : (h.apiStatus ? "Fout " + h.apiStatus : "Niet bereikbaar");
+      $("[data-h-sw]").textContent = h.serviceWorker ? "Actief" : "Niet beschikbaar";
+
+      const logs = window.VakentoHeal.logs().slice().reverse();
+      $("[data-log]").innerHTML = logs.length ? logs.map((x) =>
+        '<article class="item"><strong>' +
+        new Date(x.at).toLocaleString("nl-NL") +
+        '</strong><span>' + String(x.message || "").replace(/[&<>]/g, "") +
+        '</span><span class="muted">' + String(x.kind || "fout") + " · " + String(x.page || "") + '</span></article>'
+      ).join("") : '<p class="muted">Geen fouten geregistreerd op dit apparaat.</p>';
+    }
+
+    $("[data-heal]").addEventListener("click", () => window.VakentoHeal.recover("Handmatige systeemcontrole", { force:true }));
+    $("[data-clear-log]").addEventListener("click", () => {
+      window.VakentoHeal.clearLogs();
+      refresh();
+    });
+    refresh();
+  </script>
+</body>
+</html>

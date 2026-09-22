@@ -140,12 +140,6 @@ export function werkbonUitUren(data, klusId) {
   };
 }
 
-export function klantmail(offerte, klantNaam) {
-  return {
-    tekst: `Beste ${klantNaam},\n\nHierbij de prijs voor ${offerte.titel}: €${offerte.bedrag} excl. btw.\n${offerte.risico || ""}\n\nMet vriendelijke groet,\n${offerte.firm || "Vakento"}\n`,
-    bron: "vakverstand",
-  };
-}
 
 export async function verrijkMetServer(task, local, context) {
   try {

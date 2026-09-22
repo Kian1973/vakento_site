@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <title>Uitloggen | Vakento</title>
+  <link rel="stylesheet" href="/css/vakento.css?v=logout1">
+</head>
+<body>
+  <main style="min-height:100vh;display:grid;place-items:center;padding:24px">
+    <section style="width:min(520px,100%);background:#fff;border:1px solid #ddd;border-radius:18px;padding:24px">
+      <p class="kicker">Vakento</p>
+      <h1>Je wordt uitgelogd…</h1>
+      <p class="muted" data-msg>Even bezig.</p>
+      <p><a class="btn btn-ghost" href="/account.html">Naar inloggen</a></p>
+    </section>
+  </main>
+  <script>
+  (async () => {
+    const msg = document.querySelector("[data-msg]");
+    try {
+      await fetch("/api/logout?t=" + Date.now(), {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache"
+        },
+        body: "{}"
+      });
+    } catch (_) {}
+
+    try {
+      sessionStorage.clear();
+      localStorage.removeItem("vakento.uid");
+      localStorage.removeItem("vakento.firm");
+    } catch (_) {}
+
+    try {
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(k => k.startsWith("vakento-app-")).map(k => caches.delete(k)));
+      }
+    } catch (_) {}
+
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.update().catch(() => {})));
+      }
+    } catch (_) {}
+
+    try {
+      const check = await fetch("/api/me?t=" + Date.now(), {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+        headers: {"Cache-Control":"no-cache","Pragma":"no-cache"}
+      });
+      const data = await check.json().catch(() => ({}));
+      if (data && data.email) {
+        if (msg) msg.textContent = "De sessie op de server is nog actief. Probeer opnieuw of sluit de app volledig.";
+        return;
+      }
+    } catch (_) {}
+
+    location.replace("/account.html?uitgelogd=1&t=" + Date.now());
+  })();
+  </script>
+</body>
+</html>

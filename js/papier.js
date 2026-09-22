@@ -88,22 +88,35 @@ function voet(data) {
 }
 
 function regelsTabel(regels) {
-  const rows = (regels || [])
+  const normalized = (regels || []).map((r) => ({
+    ...r,
+    bedrag: Number(r.bedrag || 0),
+    btw: [0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21,
+  }));
+
+  const rows = normalized
     .map(
       (r) =>
-        `<tr><td>${esc(r.tekst)}</td><td class="num">${esc(euro(Number(r.bedrag || 0)))}</td></tr>`
+        `<tr><td>${esc(r.tekst)}<br><small>${r.btw}% btw</small></td><td class="num">${esc(euro(r.bedrag))}</td></tr>`
     )
     .join("");
-  const excl = (regels || []).reduce((a, r) => a + Number(r.bedrag || 0), 0);
-  const btw = Math.round(excl * 0.21);
+
+  const excl = normalized.reduce((sum, r) => sum + r.bedrag, 0);
+  const btw9Basis = normalized.filter((r) => r.btw === 9).reduce((sum, r) => sum + r.bedrag, 0);
+  const btw21Basis = normalized.filter((r) => r.btw === 21).reduce((sum, r) => sum + r.bedrag, 0);
+  const btw9 = btw9Basis * 0.09;
+  const btw21 = btw21Basis * 0.21;
+  const totaal = excl + btw9 + btw21;
+
   return `
     <table class="brief-tabel">
       <thead><tr><th>Omschrijving</th><th>Bedrag</th></tr></thead>
       <tbody>${rows}</tbody>
       <tfoot>
         <tr><td>Totaal excl. btw</td><td class="num">${esc(euro(excl))}</td></tr>
-        <tr><td>btw 21%</td><td class="num">${esc(euro(btw))}</td></tr>
-        <tr class="totaal"><td>Totaal incl. btw</td><td class="num">${esc(euro(excl + btw))}</td></tr>
+        ${btw9Basis ? `<tr><td>btw 9% over ${esc(euro(btw9Basis))}</td><td class="num">${esc(euro(btw9))}</td></tr>` : ""}
+        ${btw21Basis ? `<tr><td>btw 21% over ${esc(euro(btw21Basis))}</td><td class="num">${esc(euro(btw21))}</td></tr>` : ""}
+        <tr class="totaal"><td>Totaal incl. btw</td><td class="num">${esc(euro(totaal))}</td></tr>
       </tfoot>
     </table>`;
 }
@@ -171,7 +184,7 @@ export function htmlOfferte(data, o) {
 
 export function htmlFactuur(data, f) {
   const c = klant(data, f.klant);
-  const regels = [{ tekst: f.titel, bedrag: f.bedrag }];
+  const regels = (f.regels && f.regels.length) ? f.regels : [{ tekst: f.titel, bedrag: f.bedrag, btw: f.btw || 21 }];
   const binnen = `
     <div class="brief-meta">
       <div>

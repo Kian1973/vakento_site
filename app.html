@@ -73,16 +73,21 @@
           <label>Leverancier<input name="supplier" maxlength="80" placeholder="Bijv. Bouwmaat"></label>
         </div>
         <div class="app-two">
-          <label>Bedrag incl. btw<input name="amount" inputmode="decimal" placeholder="0,00"></label>
-          <label>BTW
+          <label>Totaal incl. btw<input name="amount" inputmode="decimal" placeholder="0,00"></label>
+          <label>BTW inbegrepen
             <select name="vat">
-              <option value="">Nog invullen</option>
+              <option value="">Nog bepalen</option>
               <option value="21">21%</option>
               <option value="9">9%</option>
               <option value="0">0%</option>
             </select>
           </label>
         </div>
+        <div class="app-two" style="padding:12px;border:1px solid var(--line);border-radius:12px">
+          <div><small class="muted">Bedrag excl. btw</small><strong data-net-amount style="display:block;margin-top:3px">—</strong></div>
+          <div><small class="muted">BTW uit totaal</small><strong data-vat-amount style="display:block;margin-top:3px">—</strong></div>
+        </div>
+        <p class="muted" style="margin-top:-4px">De btw zit al in het gescande totaalbedrag en wordt er automatisch uit teruggerekend.</p>
         <label>Betaald met
           <select name="paidWith">
             <option value="">Niet opgegeven</option>
@@ -147,7 +152,7 @@
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script type="module" src="/js/vakento-app.js?v=app6"></script>
+  <script type="module" src="/js/vakento-app.js?v=app7"></script>
   <script src="/js/install-app.js?v=app6"></script>
 </body>
 </html>

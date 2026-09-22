@@ -1,6 +1,8 @@
+import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 const baseURL = process.env.VAKENTO_BASE_URL || 'https://vakento.nl';
+const authState = '.auth/vakento.json';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -19,6 +21,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     ignoreHTTPSErrors: false,
+    storageState: existsSync(authState) ? authState : undefined,
   },
   projects: [
     {

@@ -1,4 +1,4 @@
-const CACHE = "vakento-app-v4";
+const CACHE = "vakento-app-v5";
 const SHELL = [
   "/app.html",
   "/css/vakento.css",

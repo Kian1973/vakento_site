@@ -3,7 +3,7 @@ import { me } from "./api.js";
 try {
   const user = await me();
   if (!user.paid) {
-    location.replace("prijzen.html?next=werk");
+    location.replace("/#lidworden");
   } else {
     try {
       sessionStorage.setItem("vakento.uid", user.id || "");

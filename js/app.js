@@ -16,7 +16,6 @@ import {
   briefing,
   planWeek,
   werkbonUitUren,
-  klantmail,
   verrijkMetServer,
 } from "./brein.js";
 import {
@@ -875,9 +874,8 @@ function bind(root) {
     box.hidden = false;
     box.textContent = "Even nadenken…";
     const local = { tekst: offerteUitTekst(vraag, data.place).toelichting };
-    const mail = klantmail({ ...offerteUitTekst(vraag, data.place), firm: data.firm }, data.klanten[0].name);
-    const out = await verrijkMetServer("vraag", { tekst: vraag + "\n\n" + mail.tekst }, { vraag, briefing: briefing(data, roster) });
-    box.innerHTML = `<p class="kicker">${out.bron}</p>${out.tekst || mail.tekst}`;
+    const out = await verrijkMetServer("vraag", local, { vraag, briefing: briefing(data, roster) });
+    box.innerHTML = `<p class="kicker">${out.bron}</p>${out.tekst || local.tekst}`;
   });
   root.querySelector("[data-act='start-uren']")?.addEventListener("click", () => {
     location.hash = "#/uren";

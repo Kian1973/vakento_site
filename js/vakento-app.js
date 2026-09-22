@@ -218,3 +218,11 @@ $("[data-share-books]")?.addEventListener("click", async () => {
     alert(err.message || "Delen mislukt.");
   }
 });
+
+
+$("[data-logout]")?.addEventListener("click", async () => {
+  try {
+    await api("/api/logout", {});
+  } catch (_) {}
+  location.replace("/account.html");
+});

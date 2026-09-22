@@ -116,18 +116,11 @@
       link: "Open Onderhoud"
     },
     {
-      keys: ["mail", "email", "e-mail", "@vakento.nl", "mailbox", "outlook"],
-      title: "Vakento e-mail",
-      answer: "Vakento is voorbereid op een eigen naam@vakento.nl-adres. Pro heeft de mogelijkheid voor een eigen Vakento-adres; Pro+ is bedoeld voor uitgebreidere mailboxfuncties zoals extra opslag en gebruik als mailbox.",
-      href: "/werk.html#/post",
-      link: "Open E-mail"
-    },
-    {
-      keys: ["pro", "pro+", "pro plus", "abonnement", "pakket", "prijs", "lidmaatschap"],
-      title: "Pro en Pro+",
-      answer: "Vakento werkt met Pro en Pro+. De kern is bedrijfsbeheer: klanten, opdrachten, offertes, facturen, uren, bonnen, cloud en slimme hulp. Pro+ is bedoeld voor uitgebreidere functies zoals een ruimere e-mailbox en extra mailmogelijkheden.",
+      keys: ["pro", "abonnement", "pakket", "prijs", "lidmaatschap"],
+      title: "Vakento Pro",
+      answer: "Vakento Pro bundelt klanten, opdrachten, offertes, facturen, planning, uren, bonnen, boekhouding, cloud en slimme hulp in één omgeving.",
       href: "/#abonnementen",
-      link: "Bekijk abonnementen"
+      link: "Bekijk abonnement"
     },
     {
       keys: ["mobiele app", "app", "telefoon", "android", "iphone", "ios", "installeren"],
@@ -306,7 +299,7 @@
       addMsg('<strong>Hoi, ik ben Max.</strong><br>' + escapeHtml(GENERAL));
       const quick = document.createElement("div");
       quick.className = "max-quick";
-      ["Bonnen scannen","Offerte maken","9% btw","Contacten","Mobiele app","Pro en Pro+"].forEach(label => {
+      ["Bonnen scannen","Offerte maken","9% btw","Contacten","Mobiele app","Boekhouding"].forEach(label => {
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = label;

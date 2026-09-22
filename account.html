@@ -3,29 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1e5aa6">
   <title>Mijn account | Vakento</title>
-  <link rel="stylesheet" href="css/vakento.css?v=cloud1">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="css/vakento.css?v=account5">
   <link rel="stylesheet" href="css/vakento-public.css?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     .account-login-page{min-height:calc(100vh - 90px);display:grid;place-items:start center;padding:56px 16px}
-    .account-login-card{width:min(520px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px}
+    .account-login-card{width:min(620px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px}
     .account-login-card h1{margin:8px 0 18px;max-width:none;font-size:clamp(2rem,5vw,3rem)}
+    .account-section{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+    .account-app-card{margin-top:12px;padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#f8fbff 0%,#fff 100%)}
+    .account-app-card h2{margin:4px 0 8px;font-size:1.45rem}
+    .account-app-actions{display:grid;gap:9px;margin-top:14px}
+    .account-app-actions .btn{width:100%;text-align:center;justify-content:center}
+    .account-back{font-size:.92rem;text-decoration:none}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap site-top">
       <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
+      <a class="account-back" href="/werk.html">Naar Vakento</a>
     </div>
   </header>
 
   <main class="account-login-page">
-    <section class="account-login-card">
+    <section class="account-login-card" data-login-view hidden>
       <p class="kicker">Mijn account</p>
       <h1>Direct naar je eigen Vakento.</h1>
+
       <form class="stack" data-login>
         <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
         <label>Wachtwoord<input name="password" type="password" required autocomplete="current-password"></label>
@@ -33,14 +43,6 @@
         <button class="btn btn-ghost" type="button" data-forgot-open>Wachtwoord vergeten?</button>
         <p class="warn" data-err hidden></p>
       </form>
-
-      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
-        <p class="kicker">Vakento app</p>
-        <p class="muted">Gebruik je telefooncamera voor bonnen en werkfoto's en sla ze direct op in je Vakento Cloud.</p>
-        <a class="btn" href="/app.html" style="width:100%;margin-top:10px">Open Vakento app</a>
-        <button class="btn btn-ghost" type="button" data-install-app hidden style="width:100%;margin-top:8px">Installeer app op telefoon</button>
-        <p class="muted" data-install-msg hidden style="margin-top:8px"></p>
-      </div>
 
       <form class="stack" data-forgot hidden style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
         <p class="kicker">Wachtwoord herstellen</p>
@@ -51,9 +53,28 @@
         <p class="muted" data-forgot-msg hidden></p>
       </form>
     </section>
+
+    <section class="account-login-card" data-account-view hidden>
+      <p class="kicker">Mijn account</p>
+      <h1>Je Vakento-account</h1>
+      <div data-me><p class="muted">Account laden…</p></div>
+
+      <div class="account-section">
+        <p class="kicker">Vakento app</p>
+        <div class="account-app-card">
+          <h2>Vakento op je telefoon</h2>
+          <p class="muted">Scan bonnen met je camera, maak werkfoto's en sla alles direct op in de juiste Vakento Cloud-map.</p>
+          <div class="account-app-actions">
+            <a class="btn" href="/app.html">Open Vakento app</a>
+            <button class="btn btn-ghost" type="button" data-install-app>Installeer app op telefoon</button>
+          </div>
+          <p class="muted" data-install-msg hidden style="margin-top:10px"></p>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script type="module" src="js/pay.js?v=account4"></script>
-  <script src="/js/install-app.js?v=app2"></script>
+  <script type="module" src="js/pay.js?v=account5"></script>
+  <script src="/js/install-app.js?v=app3"></script>
 </body>
 </html>

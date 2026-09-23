@@ -1564,7 +1564,7 @@ function bind(root) {
   bindKantoor(root, { data, persist, toast });
   bindSlim(root, { data, persist, toast });
   bindContacten(root, { data, toast });
-  bindRompslomp(root, { persist, toast });
+  bindRompslomp(root, { data, persist, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);
 }

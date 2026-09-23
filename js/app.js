@@ -145,72 +145,76 @@ function viewVandaag() {
   const offertes = data.offertes.filter((o) => o.status === "verstuurd");
   const missingHours = roster.filter((p) => !data.uren.some((u) => u.person === p.id && u.day === today));
   const low = data.materiaal.filter((m) => m.voorraad <= m.min);
-  const letop =
-    missingHours.map((p) => `<article class="item"><strong class="warn">Geen uren</strong><span>${p.name} heeft vandaag nog niets ingevuld.</span></article>`).join("") +
-    low.map((m) => `<article class="item"><strong class="warn">Voorraad</strong><span>${m.naam}: ${m.voorraad} (min ${m.min})</span></article>`).join("") +
-    offertes
-      .map(
-        (o) => `<article class="item"><strong>Offerte ${o.nr}</strong><span>${o.titel} wacht bij ${klant(data, o.klant).name}. Eén tik naar het bord als ze ja zeggen.</span><div class="actions"><button class="btn" data-ok="${o.id}">Akkoord, zet op bord</button></div></article>`
-      )
-      .join("") +
-    openFact.map((f) => `<article class="item"><strong>Factuur ${f.nr}</strong><span>${euro(f.bedrag)} open sinds ${f.dag}</span></article>`).join("");
+  const openAmount = openFact.reduce((a, f) => a + Number(f.bedrag || 0), 0);
+
+  const alerts =
+    openFact.slice(0, 4).map((f) =>
+      `<article class="item"><strong>Factuur ${f.nr}</strong><span>${euro(f.bedrag)} open sinds ${f.dag}</span></article>`
+    ).join("") +
+    offertes.slice(0, 3).map((o) =>
+      `<article class="item"><strong>Offerte ${o.nr}</strong><span>${o.titel} · wacht op akkoord</span></article>`
+    ).join("") +
+    missingHours.slice(0, 2).map((p) =>
+      `<article class="item"><strong>Uren ontbreken</strong><span>${p.name} heeft vandaag nog niets ingevuld.</span></article>`
+    ).join("") +
+    low.slice(0, 2).map((m) =>
+      `<article class="item"><strong>Voorraad laag</strong><span>${m.naam}: ${m.voorraad}</span></article>`
+    ).join("");
+
+  const todayRows = inzet.length
+    ? inzet.slice(0, 6).map((i) => {
+        const k = klus(data, i.klus);
+        const c = klant(data, k.klant);
+        return `<article class="item"><strong>${k.title}</strong><span>${person(i.person).name} · ${c.name}${c.plaats ? " · " + c.plaats : ""}</span></article>`;
+      }).join("")
+    : '<article class="item"><strong>Nog niets gepland</strong><span>Open Planning om een klus in te plannen.</span></article>';
 
   return `
     <div class="row">
       <div>
         <p class="kicker">${data.place || "Werkplaats"}</p>
-        <h1>Wat er vandaag moet gebeuren.</h1>
-        <p class="muted">${data.firm} · ${new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })}</p>
+        <h1>Overzicht</h1>
+        <p class="muted">${data.firm} · ${new Date().toLocaleDateString("nl-NL", { weekday:"long", day:"numeric", month:"long" })}</p>
       </div>
-      <div class="actions">
-        <button class="btn" data-act="briefing">AI-ochtend</button>
-        <button class="btn btn-ghost" data-act="start-uren">Uren starten</button>
-        <button class="btn btn-ghost" data-act="bon">Werkbon</button>
-      </div>
-    </div>
-    <div class="card" style="margin-bottom:18px">
-      <p class="kicker">Hoofdmenu abonnement</p>
-      <h2 style="margin:4px 0 12px">Belangrijkste onderdelen</h2>
-      <div class="start-grid">
-        <a class="card" href="#/"><p class="kicker">Vandaag</p><h3>Dagoverzicht</h3><p class="muted">Wat moet er gebeuren</p></a>
-        <a class="card" href="#/bord"><p class="kicker">Planning</p><h3>Weekbord</h3><p class="muted">Wie staat waar</p></a>
-        <a class="card" href="#/klussen"><p class="kicker">Werk</p><h3>Klussen</h3><p class="muted">${data.klussen.length} dossiers</p></a>
-        <a class="card" href="#/contacten"><p class="kicker">Relaties</p><h3>Contacten</h3><p class="muted">${data.klanten.length} klanten & leveranciers</p></a>
-        <a class="card" href="#/papier"><p class="kicker">Papier</p><h3>Offertes & facturen</h3><p class="muted">${data.offertes.length} offertes</p></a>
-        <a class="card" href="#/uren"><p class="kicker">Tijd</p><h3>Uren</h3><p class="muted">Snel registreren</p></a>
-        <a class="card" href="#/boekhouding"><p class="kicker">Boekhouding</p><h3>Boekhouding</h3><p class="muted">Verkoop, inkoop, btw en boekhouder-export</p></a>
-        <a class="card" href="/app.html#bon"><p class="kicker">Bonnen</p><h3>Bonnen scannen</h3><p class="muted">Lezen, btw en opslaan</p></a>
-        <a class="card" href="#/cloud"><p class="kicker">Cloud</p><h3>Bestanden</h3><p class="muted">5 GB opslag</p></a>
-        <a class="card" href="#/winst"><p class="kicker">Financiën</p><h3>Winst</h3><p class="muted">Omzet en kosten</p></a>
-        <a class="card" href="#/slim"><p class="kicker">AI</p><h3>Slim werken</h3><p class="muted">AI-assistent</p></a>
-        <a class="card" href="/account.html"><p class="kicker">Account</p><h3>Abonnement</h3><p class="muted">Abonnement en app</p></a>
+      <div class="dashboard-actions">
+        <a class="btn" href="#/papier">Nieuwe factuur</a>
+        <a class="btn btn-ghost" href="#/uren">Uren boeken</a>
+        <a class="btn btn-ghost" href="/app.html#bon">Bon scannen</a>
       </div>
     </div>
+
     <div class="stat-grid">
-      <div class="stat"><span class="muted">Op pad</span><b>${inzet.length}</b></div>
-      <div class="stat"><span class="muted">Open facturen</span><b>${euro(openFact.reduce((a, f) => a + f.bedrag, 0))}</b></div>
-      <div class="stat"><span class="muted">Wacht op akkoord</span><b>${offertes.length}</b></div>
-      <div class="stat"><span class="muted">Uren nog leeg</span><b>${missingHours.length}</b></div>
+      <div class="stat"><span class="muted">Openstaande facturen</span><b>${euro(openAmount)}</b></div>
+      <div class="stat"><span class="muted">Offertes wachten</span><b>${offertes.length}</b></div>
+      <div class="stat"><span class="muted">Vandaag gepland</span><b>${inzet.length}</b></div>
+      <div class="stat"><span class="muted">Contacten</span><b>${data.klanten.length}</b></div>
     </div>
-    <h2 style="margin:22px 0 10px">Wie waar</h2>
-    <div class="list">
-      ${
-        inzet.length
-          ? inzet
-              .map((i) => {
-                const k = klus(data, i.klus);
-                const c = klant(data, k.klant);
-                return `<article class="item"><strong>${person(i.person).name}</strong><span>${k.title} · ${c.name}, ${c.plaats}</span></article>`;
-              })
-              .join("")
-          : `<article class="item"><strong>Niemand op het bord</strong><span>Zet de ploeg op het weekbord. <a href="#/bord">Naar het bord</a></span></article>`
-      }
+
+    <div class="quick-links">
+      <a class="quick-link" href="#/contacten"><strong>Contacten</strong><small>Klanten en leveranciers</small></a>
+      <a class="quick-link" href="#/papier"><strong>Offertes & facturen</strong><small>Verkoopadministratie</small></a>
+      <a class="quick-link" href="#/boekhouding"><strong>Boekhouding</strong><small>Inkoop, btw en export</small></a>
+      <a class="quick-link" href="#/cloud"><strong>Cloud</strong><small>Documenten en foto's</small></a>
     </div>
-    <h2 style="margin:22px 0 10px">Let op</h2>
-    <div class="list">
-      ${letop || `<article class="item"><strong>Rustig</strong><span>Geen open facturen, geen uren die wachten.</span></article>`}
+
+    <div class="dashboard-grid">
+      <section class="dashboard-panel">
+        <div class="row">
+          <div><p class="kicker">Vandaag</p><h2>Planning</h2></div>
+          <a class="btn btn-ghost" href="#/bord">Open planning</a>
+        </div>
+        <div class="list">${todayRows}</div>
+      </section>
+
+      <section class="dashboard-panel">
+        <div class="row">
+          <div><p class="kicker">Aandacht</p><h2>Te doen</h2></div>
+        </div>
+        <div class="list">${alerts || '<article class="item"><strong>Alles bijgewerkt</strong><span>Geen dringende aandachtspunten.</span></article>'}</div>
+      </section>
     </div>
-    <div class="card" id="briefing-out" hidden></div>`;
+
+    <div class="card" id="briefing-out" hidden style="margin-top:16px"></div>`;
 }
 
 function viewBord() {

@@ -160,7 +160,113 @@ async function uploadFile(file, batch) {
   return out;
 }
 
-export function bindRompslomp(root, { persist, toast }) {
+
+async function mergeImportedData(data, imported = {}) {
+  data.klanten ||= [];
+  data.facturen ||= [];
+  data.inkoop ||= [];
+  data.uren ||= [];
+  data.artikelen ||= [];
+  data.klussen ||= [];
+  data.ploeg ||= [];
+
+  const contactByName = new Map(
+    data.klanten.map((c) => [String(c.name || "").trim().toLowerCase(), c])
+  );
+
+  for (const raw of imported.contacts || []) {
+    const key = String(raw.name || "").trim().toLowerCase();
+    if (!key || contactByName.has(key)) continue;
+    try {
+      const payload = { ...raw };
+      delete payload.id;
+      delete payload.bron;
+      const out = await api("/api/contacts", payload, "POST");
+      const saved = out.contact || out;
+      data.klanten.push(saved);
+      contactByName.set(key, saved);
+    } catch (_) {
+      data.klanten.push(raw);
+      contactByName.set(key, raw);
+    }
+  }
+
+  const ensureContact = (name) => {
+    const key = String(name || "").trim().toLowerCase();
+    if (!key) return "";
+    const found = contactByName.get(key);
+    if (found) return found.id || "";
+    const c = { id:"romp-auto-c-" + Date.now() + Math.random().toString(36).slice(2,7), name:String(name).trim(), type:"klant", entityType:"bedrijf", bron:"rompslomp" };
+    data.klanten.push(c);
+    contactByName.set(key, c);
+    return c.id;
+  };
+
+  const invoiceNumbers = new Set(data.facturen.map((x) => String(x.nr || "").trim().toLowerCase()));
+  for (const f of imported.invoices || []) {
+    const key = String(f.nr || "").trim().toLowerCase();
+    if (key && invoiceNumbers.has(key)) continue;
+    const klantId = ensureContact(f.klantNaam);
+    data.facturen.push({ ...f, klant:klantId });
+    if (key) invoiceNumbers.add(key);
+  }
+
+  const expenseKeys = new Set((data.inkoop || []).map((x) =>
+    [x.dag || x.datum || "", x.leverancier || "", Number(x.bedragInclBtw || x.bedrag || 0).toFixed(2)].join("|").toLowerCase()
+  ));
+  for (const x of imported.expenses || []) {
+    const key = [x.dag || "", x.leverancier || "", Number(x.bedragInclBtw || x.bedrag || 0).toFixed(2)].join("|").toLowerCase();
+    if (expenseKeys.has(key)) continue;
+    data.inkoop.push(x);
+    expenseKeys.add(key);
+  }
+
+  const articleNames = new Set((data.artikelen || []).map((x) => String(x.naam || "").trim().toLowerCase()));
+  for (const a of imported.products || []) {
+    const key = String(a.naam || "").trim().toLowerCase();
+    if (!key || articleNames.has(key)) continue;
+    data.artikelen.push(a);
+    articleNames.add(key);
+  }
+
+  const personId = data.ploeg?.[0]?.id || "p1";
+  const jobByName = new Map((data.klussen || []).map((k) => [String(k.title || "").trim().toLowerCase(), k]));
+  const hourKeys = new Set((data.uren || []).map((u) =>
+    [u.day || "", u.uren || 0, u.note || "", u.klus || ""].join("|").toLowerCase()
+  ));
+
+  for (const u of imported.hours || []) {
+    let klusId = "";
+    const title = String(u.klusNaam || u.klantNaam || "Rompslomp uren").trim();
+    const keyTitle = title.toLowerCase();
+    let job = jobByName.get(keyTitle);
+    if (!job) {
+      const klantId = ensureContact(u.klantNaam);
+      job = {
+        id:"romp-k-" + Date.now() + Math.random().toString(36).slice(2,7),
+        title,
+        klant:klantId,
+        status:"historisch",
+        start:u.day || "",
+        einde:u.day || "",
+        begroot:0,
+        kost:0,
+        people:[personId],
+        token:"rompslomp-" + Math.random().toString(36).slice(2,9),
+        bron:"rompslomp",
+      };
+      data.klussen.push(job);
+      jobByName.set(keyTitle, job);
+    }
+    klusId = job.id;
+    const hKey = [u.day || "", u.uren || 0, u.note || "", klusId].join("|").toLowerCase();
+    if (hourKeys.has(hKey)) continue;
+    data.uren.push({ ...u, person:personId, klus:klusId });
+    hourKeys.add(hKey);
+  }
+}
+
+export function bindRompslomp(root, { data, persist, toast }) {
   const input = root.querySelector("[data-rompslomp-files]");
   const list = root.querySelector("[data-rompslomp-file-list]");
   const analyse = root.querySelector("[data-rompslomp-analyse]");
@@ -205,8 +311,11 @@ export function bindRompslomp(root, { persist, toast }) {
           archiveOriginals: true,
           overwriteExisting: false,
         });
+        await mergeImportedData(data, out.data || {});
         if (result) {
-          result.textContent = out.message || "Import voltooid. Je Rompslomp-gegevens staan nu in Vakento.";
+          const c = out.summary || {};
+          result.textContent = "Import voltooid: " +
+            [c.contacts ? c.contacts + " contacten" : "", c.invoices ? c.invoices + " facturen" : "", c.expenses ? c.expenses + " uitgaven" : "", c.hours ? c.hours + " urenregels" : "", c.products ? c.products + " artikelen" : ""].filter(Boolean).join(", ") + ".";
           result.classList.remove("warn");
           result.classList.add("ok");
         }

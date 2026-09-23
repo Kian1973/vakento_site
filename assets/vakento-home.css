@@ -13,3 +13,11 @@
 .faq-item summary{cursor:pointer;list-style:none;font-weight:800;padding:18px 0}
 .faq-item summary::-webkit-details-marker{display:none}
 .faq-item p{margin:0;padding:0 0 18px;color:var(--muted)}
+
+
+/* Betaalmethoden bij abonnement */
+.payment-methods{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.payment-method{display:inline-flex;align-items:center;justify-content:center;min-width:74px;padding:8px 12px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:900;letter-spacing:.01em}
+.payment-ideal{color:#cc0066}
+.payment-paypal{color:#003087}
+.payment-methods small{width:100%;text-align:center;color:var(--muted);font-size:12px}

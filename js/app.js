@@ -40,6 +40,7 @@ import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
 import { viewContacten, bindContacten } from "./contacten.js?v=2";
+import { viewRompslomp, bindRompslomp } from "./rompslomp.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();
@@ -65,6 +66,7 @@ const routes = {
   "#/taken": () => viewTaken(data),
   "#/cloud": viewCloud,
   "#/slim": () => viewSlim(data),
+  "#/rompslomp": viewRompslomp,
 };
 
 function toast(msg) {
@@ -1562,6 +1564,7 @@ function bind(root) {
   bindKantoor(root, { data, persist, toast });
   bindSlim(root, { data, persist, toast });
   bindContacten(root, { data, toast });
+  bindRompslomp(root, { persist, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);
 }

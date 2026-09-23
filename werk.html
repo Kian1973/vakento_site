@@ -21,144 +21,205 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/vakento.css?v=menu-left1">
+  <link rel="stylesheet" href="css/vakento.css?v=workspace2">
   <style>
-    .account-icon-btn{
-      position:relative;
-      width:46px;
-      height:46px;
-      flex:0 0 46px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid rgba(18,24,38,.35);
-      border-radius:11px;
-      background:#fff;
-      color:#314458;
-      text-decoration:none;
-      transition:background .15s ease,border-color .15s ease,transform .15s ease;
+    .workspace-shell{min-height:100dvh}
+    .workspace-sidebar{
+      position:fixed;inset:0 auto 0 0;width:248px;z-index:40;
+      display:flex;flex-direction:column;background:#fff;border-right:1px solid var(--line);
+      overflow-y:auto;overscroll-behavior:contain
     }
-    .account-icon-btn:hover,
-    .account-icon-btn:focus-visible{
-      background:#f7f9fb;
-      border-color:#314458;
-      transform:translateY(-1px);
-      outline:none;
+    .workspace-brand{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+    .workspace-brand .logo{font-size:1.18rem}
+    .workspace-brand small{display:block;margin:6px 0 0 44px;color:var(--muted);font-size:.76rem}
+    .workspace-nav{display:block!important;overflow:visible!important;padding:12px!important;flex:0 0 auto!important}
+    .workspace-nav .nav-group{display:grid;gap:3px;margin-bottom:14px}
+    .workspace-nav .nav-title{
+      margin:8px 9px 4px;font-size:.68rem;line-height:1;text-transform:uppercase;
+      letter-spacing:.09em;color:#8a94a3;font-weight:700
     }
-    .account-icon-btn svg{
-      width:24px;
-      height:24px;
-      display:block;
+    .workspace-nav a{
+      display:flex!important;align-items:center;gap:10px;width:100%;
+      padding:9px 10px!important;border-radius:9px!important;color:#3d4654!important;
+      text-decoration:none;font-size:.9rem!important;font-weight:500!important;background:transparent!important
     }
-    .account-icon-btn .account-tooltip{
-      position:absolute;
-      top:calc(100% + 10px);
-      right:0;
-      z-index:60;
-      padding:7px 10px;
-      border-radius:8px;
-      background:#121826;
-      color:#fff;
-      font-size:.78rem;
-      font-weight:600;
-      line-height:1;
-      white-space:nowrap;
-      opacity:0;
-      visibility:hidden;
-      transform:translateY(-4px);
-      transition:opacity .15s ease,transform .15s ease,visibility .15s ease;
-      pointer-events:none;
-      box-shadow:0 8px 24px rgba(18,24,38,.18);
+    .workspace-nav a:hover{background:#f3f6fa!important;color:var(--ink)!important}
+    .workspace-nav a.active{background:#e8f0fb!important;color:#174f94!important;font-weight:700!important}
+    .workspace-nav .nav-dot{
+      width:8px;height:8px;border-radius:50%;background:#c7d0dc;flex:0 0 8px
     }
-    .account-icon-btn:hover .account-tooltip,
-    .account-icon-btn:focus-visible .account-tooltip{
-      opacity:1;
-      visibility:visible;
-      transform:translateY(0);
+    .workspace-nav a.active .nav-dot{background:var(--moss)}
+    .workspace-account{margin-top:auto;padding:12px;border-top:1px solid var(--line);display:grid;gap:4px}
+    .workspace-account a{
+      color:#3d4654;text-decoration:none;padding:9px 10px;border-radius:9px;font-size:.88rem
     }
-    /* Werkplaatsmenu consequent links uitlijnen */
-    .app-bar{
-      justify-content:flex-start;
+    .workspace-account a:hover{background:#f3f6fa}
+    .workspace-account .logout{color:#8a2f22}
+    .workspace-main{min-height:100dvh;margin-left:248px}
+    .workspace-topbar{
+      position:sticky;top:0;z-index:25;display:flex;align-items:center;justify-content:space-between;
+      min-height:58px;padding:10px 22px;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line)
     }
-    .app-nav{
-      justify-content:flex-start !important;
-      text-align:left !important;
-      margin-left:0;
+    .workspace-topbar strong{font-size:.92rem}
+    .workspace-topbar .top-actions{display:flex;gap:8px;align-items:center}
+    .workspace-topbar .btn{padding:8px 12px;font-size:.82rem;border-radius:9px}
+    .mobile-menu{display:none;position:relative}
+    .mobile-menu>summary{list-style:none;cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:#fff;font-weight:600}
+    .mobile-menu>summary::-webkit-details-marker{display:none}
+    .mobile-nav{
+      position:absolute;top:calc(100% + 8px);left:0;width:min(300px,86vw);max-height:70vh;overflow:auto;
+      background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 45px rgba(18,24,38,.16);padding:10px
     }
-    .app-nav > a,
-    .nav-more,
-    .nav-more > summary,
-    .nav-panel,
-    .nav-panel a{
-      text-align:left !important;
+    .mobile-nav p{margin:10px 8px 4px;color:#8a94a3;text-transform:uppercase;font-size:.68rem;letter-spacing:.08em;font-weight:700}
+    .mobile-nav a{display:block;color:var(--ink);text-decoration:none;padding:9px 10px;border-radius:8px}
+    .mobile-nav a:hover,.mobile-nav a.active{background:#eef4fb;color:#174f94}
+    .stage{width:min(1180px,calc(100% - 40px));margin:24px auto 96px}
+    .app-body .stage h1{font-size:clamp(2rem,4vw,3rem);line-height:1.05;max-width:none}
+    .app-body .stage h2{font-size:1.45rem}
+    .dashboard-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:16px;margin-top:18px}
+    .dashboard-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+    .dashboard-panel .item{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:11px 0}
+    .dashboard-panel .item:last-child{border-bottom:0}
+    .quick-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+    .quick-link{
+      display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);
+      border-radius:13px;padding:14px;min-height:92px
     }
-    .nav-panel{
-      left:0 !important;
-      right:auto !important;
+    .quick-link:hover{border-color:rgba(30,90,166,.35);box-shadow:0 8px 20px rgba(18,24,38,.05)}
+    .quick-link strong{display:block;margin-bottom:3px}
+    .quick-link small{color:var(--muted)}
+    .dashboard-actions{display:flex;gap:8px;flex-wrap:wrap}
+    @media(max-width:1050px){
+      .dashboard-grid{grid-template-columns:1fr}
+      .quick-links{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:899px){
+      .workspace-sidebar{display:none}
+      .workspace-main{margin-left:0}
+      .workspace-topbar{padding:9px 14px}
+      .mobile-menu{display:block}
+      .stage{width:min(100% - 24px,1180px);margin-top:16px}
+    }
+    @media(max-width:560px){
+      .quick-links{grid-template-columns:1fr 1fr}
+      .workspace-topbar .top-name{display:none}
+      .app-body .stage h1{font-size:2rem}
     }
   </style>
 </head>
 <body class="app-body">
-  <header class="app-bar">
-    <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
-    <nav class="app-nav">
-      <a href="#/" data-home>Vandaag</a>
-      <a href="#/bord">Bord</a>
-      <a href="#/klussen">Klussen</a>
-      <a href="#/contacten">Contacten</a>
-      <a href="#/papier">Papier</a>
-      <a href="#/uren">Uren</a>
-      <details class="nav-more">
-        <summary>Meer</summary>
-        <div class="nav-panel">
-          <p>Voorbereiden</p>
-          <a href="#/stam">Artikelen &amp; prijzen</a>
-          <a href="#/calculatie">Calculatie</a>
-          <a href="#/inkoop">Inkoop</a>
-          <a href="#/taken">Taken</a>
-          <a href="#/spullen">Materiaal &amp; spullen</a>
+  <div class="workspace-shell">
+    <aside class="workspace-sidebar">
+      <div class="workspace-brand">
+        <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
+        <small>Werkplaats</small>
+      </div>
 
-          <p>Relaties</p>
-          <a href="#/contacten">Contacten</a>
-
-          <p>Uitvoeren &amp; communiceren</p>
-          <a href="#/ploeg">Ploeg</a>
-          <a href="#/berichten">Chat</a>
-          <a href="#/cloud">Cloud</a>
-
-          <p>Financiën &amp; overzicht</p>
-          <a href="#/boekhouding"><strong>Boekhouding</strong></a>
-          <a href="#/winst">Winst</a>
-          <a href="#/geld">Geld</a>
-
-          <p>Slimmer werken</p>
-          <a href="#/brein">AI-assistent</a>
-          <a href="#/slim">Slim werken</a>
-
-          <p>Overstappen</p>
-          <a href="#/rompslomp"><strong>Van Rompslomp naar Vakento</strong></a>
-
-          <p>Account</p>
-          <a href="/account.html">Mijn account</a>
-          <a href="/app.html">Vakento app</a>
-          <a href="/diagnose.html">Systeemcontrole</a>
+      <nav class="app-nav workspace-nav">
+        <div class="nav-group">
+          <p class="nav-title">Overzicht</p>
+          <a href="#/" data-home><span class="nav-dot"></span>Overzicht</a>
+          <a href="#/bord"><span class="nav-dot"></span>Planning</a>
+          <a href="#/klussen"><span class="nav-dot"></span>Klussen</a>
         </div>
-      </details>
-    </nav>
-    <a class="btn btn-ghost" href="/logout.html?v=2" style="margin-left:auto;padding:9px 14px;white-space:nowrap">Uitloggen</a>
-  </header>
-  <main class="stage" id="stage"><p class="muted">Laden…</p></main>
+
+        <div class="nav-group">
+          <p class="nav-title">Relaties</p>
+          <a href="#/contacten"><span class="nav-dot"></span>Contacten</a>
+          <a href="#/ploeg"><span class="nav-dot"></span>Ploeg</a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-title">Administratie</p>
+          <a href="#/papier"><span class="nav-dot"></span>Offertes &amp; facturen</a>
+          <a href="#/inkoop"><span class="nav-dot"></span>Inkoop</a>
+          <a href="#/uren"><span class="nav-dot"></span>Uren</a>
+          <a href="#/boekhouding"><span class="nav-dot"></span>Boekhouding</a>
+          <a href="#/winst"><span class="nav-dot"></span>Winst</a>
+          <a href="#/geld"><span class="nav-dot"></span>Openstaand</a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-title">Werk</p>
+          <a href="#/stam"><span class="nav-dot"></span>Artikelen &amp; prijzen</a>
+          <a href="#/calculatie"><span class="nav-dot"></span>Calculatie</a>
+          <a href="#/taken"><span class="nav-dot"></span>Taken</a>
+          <a href="#/spullen"><span class="nav-dot"></span>Materiaal</a>
+          <a href="#/cloud"><span class="nav-dot"></span>Cloud</a>
+        </div>
+
+        <div class="nav-group">
+          <p class="nav-title">Slim</p>
+          <a href="#/brein"><span class="nav-dot"></span>AI-assistent</a>
+          <a href="#/slim"><span class="nav-dot"></span>Slim werken</a>
+          <a href="#/rompslomp"><span class="nav-dot"></span>Overstappen</a>
+        </div>
+      </nav>
+
+      <div class="workspace-account">
+        <a href="/account.html">Mijn account</a>
+        <a href="/app.html">Vakento app</a>
+        <a href="/diagnose.html">Systeemcontrole</a>
+        <a class="logout" href="/logout.html?v=2">Uitloggen</a>
+      </div>
+    </aside>
+
+    <div class="workspace-main">
+      <header class="workspace-topbar">
+        <div style="display:flex;align-items:center;gap:10px">
+          <details class="mobile-menu">
+            <summary>Menu</summary>
+            <nav class="mobile-nav">
+              <p>Overzicht</p>
+              <a href="#/" data-home>Overzicht</a>
+              <a href="#/bord">Planning</a>
+              <a href="#/klussen">Klussen</a>
+              <p>Administratie</p>
+              <a href="#/contacten">Contacten</a>
+              <a href="#/papier">Offertes &amp; facturen</a>
+              <a href="#/inkoop">Inkoop</a>
+              <a href="#/uren">Uren</a>
+              <a href="#/boekhouding">Boekhouding</a>
+              <a href="#/winst">Winst</a>
+              <p>Werk</p>
+              <a href="#/stam">Artikelen &amp; prijzen</a>
+              <a href="#/calculatie">Calculatie</a>
+              <a href="#/taken">Taken</a>
+              <a href="#/spullen">Materiaal</a>
+              <a href="#/cloud">Cloud</a>
+              <p>Slim</p>
+              <a href="#/brein">AI-assistent</a>
+              <a href="#/slim">Slim werken</a>
+              <a href="#/rompslomp">Overstappen van Rompslomp</a>
+              <p>Account</p>
+              <a href="/account.html">Mijn account</a>
+              <a href="/logout.html?v=2">Uitloggen</a>
+            </nav>
+          </details>
+          <strong class="top-name">Mijn Vakento</strong>
+        </div>
+        <div class="top-actions">
+          <a class="btn btn-ghost" href="/app.html#bon">Bon scannen</a>
+          <a class="btn" href="#/uren">Uren boeken</a>
+        </div>
+      </header>
+
+      <main class="stage" id="stage"><p class="muted">Laden…</p></main>
+    </div>
+  </div>
+
   <nav class="bottom">
-    <a href="#/" data-home>Vandaag</a>
-    <a href="#/bord">Bord</a>
-    <a href="#/slim">Slim</a>
-    <a href="#/papier">Papier</a>
+    <a href="#/" data-home>Overzicht</a>
+    <a href="#/bord">Planning</a>
+    <a href="#/klussen">Klussen</a>
+    <a href="#/papier">Facturen</a>
     <a href="#/uren">Uren</a>
-    <a href="#/winst">Winst</a>
   </nav>
+
   <script src="/js/self-heal.js?v=1"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script type="module" src="js/gate.js?v=rompslomp1"></script>
+  <script type="module" src="js/gate.js?v=workspace2"></script>
   <script src="js/cookies.js?v=cookie1"></script>
   <script src="/js/max.js?v=max1"></script>
 </body>

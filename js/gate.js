@@ -17,7 +17,7 @@ try {
         "Gratis tot " + tot + ". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan. <a href=\"account.html\">Betalen</a>";
       document.querySelector(".app-bar")?.insertAdjacentElement("afterend", note);
     }
-    await import("./app.js?v=nomail1");
+    await import("./app.js?v=rompslomp1");
   }
 } catch (err) {
   window.VakentoHeal?.report?.(err, { kind: "gate-load" });

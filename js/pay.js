@@ -139,7 +139,7 @@ if (paidBox) {
   const user = await me();
   paidBox.innerHTML = user.everPaid && user.paid
     ? `<h1>Betaling binnen. Alles blijft staan.</h1><p>Je cloud: ${gb(user.usedBytes)} / ${gb(user.quotaBytes)} GB.</p><p><a class="btn" href="werk.html">Open de werkplaats</a></p>`
-    : `<h1>Even wachten.</h1><p>iDEAL via Mollie is nog niet bevestigd. Ververs over een paar seconden.</p><p><a class="btn" href="account.html">Naar account</a></p>`;
+    : `<h1>Even wachten.</h1><p>De betaling via iDEAL of PayPal is nog niet bevestigd. Ververs over een paar seconden.</p><p><a class="btn" href="account.html">Naar account</a></p>`;
 }
 
 

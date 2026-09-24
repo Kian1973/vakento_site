@@ -33,7 +33,7 @@ function rowUser(u) {
         <input data-months="${u.id}" type="number" min="1" max="1200" value="1" style="width:78px" aria-label="Aantal maanden">
         <button class="btn btn-ghost" data-membership="${u.id}">Toepassen</button>
         <button class="btn btn-ghost" data-gb="${u.id}">+1 GB</button>
-        ${u.admin ? '<span class="muted">Beveiligd</span>' : `<button class="btn btn-ghost" type="button" data-delete-member="${u.id}" style="border-color:#b42318;color:#b42318">Verwijderen</button>`}
+        ${u.admin ? '<span class="muted">Beveiligd</span>' : `<button class="btn btn-ghost" type="button" data-delete-member="${u.id || ""}" data-delete-email="${u.email || ""}" style="border-color:#b42318;color:#b42318">Verwijderen</button>`}
       </div>
     </td>
   </tr>`;
@@ -84,7 +84,10 @@ async function teken(data) {
       const oldText = btn.textContent;
       btn.textContent = "Verwijderen…";
       try {
-        await api("/api/admin/lid/verwijderen", { userId: btn.dataset.deleteMember });
+        await api("/api/admin/lid/verwijderen", {
+          userId: btn.dataset.deleteMember || "",
+          email: btn.dataset.deleteEmail || email
+        });
         await laad();
       } catch (ex) {
         alert(ex.message || "Lid verwijderen is niet gelukt.");

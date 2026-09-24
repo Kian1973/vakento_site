@@ -3,53 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin | Vakento</title>
+  <title>Ledenbeheer | Vakento</title>
   <meta name="robots" content="noindex,nofollow">
   <link rel="stylesheet" href="css/vakento.css?v=cookie1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .admin-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+    .admin-tools input,.admin-tools select{min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .admin-tools input{min-width:min(360px,100%);flex:1}
+    .member-status{display:inline-flex;align-items:center;gap:7px;font-weight:600;white-space:nowrap}
+    .member-status::before{content:"";width:9px;height:9px;border-radius:50%;background:#8b98a7}
+    .member-status.active::before{background:#24a148}
+    .member-status.trial::before{background:#f59e0b}
+    .member-status.inactive::before{background:#b42318}
+    .member-email{font-size:.92rem;color:var(--muted)}
+    .table td,.table th{vertical-align:top}
+    .admin-toplink{text-decoration:none}
+    @media(max-width:760px){
+      .table{min-width:980px}
+      .admin-tools input{width:100%;min-width:0}
+    }
+  </style>
 </head>
 <body>
   <header>
     <div class="wrap site-top">
       <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
-      <span class="muted">Alleen voor de baas</span>
+      <a class="admin-toplink" href="/account.html">Mijn account</a>
     </div>
   </header>
+
   <section class="wrap" style="padding:28px 0 72px">
     <p class="kicker">Admin</p>
-    <h1>Alles in één scherm.</h1>
-    <p class="muted">Leden, iDEAL via Mollie, cloud en AI. Eerste account of hallo@leukonline.nl is baas.</p>
+    <h1>Ledenbeheer</h1>
+    <p class="muted">Bekijk je leden, abonnementen, betaalstatus en cloudgebruik. Deze pagina is alleen toegankelijk voor een admin-account.</p>
 
     <form class="card stack" data-login style="margin-top:24px;max-width:420px">
-      <h3>Inloggen</h3>
-      <label>E-mail<input name="email" type="email" required value="hallo@leukonline.nl"></label>
-      <label>Wachtwoord<input name="password" type="password" required minlength="8"></label>
-      <button class="btn" type="submit">Open admin</button>
-    </form>
-    <form class="card stack" data-reg style="margin-top:16px;max-width:420px">
-      <h3>Eerste keer: baas-account maken</h3>
-      <label>Naam<input name="name" value="LeukOnline"></label>
-      <label>E-mail<input name="email" type="email" required value="hallo@leukonline.nl"></label>
-      <label>Wachtwoord<input name="password" type="password" required minlength="8"></label>
-      <button class="btn btn-ghost" type="submit">Account maken</button>
+      <h3>Admin inloggen</h3>
+      <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
+      <label>Wachtwoord<input name="password" type="password" required minlength="8" autocomplete="current-password"></label>
+      <button class="btn" type="submit">Open ledenbeheer</button>
       <p class="warn" data-err hidden></p>
     </form>
 
     <div data-board hidden>
       <div data-stats style="margin:28px 0"></div>
-      <h2>Leden</h2>
-      <div class="table-wrap" style="overflow:auto;margin:12px 0 28px">
-        <table class="table"><thead><tr><th>Zaak</th><th>Lid</th><th>Abonnement</th><th>Cloud</th><th>Rol</th><th>Beheer</th></tr></thead><tbody data-users></tbody></table>
+
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:end;flex-wrap:wrap">
+        <div>
+          <p class="kicker">Gebruikers</p>
+          <h2 style="margin-bottom:4px">Leden</h2>
+          <p class="muted" style="margin-top:0"><span data-member-count>0</span> zichtbaar</p>
+        </div>
       </div>
+
+      <div class="admin-tools">
+        <input type="search" data-member-search placeholder="Zoek op naam of e-mail" aria-label="Zoek leden">
+        <select data-member-filter aria-label="Filter leden">
+          <option value="all">Alle leden</option>
+          <option value="active">Actief betaald</option>
+          <option value="trial">Proefperiode</option>
+          <option value="inactive">Niet actief</option>
+          <option value="admin">Admins</option>
+        </select>
+      </div>
+
+      <div class="table-wrap" style="overflow:auto;margin:12px 0 34px">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Naam / bedrijf</th>
+              <th>E-mail</th>
+              <th>Status</th>
+              <th>Abonnement</th>
+              <th>Betaald tot</th>
+              <th>Cloud</th>
+              <th>Rol</th>
+              <th>Beheer</th>
+            </tr>
+          </thead>
+          <tbody data-users></tbody>
+        </table>
+      </div>
+
       <h2>Betalingen</h2>
       <div class="table-wrap" style="overflow:auto">
-        <table class="table"><thead><tr><th>iDEAL</th><th>Sku</th><th>Bedrag</th><th>Status</th></tr></thead><tbody data-pay></tbody></table>
+        <table class="table">
+          <thead><tr><th>Betaling</th><th>Sku</th><th>Bedrag</th><th>Status</th></tr></thead>
+          <tbody data-pay></tbody>
+        </table>
       </div>
     </div>
   </section>
-  <script type="module" src="js/admin.js?v=admin2"></script>
+
+  <script type="module" src="js/admin.js?v=members3"></script>
   <script src="js/cookies.js?v=cookie1"></script>
 </body>
 </html>

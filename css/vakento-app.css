@@ -21,3 +21,76 @@
 .mobile-app-bottom a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-size:.72rem;font-weight:600;padding:7px 3px}
 @media(max-width:560px){.app-camera-permission{align-items:stretch;flex-direction:column}.app-camera-permission .btn{width:100%}}
 @media(max-width:440px){.app-two{grid-template-columns:1fr}.app-panel{padding:15px}.mobile-app-shell{width:min(100% - 16px,720px)}}
+
+/* Phone-first start screen */
+html,body{max-width:100%;overflow-x:hidden}
+.mobile-app-body{padding-bottom:96px;overflow-x:hidden}
+.mobile-app-shell{width:min(720px,calc(100% - 20px));overflow-x:hidden}
+.app-welcome{padding:8px 2px 12px}
+.app-welcome h1{font-size:clamp(2rem,9vw,3.15rem);line-height:1;margin:4px 0 8px}
+.app-home-launch{display:grid;gap:12px;margin:4px 0 18px}
+.app-scan-hero{
+  display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;gap:12px;
+  min-height:126px;padding:18px;border-radius:22px;background:var(--moss);color:#fff;
+  text-decoration:none;box-shadow:0 14px 32px rgba(30,90,166,.22)
+}
+.app-scan-hero .app-launch-icon{
+  width:56px;height:56px;border-radius:17px;display:grid;place-items:center;
+  background:rgba(255,255,255,.16);font-size:1.8rem
+}
+.app-scan-hero strong{display:block;font-size:1.28rem;line-height:1.15}
+.app-scan-hero small{display:block;margin-top:5px;color:rgba(255,255,255,.82);font-size:.82rem;line-height:1.3}
+.app-scan-hero>b{font-size:2rem;font-weight:400}
+.app-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%}
+.app-home-tile{
+  min-width:0;min-height:126px;padding:15px;border:1px solid var(--line);border-radius:18px;
+  background:#fff;color:var(--ink);text-decoration:none;display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:flex-start;gap:4px;box-shadow:0 6px 18px rgba(18,24,38,.04)
+}
+.app-home-tile .app-launch-icon{
+  width:42px;height:42px;display:grid;place-items:center;border-radius:13px;
+  background:#edf4fc;color:var(--moss);font-size:1.35rem;margin-bottom:5px
+}
+.app-home-tile strong{font-size:1rem;line-height:1.18;overflow-wrap:anywhere}
+.app-home-tile small{color:var(--muted);font-size:.76rem;line-height:1.25;overflow-wrap:anywhere}
+.app-home-more{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.app-home-more a{
+  min-width:0;padding:11px 6px;border-radius:13px;background:#fff;border:1px solid var(--line);
+  color:var(--ink);text-decoration:none;text-align:center;font-size:.75rem;font-weight:650;
+  white-space:normal;overflow-wrap:anywhere
+}
+.app-camera-note{
+  display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:15px;
+  background:#f7faff;border:1px solid rgba(30,90,166,.14)
+}
+.app-camera-note>span{font-size:1.25rem}
+.app-camera-note p{margin:0;display:grid;gap:1px}
+.app-camera-note strong{font-size:.84rem}
+.app-camera-note small{color:var(--muted);font-size:.74rem;line-height:1.25}
+
+.mobile-app-bottom{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;
+  left:8px;right:8px;padding:6px 4px;overflow:hidden
+}
+.mobile-app-bottom a{
+  min-width:0;display:grid;place-items:center;gap:1px;padding:5px 1px;
+  font-size:.66rem;line-height:1.05;white-space:normal
+}
+.mobile-app-bottom a span{font-size:1.05rem;line-height:1.15}
+.mobile-app-bottom a strong{font-size:.66rem;font-weight:700;overflow-wrap:anywhere}
+.mobile-app-bottom-primary{color:var(--moss)!important;background:#edf4fc;border-radius:12px}
+
+@media(max-width:430px){
+  .mobile-app-top{padding-left:10px;padding-right:10px}
+  .mobile-app-top .logo{font-size:1.05rem}
+  .mobile-app-top>div>div{display:none!important}
+  .mobile-app-top .btn{padding:7px 9px!important;font-size:.76rem}
+  .app-home-grid{gap:8px}
+  .app-home-tile{min-height:118px;padding:13px}
+  .app-home-more{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:350px){
+  .app-home-grid{grid-template-columns:1fr}
+  .app-scan-hero{grid-template-columns:48px minmax(0,1fr) auto;padding:15px}
+  .app-scan-hero .app-launch-icon{width:48px;height:48px}
+}

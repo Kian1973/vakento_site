@@ -55,6 +55,12 @@ function emptyStart() {
     fotos: [],
     onderhoud: [],
     dagnotities: [],
+    activa: [],
+    periodiekeFacturen: [],
+    bankMutaties: [],
+    auditLog: [],
+    boekhoudingPlus: { year: new Date().getFullYear(), administrationName: firm, accountantEmail: "", bankOpeningBalance: 0 },
+    boekhouder: { year: new Date().getFullYear(), software: "other" },
     toeslag: 12,
     kantoorZit: 2,
     papier: {
@@ -96,6 +102,12 @@ export function load() {
       data.fotos ||= [];
       data.onderhoud ||= [];
       data.dagnotities ||= [];
+      data.activa ||= [];
+      data.periodiekeFacturen ||= [];
+      data.bankMutaties ||= [];
+      data.auditLog ||= [];
+      data.boekhoudingPlus ||= { year:new Date().getFullYear(), administrationName:data.firm || "", accountantEmail:"", bankOpeningBalance:0 };
+      data.boekhouder ||= { year:new Date().getFullYear(), software:"other" };
       data.klanten ||= [];
       data.klussen ||= [];
       data.offertes ||= [];

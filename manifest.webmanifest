@@ -2,7 +2,7 @@
   "name": "Vakento",
   "short_name": "Vakento",
   "description": "Bonnen automatisch lezen en opslaan, werkfoto's bewaren en je Vakento-werkplaats openen.",
-  "start_url": "/app.html?v=4",
+  "start_url": "/app.html?v=phone1",
   "scope": "/",
   "display": "standalone",
   "background_color": "#eef2f7",

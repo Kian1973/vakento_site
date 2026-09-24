@@ -867,6 +867,64 @@ async function saveReceiptCorrectionToCloud(row) {
   return res.ok;
 }
 
+
+function offerteEditorRegel(r = {}) {
+  const aantal = Number(r.aantal ?? 1) || 1;
+  const stukprijs = Number(r.stukprijs ?? r.bedrag ?? 0) || 0;
+  const btw = [0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21;
+  const eenheid = String(r.eenheid || "st");
+  const bedrag = aantal * stukprijs;
+  return `<div class="offer-editor-line" data-offer-line>
+    <div class="offer-editor-description">
+      <label>Omschrijving
+        <input name="regel_tekst" value="${esc(r.tekst || "")}" placeholder="Bijvoorbeeld: schilderen kozijnen" spellcheck="true" lang="nl" autocapitalize="sentences" required>
+      </label>
+      <label class="offer-extra-label">Extra informatie
+        <input name="regel_extra" value="${esc(r.extra || "")}" placeholder="Optioneel: materiaal, kleur, uitvoering..." spellcheck="true" lang="nl" autocapitalize="sentences">
+      </label>
+    </div>
+    <label>Aantal
+      <input name="regel_aantal" type="number" min="0" step="0.01" value="${aantal}">
+    </label>
+    <label>Eenheid
+      <select name="regel_eenheid">
+        ${["st","uur","m","m²","m³","set","keer","dag"].map((x) => `<option value="${x}" ${x === eenheid ? "selected" : ""}>${x}</option>`).join("")}
+      </select>
+    </label>
+    <label>Prijs excl. btw
+      <input name="regel_prijs" type="number" min="0" step="0.01" value="${stukprijs.toFixed(2)}">
+    </label>
+    <label>BTW
+      <select name="regel_btw">
+        <option value="21" ${btw === 21 ? "selected" : ""}>21%</option>
+        <option value="9" ${btw === 9 ? "selected" : ""}>9%</option>
+        <option value="0" ${btw === 0 ? "selected" : ""}>0%</option>
+      </select>
+    </label>
+    <div class="offer-editor-line-total">
+      <span>Regeltotaal</span>
+      <strong data-offer-line-total>${euro(bedrag)}</strong>
+    </div>
+    <button class="offer-line-remove" type="button" data-offer-remove aria-label="Regel verwijderen">×</button>
+  </div>`;
+}
+
+function offerteRegelsUitEditor(form) {
+  return [...form.querySelectorAll("[data-offer-line]")].map((row) => {
+    const aantal = Math.max(0, Number(row.querySelector('[name="regel_aantal"]')?.value || 0));
+    const stukprijs = Math.max(0, Number(row.querySelector('[name="regel_prijs"]')?.value || 0));
+    return {
+      tekst: String(row.querySelector('[name="regel_tekst"]')?.value || "").trim(),
+      extra: String(row.querySelector('[name="regel_extra"]')?.value || "").trim(),
+      aantal,
+      eenheid: String(row.querySelector('[name="regel_eenheid"]')?.value || "st"),
+      stukprijs,
+      bedrag: Math.round(aantal * stukprijs * 100) / 100,
+      btw: Number(row.querySelector('[name="regel_btw"]')?.value || 21),
+    };
+  }).filter((r) => r.tekst);
+}
+
 function viewPapier() {
   const p = papierVan(data);
   return `
@@ -896,27 +954,83 @@ function viewPapier() {
       </form>
       <div class="card">${previewBrief(data)}</div>
     </div>
-    <form class="card stack" data-ai-offerte>
-      <p class="kicker">Brein</p>
-      <h3>Zeg wat de klant wil. De calculatie komt eronder.</h3>
-      <label>Klant${
-        data.klanten.length
-          ? `<select name="klant">${data.klanten.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}</select>`
-          : `<span class="muted"> Nog geen klant. Voeg er eerst één toe.</span>`
-      }</label>
-      <label>Opdracht<textarea name="vraag" rows="3" required placeholder="Beschrijf de opdracht"></textarea></label>
-      <label>BTW-categorie
-        <select name="btwCategorie">
-          <option value="standaard21">21% standaard</option>
-          <option value="schilder9">9% schilderwerk woning ouder dan 2 jaar</option>
-          <option value="stukadoor9">9% stukadoorswerk woning ouder dan 2 jaar</option>
-          <option value="behang9">9% behangen woning ouder dan 2 jaar</option>
-          <option value="isolatieMix">Isolatie: arbeid 9%, materiaal 21%</option>
-          <option value="schoonmaak9">9% schoonmaak in woning</option>
-        </select>
+    <form class="card stack offer-editor-card" data-offerte-editor>
+      <div class="offer-editor-heading">
+        <div>
+          <p class="kicker">Nieuwe offerte</p>
+          <h2>Maak de offerte regel voor regel</h2>
+          <p class="muted">Duidelijk invoeren, direct bedragen en btw zien. Nederlandse spellingcontrole staat aan.</p>
+        </div>
+        <span class="offer-editor-badge">Concept</span>
+      </div>
+
+      <div class="offer-editor-meta">
+        <label>Klant
+          ${
+            data.klanten.length
+              ? `<select name="klant" required>${data.klanten.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>`
+              : `<span class="muted">Nog geen klant. Voeg eerst een contact toe.</span>`
+          }
+        </label>
+        <label>Titel
+          <input name="titel" placeholder="Bijvoorbeeld: Buitenschilderwerk woning" spellcheck="true" lang="nl" autocapitalize="sentences" required>
+        </label>
+        <label>Offertedatum
+          <input name="datum" type="date" value="${iso(new Date())}">
+        </label>
+        <label>Geldig tot
+          <input name="geldigTot" type="date" value="${iso(addDays(new Date(), 30))}">
+        </label>
+      </div>
+
+      <label>Introductie
+        <textarea name="intro" rows="3" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: Hierbij ontvangt u onze offerte voor de afgesproken werkzaamheden."></textarea>
       </label>
-      <p class="muted">Vakento splitst 9% en 21% op de offerte en factuur. Controleer altijd of de werkzaamheden aan de voorwaarden voldoen.</p>
-      <button class="btn" type="submit">Maak offerte met AI</button>
+
+      <div class="offer-editor-lines-head">
+        <div>
+          <strong>Offerteregels</strong>
+          <span class="muted">Omschrijving, aantal, prijs en btw per onderdeel.</span>
+        </div>
+        <button class="btn btn-ghost" type="button" data-offer-add>+ Nieuwe regel</button>
+      </div>
+
+      <div class="offer-editor-lines" data-offer-lines>
+        ${offerteEditorRegel({ aantal: 1, eenheid: "st", stukprijs: 0, btw: 21 })}
+      </div>
+
+      <div class="offer-editor-ai">
+        <label>Sneller met Vakento AI
+          <textarea name="vraag" rows="2" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: plafond 44 m² spuiten, muren 42 m² schilderen en 3 kozijnen aflakken"></textarea>
+        </label>
+        <label>BTW-categorie
+          <select name="btwCategorie">
+            <option value="standaard21">21% standaard</option>
+            <option value="schilder9">9% schilderwerk woning ouder dan 2 jaar</option>
+            <option value="stukadoor9">9% stukadoorswerk woning ouder dan 2 jaar</option>
+            <option value="behang9">9% behangen woning ouder dan 2 jaar</option>
+            <option value="isolatieMix">Isolatie: arbeid 9%, materiaal 21%</option>
+            <option value="schoonmaak9">9% schoonmaak in woning</option>
+          </select>
+        </label>
+        <button class="btn btn-ghost" type="button" data-offer-ai>Vul offerteregels met AI</button>
+      </div>
+
+      <label>Opmerkingen / afspraken
+        <textarea name="opmerkingen" rows="3" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Planning, betaling, meerwerk of andere afspraken."></textarea>
+      </label>
+
+      <div class="offer-editor-footer">
+        <div class="offer-editor-totals" aria-live="polite">
+          <span>Excl. btw <strong data-offer-excl>€ 0,00</strong></span>
+          <span>BTW <strong data-offer-vat>€ 0,00</strong></span>
+          <span class="offer-editor-grand">Incl. btw <strong data-offer-incl>€ 0,00</strong></span>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost" type="button" data-offer-spelling>Spelling verbeteren</button>
+          <button class="btn" type="submit">Opslaan als concept</button>
+        </div>
+      </div>
     </form>
     <h2 style="margin-top:22px">Offertes</h2>
     <div class="list" style="margin:10px 0 24px">

@@ -53,7 +53,7 @@ const routes = {
   "#/bord": viewBord,
   "#/klussen": viewKlussen,
   "#/contacten": () => viewContacten(data),
-  "#/papier": viewPapier,
+  "#/papier": () => viewPapier("offerte"),
   "#/offertes": () => viewPapier("offerte"),
   "#/facturen": () => viewPapier("factuur"),
   "#/uren": viewUren,
@@ -183,7 +183,8 @@ function viewStart() {
 
     <div class="start-grid start-full-links">
       <a class="card" href="#/contacten"><p class="kicker">Relaties</p><h3>Contacten</h3><p class="muted">Klanten en leveranciers centraal bewaren.</p></a>
-      <a class="card" href="#/papier"><p class="kicker">Administratie</p><h3>Offertes & facturen</h3><p class="muted">Van aanvraag naar betaling.</p></a>
+      <a class="card" href="/offertes.html"><p class="kicker">Offertes</p><h3>Offertes</h3><p class="muted">Zelf maken of met Vakento AI.</p></a>
+      <a class="card" href="/facturen.html"><p class="kicker">Facturen</p><h3>Facturen</h3><p class="muted">Maken, bekijken en betalingen volgen.</p></a>
       <a class="card" href="#/cloud"><p class="kicker">Cloud</p><h3>Bestanden</h3><p class="muted">Documenten en foto's bij elkaar.</p></a>
       <a class="card" href="#/slim"><p class="kicker">AI</p><h3>Slim werken</h3><p class="muted">Laat Vakento werk uit handen nemen.</p></a>
     </div>`;
@@ -243,10 +244,15 @@ function viewVandaag() {
         <strong>Werkfoto</strong>
         <small>Maak een foto en zet hem bij de juiste klus.</small>
       </a>
-      <a class="simple-action" href="#/papier">
+      <a class="simple-action" href="/offertes.html">
+        <span class="simple-icon">✎</span>
+        <strong>Offerte</strong>
+        <small>Zelf maken of met Vakento AI.</small>
+      </a>
+      <a class="simple-action" href="/facturen.html">
         <span class="simple-icon">€</span>
-        <strong>Offerte / factuur</strong>
-        <small>Maak snel een klantdocument.</small>
+        <strong>Factuur</strong>
+        <small>Nieuwe factuur maken of bestaande bekijken.</small>
       </a>
       <a class="simple-action" href="#/bord">
         <span class="simple-icon">▦</span>
@@ -312,10 +318,15 @@ function viewGeldOverzicht() {
     </div>
 
     <div class="simple-actions">
-      <a class="simple-action" href="#/papier">
+      <a class="simple-action" href="/facturen.html">
         <span class="simple-icon">€</span>
-        <strong>Offertes & facturen</strong>
-        <small>Maken, bekijken en versturen.</small>
+        <strong>Facturen</strong>
+        <small>Maken, bekijken en betalingen volgen.</small>
+      </a>
+      <a class="simple-action" href="/offertes.html">
+        <span class="simple-icon">✎</span>
+        <strong>Offertes</strong>
+        <small>Bekijk offertes of maak een nieuwe met AI.</small>
       </a>
       <a class="simple-action" href="#/geld">
         <span class="simple-icon">!</span>

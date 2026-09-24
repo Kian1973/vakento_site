@@ -59,20 +59,26 @@ function payloadFrom(form) {
 
 function rowsHtml(contacts = []) {
   if (!contacts.length) {
-    return '<tr><td colspan="7"><p class="muted">Nog geen contacten. Voeg je eerste klant of leverancier toe.</p></td></tr>';
+    return '<tr class="contact-empty"><td colspan="5"><strong>Nog geen contacten</strong><span class="muted">Voeg je eerste klant of leverancier toe.</span></td></tr>';
   }
   return contacts.map((ct, index) => {
     const c = normalize(ct);
     const search = [c.name,c.contact,c.email,c.factuurEmail,c.plaats,c.tel,c.klantnr,c.kvk,c.btw,c.type]
       .filter(Boolean).join(" ").toLowerCase();
+    const meta = [c.contact, "nr. " + num(c,index)].filter(Boolean).join(" · ");
+    const reach = [
+      c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : "",
+      c.tel ? `<a href="tel:${esc(c.tel)}">${esc(c.tel)}</a>` : ""
+    ].filter(Boolean).join("");
     return `<tr data-contact-row data-id="${esc(c.id)}" data-type="${esc(c.type)}" data-search="${esc(search)}">
-      <td><strong>${esc(num(c,index))}</strong></td>
-      <td><strong>${esc(c.name || "Naamloos contact")}</strong>${c.contact ? `<small class="muted contact-sub">${esc(c.contact)}</small>` : ""}</td>
-      <td><span class="contact-pill">${c.type === "leverancier" ? "Leverancier" : "Klant"}</span></td>
-      <td>${esc(c.plaats)}</td>
-      <td>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ""}</td>
-      <td>${c.tel ? `<a href="tel:${esc(c.tel)}">${esc(c.tel)}</a>` : ""}</td>
-      <td class="num"><button class="btn btn-ghost" type="button" data-contact-edit="${esc(c.id)}">Bewerken</button></td>
+      <td class="contact-main">
+        <strong>${esc(c.name || "Naamloos contact")}</strong>
+        <small>${esc(meta)}</small>
+      </td>
+      <td class="contact-type-cell"><span class="contact-pill">${c.type === "leverancier" ? "Leverancier" : "Klant"}</span></td>
+      <td class="contact-place-cell">${esc(c.plaats || "—")}</td>
+      <td class="contact-reach">${reach || '<span class="muted">Geen contactgegevens</span>'}</td>
+      <td class="contact-action"><button class="contact-open" type="button" data-contact-edit="${esc(c.id)}" aria-label="Open ${esc(c.name || "contact")}">Open</button></td>
     </tr>`;
   }).join("");
 }
@@ -80,39 +86,48 @@ function rowsHtml(contacts = []) {
 export function viewContacten(data) {
   const contacten = data.klanten || [];
   return `
-    <div class="row contacts-head">
+    <div class="contacts-page-head">
       <div>
         <p class="kicker">Relaties</p>
-        <h1>Contacten</h1>
-        <p class="muted">Klanten en leveranciers centraal opgeslagen. Op laptop en telefoon hetzelfde.</p>
+        <div class="contacts-title-row">
+          <h1>Contacten</h1>
+          <span class="contacts-count">${contacten.length}</span>
+        </div>
+        <p class="muted">Klanten en leveranciers overzichtelijk bij elkaar.</p>
       </div>
-      <div class="actions">
-        <label class="btn btn-ghost" style="cursor:pointer">Importeer CSV<input type="file" accept=".csv,text/csv" data-contact-import hidden></label>
-        <button class="btn btn-ghost" type="button" data-contact-export>Exporteer CSV</button>
+
+      <div class="contacts-head-actions">
+        <details class="contact-tools-menu">
+          <summary class="btn btn-ghost">Import / export</summary>
+          <div class="contact-tools-popover">
+            <label>Importeer CSV<input type="file" accept=".csv,text/csv" data-contact-import hidden></label>
+            <button type="button" data-contact-export>Exporteer CSV</button>
+          </div>
+        </details>
         <button class="btn" type="button" data-contact-new>+ Nieuw contact</button>
       </div>
     </div>
 
-    <div class="card contacts-db-state" data-contacts-db-state>
-      <strong>Contactendatabase</strong>
+    <div class="contacts-db-state" data-contacts-db-state>
+      <span class="contacts-status-dot" aria-hidden="true"></span>
       <span class="muted">Verbinden met de Vakento database…</span>
     </div>
 
-    <div class="contacts-summary">
-      <button type="button" class="contact-filter active" data-contact-type="">Alle</button>
-      <button type="button" class="contact-filter" data-contact-type="klant">Klanten</button>
-      <button type="button" class="contact-filter" data-contact-type="leverancier">Leveranciers</button>
-    </div>
-
-    <div class="card contacts-toolbar">
-      <label class="contacts-search">Zoeken
-        <input type="search" data-contact-search placeholder="Naam, e-mail, plaats, telefoon, klantnummer…">
+    <section class="contacts-controlbar">
+      <label class="contacts-search">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" data-contact-search aria-label="Contacten zoeken" placeholder="Zoek op naam, plaats, e-mail of telefoon">
       </label>
-    </div>
+      <div class="contacts-summary" role="group" aria-label="Contacttype">
+        <button type="button" class="contact-filter active" data-contact-type="">Alle</button>
+        <button type="button" class="contact-filter" data-contact-type="klant">Klanten</button>
+        <button type="button" class="contact-filter" data-contact-type="leverancier">Leveranciers</button>
+      </div>
+    </section>
 
-    <div class="card contacts-table-wrap">
+    <div class="contacts-table-wrap">
       <table class="table contacts-table">
-        <thead><tr><th>Nr.</th><th>Contact</th><th>Type</th><th>Plaats</th><th>E-mail</th><th>Telefoon</th><th></th></tr></thead>
+        <thead><tr><th>Contact</th><th>Type</th><th>Plaats</th><th>Bereikbaar</th><th></th></tr></thead>
         <tbody data-contact-list>${rowsHtml(contacten)}</tbody>
       </table>
     </div>
@@ -122,44 +137,53 @@ export function viewContacten(data) {
         <input type="hidden" name="id">
         <div class="contact-dialog-head">
           <div><p class="kicker">Contact</p><h2 data-contact-title>Nieuw contact</h2></div>
-          <button class="btn btn-ghost" type="button" data-contact-close>Sluiten</button>
+          <button class="contact-dialog-x" type="button" data-contact-close aria-label="Sluiten">×</button>
         </div>
 
         <div class="contact-choice-grid">
           <fieldset>
-            <legend>Bedrijf of particulier?</legend>
-            <label><input type="radio" name="entityType" value="bedrijf" checked> Bedrijf</label>
-            <label><input type="radio" name="entityType" value="particulier"> Particulier</label>
+            <legend>Soort</legend>
+            <label><input type="radio" name="entityType" value="bedrijf" checked><span>Bedrijf</span></label>
+            <label><input type="radio" name="entityType" value="particulier"><span>Particulier</span></label>
           </fieldset>
           <fieldset>
-            <legend>Type contact</legend>
-            <label><input type="radio" name="type" value="klant" checked> Klant</label>
-            <label><input type="radio" name="type" value="leverancier"> Leverancier</label>
+            <legend>Relatie</legend>
+            <label><input type="radio" name="type" value="klant" checked><span>Klant</span></label>
+            <label><input type="radio" name="type" value="leverancier"><span>Leverancier</span></label>
           </fieldset>
         </div>
 
-        <div class="contact-grid">
-          <label class="wide">Naam / bedrijfsnaam *<input name="name" required maxlength="160"></label>
-          <label>Contactpersoon<input name="contact" maxlength="160"></label>
-          <label>E-mailadres<input name="email" type="email" maxlength="190"></label>
-          <label class="wide">Adres<input name="adres" maxlength="190"></label>
-          <label>Postcode<input name="postcode" maxlength="20"></label>
-          <label>Plaats<input name="plaats" maxlength="120"></label>
-          <label>Land<input name="land" maxlength="100" value="Nederland"></label>
-          <label>KvK-nummer<input name="kvk" maxlength="32"></label>
-          <label>Btw-nummer<input name="btw" maxlength="40"></label>
-          <label>Telefoonnummer<input name="tel" maxlength="50"></label>
-          <label>OIN<input name="oin" maxlength="50"></label>
-          <label>Klantnummer<input name="klantnr" maxlength="40"></label>
-          <label>Factuur e-mail<input name="factuurEmail" type="email" maxlength="190"></label>
-          <label>Betaaltermijn
-            <select name="betaaltermijn"><option value="14">14 dagen</option><option value="30" selected>30 dagen</option><option value="60">60 dagen</option></select>
-          </label>
-          <label class="wide">Notitie / vrije velden<textarea name="notitie" rows="3" maxlength="2000"></textarea></label>
+        <div class="contact-section">
+          <h3>Basisgegevens</h3>
+          <div class="contact-grid">
+            <label class="wide">Naam / bedrijfsnaam *<input name="name" required maxlength="160"></label>
+            <label>Contactpersoon<input name="contact" maxlength="160"></label>
+            <label>Telefoonnummer<input name="tel" maxlength="50"></label>
+            <label>E-mailadres<input name="email" type="email" maxlength="190"></label>
+            <label class="wide">Adres<input name="adres" maxlength="190"></label>
+            <label>Postcode<input name="postcode" maxlength="20"></label>
+            <label>Plaats<input name="plaats" maxlength="120"></label>
+          </div>
         </div>
 
+        <details class="contact-extra">
+          <summary>Extra administratiegegevens</summary>
+          <div class="contact-grid">
+            <label>Land<input name="land" maxlength="100" value="Nederland"></label>
+            <label>Klantnummer<input name="klantnr" maxlength="40"></label>
+            <label>KvK-nummer<input name="kvk" maxlength="32"></label>
+            <label>Btw-nummer<input name="btw" maxlength="40"></label>
+            <label>OIN<input name="oin" maxlength="50"></label>
+            <label>Factuur e-mail<input name="factuurEmail" type="email" maxlength="190"></label>
+            <label>Betaaltermijn
+              <select name="betaaltermijn"><option value="14">14 dagen</option><option value="30" selected>30 dagen</option><option value="60">60 dagen</option></select>
+            </label>
+            <label class="wide">Notitie<textarea name="notitie" rows="3" maxlength="2000"></textarea></label>
+          </div>
+        </details>
+
         <div class="contact-form-actions">
-          <button class="btn btn-ghost" type="button" data-contact-delete hidden>Verwijderen</button>
+          <button class="contact-delete" type="button" data-contact-delete hidden>Verwijderen</button>
           <span class="contact-form-spacer"></span>
           <button class="btn btn-ghost" type="button" data-contact-close>Annuleren</button>
           <button class="btn" type="submit">Opslaan</button>

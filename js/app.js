@@ -42,6 +42,7 @@ import { viewSlim, bindSlim } from "./slim.js?v=1";
 import { viewContacten, bindContacten } from "./contacten.js?v=2";
 import { viewRompslomp, bindRompslomp } from "./rompslomp.js?v=2";
 import { viewBoekhoudingPlus, bindBoekhoudingPlus } from "./boekhouding-plus.js?v=1";
+import { viewBoekhouder, bindBoekhouder } from "./boekhouder.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();
@@ -66,6 +67,7 @@ const routes = {
   "#/meer": viewMeer,
   "#/boekhouding": viewBoekhouding,
   "#/boekhouding-plus": () => viewBoekhoudingPlus(data),
+  "#/boekhouder": () => viewBoekhouder(data),
   "#/calculatie": () => viewCalc(data),
   "#/taken": () => viewTaken(data),
   "#/cloud": viewCloud,
@@ -299,6 +301,7 @@ function viewMeer() {
       <a class="simple-more-link" href="#/slim"><strong>Slim werken</strong><span>Werkbon, meerwerk en AI-hulp.</span></a>
       <a class="simple-more-link" href="#/brein"><strong>AI-assistent</strong><span>Vraag Vakento om hulp.</span></a>
       <a class="simple-more-link" href="#/boekhouding-plus"><strong>Boekhouding Plus</strong><span>Balans, resultaat, activa, periodiek en bankmatching.</span></a>
+      <a class="simple-more-link" href="#/boekhouder"><strong>Mijn boekhouder</strong><span>RGS, UBL en compleet exportpakket voor je boekhouder.</span></a>
       <a class="simple-more-link" href="#/rompslomp"><strong>Overstappen</strong><span>Gegevens importeren uit Rompslomp.</span></a>
       <a class="simple-more-link" href="/account.html"><strong>Mijn account</strong><span>Abonnement en app.</span></a>
       <a class="simple-more-link" href="/diagnose.html"><strong>Systeemcontrole</strong><span>Alleen nodig bij problemen.</span></a>
@@ -1659,6 +1662,7 @@ function bind(root) {
   bindContacten(root, { data, toast });
   bindRompslomp(root, { data, persist, toast });
   bindBoekhoudingPlus(root, { data, persist, toast });
+  bindBoekhouder(root, { data, persist, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);
 }

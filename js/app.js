@@ -88,6 +88,19 @@ function persist() {
   render();
 }
 
+function volgendeOfferteNummer() {
+  const hoogsteBestaande = (data.offertes || []).reduce((max, offerte) => {
+    const match = String(offerte?.nr || "").match(/(?:^|\D)(\d+)$/);
+    const n = match ? Number(match[1]) : 0;
+    return Number.isFinite(n) ? Math.max(max, n) : max;
+  }, 1039);
+
+  const bewaard = Number(data.nextOfferteNummer || 0);
+  const nummer = Math.max(1040, hoogsteBestaande + 1, Number.isFinite(bewaard) ? bewaard : 0);
+  data.nextOfferteNummer = nummer + 1;
+  return "OFF-" + nummer;
+}
+
 function nav(hash) {
   document.querySelectorAll(".app-nav a, .bottom a").forEach((a) => {
     a.classList.toggle("active", a.getAttribute("href") === hash || (hash === "#/" && a.dataset.home));
@@ -1121,6 +1134,7 @@ function viewPapier() {
             <div class="actions">
               <button class="btn btn-ghost" data-print="offerte|${o.id}">Briefpapier</button>
               ${o.status !== "akkoord" ? `<button class="btn" data-ok="${o.id}">Zet op akkoord</button>` : `<button class="btn btn-ghost" data-doc="bevestiging|${o.id}">Opdrachtbevestiging</button><button class="btn btn-ghost" data-doc="pakbon|${o.id}">Pakbon</button>`}
+              <button class="btn btn-ghost offer-delete" type="button" data-offerte-delete="${o.id}">Verwijderen</button>
             </div>
           </article>`;
         })
@@ -1547,7 +1561,7 @@ function bind(root) {
 
       data.offertes.unshift({
         id:"o" + Date.now(),
-        nr:"OFF-" + (1040 + data.offertes.length),
+        nr:volgendeOfferteNummer(),
         klant:klantId,
         titel,
         regels,
@@ -1615,6 +1629,18 @@ function bind(root) {
   root.querySelector("[data-act='bon']")?.addEventListener("click", () => {
     location.hash = "#/spullen";
   });
+  root.querySelectorAll("[data-offerte-delete]").forEach((btn) => btn.addEventListener("click", () => {
+    const id = String(btn.dataset.offerteDelete || "");
+    const offerte = data.offertes.find((o) => String(o.id) === id);
+    if (!offerte) return;
+
+    const nummer = String(offerte.nr || "deze offerte");
+    if (!confirm(nummer + " verwijderen? Het offertenummer wordt niet opnieuw gebruikt.")) return;
+
+    data.offertes = data.offertes.filter((o) => String(o.id) !== id);
+    toast(nummer + " verwijderd. Nummer blijft overgeslagen.");
+    persist();
+  }));
   root.querySelectorAll("[data-ok]").forEach((btn) => btn.addEventListener("click", () => acceptOffer(btn.dataset.ok)));
   root.querySelector("[data-week='-1']")?.addEventListener("click", () => {
     weekStart = addDays(weekStart, -7);

@@ -1295,58 +1295,146 @@ function bind(root) {
     });
     persist();
   });
-  root.querySelector("form[data-ai-offerte]")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const f = new FormData(e.target);
-    const vraag = f.get("vraag");
-    const klantId = f.get("klant");
-    const btwCategorie = String(f.get("btwCategorie") || "standaard21");
-    if (!klantId) {
-      toast("Eerst een klant");
-      return;
-    }
-    toast("Calculeren");
-    const local = offerteUitTekst(vraag, data.place);
-    const out = await verrijkMetServer("offerte", local, { vraag, plaats: data.place });
-    const bronRegels = out.regels || local.regels;
-    const regelBtw = (r) => {
-      const tekst = String(r?.tekst || "").toLowerCase();
-      if (btwCategorie === "standaard21") return 21;
-      if (["schilder9", "stukadoor9", "behang9", "schoonmaak9"].includes(btwCategorie)) return 9;
-      if (btwCategorie === "isolatieMix") {
-        const materiaal = /(materiaal|isolatieplaat|isolatiemateriaal|pir|pur|glaswol|steenwol|eps|xps|folie|regelwerk|bevestiging)/i.test(tekst);
-        return materiaal ? 21 : 9;
-      }
-      return 21;
+
+  const offerForm = root.querySelector("form[data-offerte-editor]");
+  if (offerForm) {
+    const linesBox = offerForm.querySelector("[data-offer-lines]");
+
+    const updateOfferTotals = () => {
+      const regels = offerteRegelsUitEditor(offerForm);
+      const excl = regels.reduce((sum, r) => sum + Number(r.bedrag || 0), 0);
+      const vat = regels.reduce((sum, r) => sum + Number(r.bedrag || 0) * Number(r.btw || 0) / 100, 0);
+
+      offerForm.querySelectorAll("[data-offer-line]").forEach((row) => {
+        const aantal = Math.max(0, Number(row.querySelector('[name="regel_aantal"]')?.value || 0));
+        const stukprijs = Math.max(0, Number(row.querySelector('[name="regel_prijs"]')?.value || 0));
+        const total = row.querySelector("[data-offer-line-total]");
+        if (total) total.textContent = euro(aantal * stukprijs);
+      });
+
+      const exclEl = offerForm.querySelector("[data-offer-excl]");
+      const vatEl = offerForm.querySelector("[data-offer-vat]");
+      const inclEl = offerForm.querySelector("[data-offer-incl]");
+      if (exclEl) exclEl.textContent = euro(excl);
+      if (vatEl) vatEl.textContent = euro(vat);
+      if (inclEl) inclEl.textContent = euro(excl + vat);
     };
-    const regels = (bronRegels || []).map((r) => ({ ...r, btw: regelBtw(r) }));
-    const kId = "k" + Date.now();
-    data.klussen.unshift({
-      id: kId,
-      title: out.titel || local.titel,
-      klant: klantId,
-      status: "offerte",
-      start: iso(new Date()),
-      einde: iso(new Date()),
-      begroot: (regels || []).reduce((a, r) => a + Number(r.bedrag || 0), 0),
-      kost: 0,
-      people: [roster[0].id],
-      token: "ai-" + Math.floor(Math.random() * 9000 + 1000),
+
+    offerForm.querySelector("[data-offer-add]")?.addEventListener("click", () => {
+      linesBox?.insertAdjacentHTML("beforeend", offerteEditorRegel({ aantal:1, eenheid:"st", stukprijs:0, btw:21 }));
+      updateOfferTotals();
+      linesBox?.lastElementChild?.querySelector('[name="regel_tekst"]')?.focus();
     });
-    data.offertes.unshift({
-      id: "o" + Date.now(),
-      nr: "OFF-" + (1040 + data.offertes.length),
-      klant: klantId,
-      titel: out.titel || local.titel,
-      regels,
-      status: "verstuurd",
-      klus: kId,
-      risico: out.risico || local.risico,
-      btwCategorie,
+
+    offerForm.addEventListener("input", (e) => {
+      if (e.target.closest("[data-offer-line]")) updateOfferTotals();
     });
-    toast("Offerte klaar");
-    persist();
-  });
+    offerForm.addEventListener("change", (e) => {
+      if (e.target.closest("[data-offer-line]")) updateOfferTotals();
+    });
+    offerForm.addEventListener("click", (e) => {
+      const remove = e.target.closest("[data-offer-remove]");
+      if (!remove) return;
+      const rows = offerForm.querySelectorAll("[data-offer-line]");
+      if (rows.length <= 1) {
+        const row = remove.closest("[data-offer-line]");
+        row.querySelector('[name="regel_tekst"]').value = "";
+        row.querySelector('[name="regel_extra"]').value = "";
+        row.querySelector('[name="regel_aantal"]').value = "1";
+        row.querySelector('[name="regel_prijs"]').value = "0.00";
+      } else {
+        remove.closest("[data-offer-line]")?.remove();
+      }
+      updateOfferTotals();
+    });
+
+    offerForm.querySelector("[data-offer-ai]")?.addEventListener("click", async () => {
+      const formData = new FormData(offerForm);
+      const vraag = String(formData.get("vraag") || "").trim();
+      if (!vraag) return toast("Beschrijf eerst de opdracht");
+
+      const btwCategorie = String(formData.get("btwCategorie") || "standaard21");
+      toast("Vakento vult de offerte");
+
+      const local = offerteUitTekst(vraag, data.place);
+      const out = await verrijkMetServer("offerte", local, { vraag, plaats:data.place });
+      const bronRegels = out.regels || local.regels || [];
+
+      const regelBtw = (r) => {
+        const tekst = String(r?.tekst || "").toLowerCase();
+        if (btwCategorie === "standaard21") return 21;
+        if (["schilder9","stukadoor9","behang9","schoonmaak9"].includes(btwCategorie)) return 9;
+        if (btwCategorie === "isolatieMix") {
+          return /(materiaal|isolatieplaat|isolatiemateriaal|pir|pur|glaswol|steenwol|eps|xps|folie|regelwerk|bevestiging)/i.test(tekst) ? 21 : 9;
+        }
+        return 21;
+      };
+
+      offerForm.elements.titel.value = out.titel || local.titel || vraag.slice(0,80);
+      if (linesBox) {
+        linesBox.innerHTML = bronRegels.map((r) => offerteEditorRegel({
+          tekst:r.tekst || "",
+          extra:r.extra || "",
+          aantal:Number(r.aantal || 1),
+          eenheid:r.eenheid || "st",
+          stukprijs:Number(r.stukprijs ?? r.bedrag ?? 0),
+          btw:regelBtw(r)
+        })).join("") || offerteEditorRegel({ aantal:1, eenheid:"st", stukprijs:0, btw:21 });
+      }
+      updateOfferTotals();
+      toast("Offerte ingevuld. Controleer de regels.");
+    });
+
+    offerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = new FormData(offerForm);
+      const klantId = String(formData.get("klant") || "");
+      const titel = String(formData.get("titel") || "").trim();
+      const regels = offerteRegelsUitEditor(offerForm);
+
+      if (!klantId) return toast("Kies eerst een klant");
+      if (!titel) return toast("Geef de offerte een titel");
+      if (!regels.length) return toast("Voeg minimaal één offerteregel toe");
+
+      const kId = "k" + Date.now();
+      const begroot = regels.reduce((sum,r) => sum + Number(r.bedrag || 0), 0);
+
+      data.klussen.unshift({
+        id:kId,
+        title:titel,
+        klant:klantId,
+        status:"offerte",
+        start:iso(new Date()),
+        einde:iso(new Date()),
+        begroot,
+        kost:0,
+        people:[roster[0].id],
+        token:"off-" + Math.floor(Math.random()*9000+1000)
+      });
+
+      data.offertes.unshift({
+        id:"o" + Date.now(),
+        nr:"OFF-" + (1040 + data.offertes.length),
+        klant:klantId,
+        titel,
+        regels,
+        status:"concept",
+        klus:kId,
+        risico:"",
+        datum:String(formData.get("datum") || iso(new Date())),
+        geldigTot:String(formData.get("geldigTot") || ""),
+        intro:String(formData.get("intro") || "").trim(),
+        opmerkingen:String(formData.get("opmerkingen") || "").trim(),
+        btwCategorie:String(formData.get("btwCategorie") || "standaard21")
+      });
+
+      toast("Offerte als concept opgeslagen");
+      persist();
+    });
+
+    updateOfferTotals();
+  }
+
   root.querySelectorAll("[data-offerte-btw]").forEach((select) => {
     select.addEventListener("change", () => {
       const [offerteId, indexRaw] = String(select.dataset.offerteBtw || "").split("|");

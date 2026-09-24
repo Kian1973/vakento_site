@@ -1023,3 +1023,14 @@ input, select, textarea {
 
 .offer-delete{margin-left:auto;color:#a23b2b!important;border-color:#ead4cf!important;background:#fff8f6!important}
 .offer-delete:hover{background:#fff0ec!important;border-color:#d9aea5!important}
+
+
+.offer-editor-head-meta{display:grid;justify-items:end;gap:7px}
+.offer-number-preview{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:10px;
+  background:#fff;border:1px solid #d5e2ef;color:#607086;font-size:.78rem
+}
+.offer-number-preview strong{color:#174f94;font-size:.9rem;letter-spacing:.02em}
+@media(max-width:720px){
+  .offer-editor-head-meta{justify-items:start}
+}

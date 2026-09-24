@@ -828,12 +828,13 @@ input, select, textarea {
 .offer-editor-lines-head>div{display:grid;gap:2px}
 .offer-editor-lines{display:grid;gap:10px}
 .offer-editor-line{
-  position:relative;display:grid;grid-template-columns:minmax(260px,2.4fr) .65fr .75fr .9fr .7fr .9fr 36px;
+  position:relative;display:grid;grid-template-columns:minmax(260px,2.2fr) .6fr .7fr .85fr .85fr .65fr .9fr 36px;
   gap:10px;align-items:end;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fbfcfe
 }
 .offer-editor-description{display:grid;grid-template-columns:1fr;gap:8px}
 .offer-editor-line label,.offer-editor-meta label,.offer-editor-ai label{display:grid;gap:5px}
 .offer-editor-line input,.offer-editor-line select{min-width:0}
+.offer-price-incl input{font-weight:700;background:#fffdf5;border-color:#e8d9a6}
 .offer-editor-line-total{display:grid;gap:4px;padding-bottom:9px}
 .offer-editor-line-total span{color:var(--muted);font-size:.72rem}
 .offer-editor-line-total strong{font-size:.9rem}
@@ -853,7 +854,7 @@ input, select, textarea {
 .offer-editor-grand strong{font-size:1.25rem;color:#174f94}
 @media(max-width:1050px){
   .offer-editor-meta{grid-template-columns:1fr 1fr}
-  .offer-editor-line{grid-template-columns:minmax(240px,2fr) repeat(4,minmax(95px,.75fr)) 110px 36px}
+  .offer-editor-line{grid-template-columns:minmax(240px,2fr) repeat(5,minmax(95px,.75fr)) 110px 36px}
   .offer-editor-description{grid-column:1/-1}
   .offer-editor-ai{grid-template-columns:1fr 1fr}
   .offer-editor-ai .btn{grid-column:1/-1}

@@ -39,7 +39,7 @@ import {
 import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
-import { viewContacten, bindContacten } from "./contacten.js?v=clean1";
+import { viewContacten, bindContacten } from "./contacten.js?v=color1";
 import { viewRompslomp, bindRompslomp } from "./rompslomp.js?v=2";
 import { viewBoekhoudingPlus, bindBoekhoudingPlus } from "./boekhouding-plus.js?v=1";
 import { viewBoekhouder, bindBoekhouder } from "./boekhouder.js?v=1";

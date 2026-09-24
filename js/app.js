@@ -176,26 +176,36 @@ function viewVandaag() {
       </div>
     </div>
 
-    <div class="simple-actions">
-      <button class="simple-action" data-act="klus">
-        <span class="simple-icon">＋</span>
-        <strong>Nieuwe klus</strong>
-        <small>Maak een klant of opdracht aan.</small>
-      </button>
+    <div class="simple-actions mobile-home-actions">
+      <a class="simple-action mobile-priority" href="/app.html#bon">
+        <span class="simple-icon">📷</span>
+        <strong>Bon scannen</strong>
+        <small>Foto maken, automatisch uitlezen en bewaren.</small>
+      </a>
       <a class="simple-action" href="#/uren">
         <span class="simple-icon">◷</span>
         <strong>Uren boeken</strong>
-        <small>Zet gewerkte tijd bij de juiste klus.</small>
+        <small>Zet gewerkte tijd direct bij de juiste klus.</small>
       </a>
-      <a class="simple-action" href="/app.html#bon">
-        <span class="simple-icon">▣</span>
-        <strong>Bon scannen</strong>
-        <small>Maak een foto en bewaar de bon.</small>
+      <a class="simple-action" href="#/klussen">
+        <span class="simple-icon">▤</span>
+        <strong>Klussen</strong>
+        <small>Open je actieve dossiers.</small>
+      </a>
+      <a class="simple-action" href="/app.html#werkfoto">
+        <span class="simple-icon">◎</span>
+        <strong>Werkfoto</strong>
+        <small>Maak een foto en zet hem bij de juiste klus.</small>
       </a>
       <a class="simple-action" href="#/papier">
         <span class="simple-icon">€</span>
-        <strong>Offerte of factuur</strong>
-        <small>Maak snel een document voor een klant.</small>
+        <strong>Offerte / factuur</strong>
+        <small>Maak snel een klantdocument.</small>
+      </a>
+      <a class="simple-action" href="#/bord">
+        <span class="simple-icon">▦</span>
+        <strong>Planning</strong>
+        <small>Bekijk wat vandaag en deze week gepland staat.</small>
       </a>
     </div>
 
@@ -302,6 +312,8 @@ function viewMeer() {
       <a class="simple-more-link" href="#/brein"><strong>AI-assistent</strong><span>Vraag Vakento om hulp.</span></a>
       <a class="simple-more-link" href="#/boekhouding-plus"><strong>Boekhouding Plus</strong><span>Balans, resultaat, activa, periodiek en bankmatching.</span></a>
       <a class="simple-more-link" href="#/boekhouder"><strong>Mijn boekhouder</strong><span>RGS, UBL en compleet exportpakket voor je boekhouder.</span></a>
+      <a class="simple-more-link" href="/app.html#bon"><strong>Bon scannen</strong><span>Open direct de camera en sla de bon op.</span></a>
+      <a class="simple-more-link" href="/app.html#werkfoto"><strong>Werkfoto maken</strong><span>Zet een foto rechtstreeks in de juiste klusmap.</span></a>
       <a class="simple-more-link" href="#/rompslomp"><strong>Overstappen</strong><span>Gegevens importeren uit Rompslomp.</span></a>
       <a class="simple-more-link" href="/account.html"><strong>Mijn account</strong><span>Abonnement en app.</span></a>
       <a class="simple-more-link" href="/diagnose.html"><strong>Systeemcontrole</strong><span>Alleen nodig bij problemen.</span></a>

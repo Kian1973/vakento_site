@@ -107,6 +107,31 @@ function volgendeOfferteNummer() {
   return nr;
 }
 
+function huidigVolgendFactuurNummer() {
+  const hoogsteBestaande = (data.facturen || []).reduce((max, factuur) => {
+    const match = String(factuur?.nr || "").match(/(?:^|\D)(\d+)$/);
+    const n = match ? Number(match[1]) : 0;
+    return Number.isFinite(n) ? Math.max(max, n) : max;
+  }, 879);
+
+  const bewaard = Number(data.nextFactuurNummer || 0);
+  const nummer = Math.max(880, hoogsteBestaande + 1, Number.isFinite(bewaard) ? bewaard : 0);
+  return "FAC-" + nummer;
+}
+
+function volgendeFactuurNummer() {
+  const nr = huidigVolgendFactuurNummer();
+  const nummer = Number(String(nr).replace(/\D/g, ""));
+  data.nextFactuurNummer = nummer + 1;
+  return nr;
+}
+
+function papierSoort() {
+  const query = String(location.hash || "").split("?")[1] || "";
+  const soort = new URLSearchParams(query).get("soort");
+  return soort === "offerte" || soort === "factuur" ? soort : "";
+}
+
 function nav(hash) {
   document.querySelectorAll(".app-nav a, .bottom a").forEach((a) => {
     a.classList.toggle("active", a.getAttribute("href") === hash || (hash === "#/" && a.dataset.home));
@@ -980,9 +1005,24 @@ function offerteRegelsUitEditor(form) {
 
 function viewPapier() {
   const p = papierVan(data);
+  const soort = papierSoort();
   return `
-    <div class="row"><div><p class="kicker">Papier</p><h1>Offerte, akkoord, rekening.</h1></div>
-      <button class="btn btn-ghost" data-act="klant">Klant</button></div>
+    <div class="row"><div><p class="kicker">Papier</p><h1>Wat wil je maken?</h1><p class="muted">Kies eerst een offerte of een factuur.</p></div>
+      <button class="btn btn-ghost" data-act="klant">Klant toevoegen</button></div>
+
+    <div class="simple-actions" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px">
+      <a class="simple-action" href="#/papier?soort=offerte" style="min-height:105px;${soort === "offerte" ? "border-color:rgba(30,90,166,.55);box-shadow:0 8px 22px rgba(18,24,38,.08)" : ""}">
+        <span class="simple-icon">✎</span>
+        <strong>Offerte maken</strong>
+        <small>Maak zelf een offerte of gebruik Vakento AI.</small>
+      </a>
+      <a class="simple-action" href="#/papier?soort=factuur" style="min-height:105px;${soort === "factuur" ? "border-color:rgba(30,90,166,.55);box-shadow:0 8px 22px rgba(18,24,38,.08)" : ""}">
+        <span class="simple-icon">€</span>
+        <strong>Factuur maken</strong>
+        <small>Maak direct een factuur voor een klant.</small>
+      </a>
+    </div>
+
     <div class="grid-2 papier-set">
       <form class="card stack" data-papier>
         <p class="kicker">Eigen briefpapier</p>
@@ -1007,7 +1047,7 @@ function viewPapier() {
       </form>
       <div class="card">${previewBrief(data)}</div>
     </div>
-    <form class="card stack offer-editor-card" data-offerte-editor>
+    ${soort === "offerte" ? `<form class="card stack offer-editor-card" data-offerte-editor>
       <div class="offer-editor-heading">
         <div>
           <p class="kicker">Nieuwe offerte</p>
@@ -1097,8 +1137,68 @@ function viewPapier() {
           <button class="btn btn-ghost" type="button" data-offer-spelling>Spelling hele pagina verbeteren</button>
           <button class="btn" type="submit">Opslaan als concept</button>
         </div>
+
       </div>
-    </form>
+    </form>` : ""}
+
+    ${soort === "factuur" ? `
+    <form class="card stack offer-editor-card" data-factuur-editor>
+      <div class="offer-editor-heading">
+        <div>
+          <p class="kicker">Nieuwe factuur</p>
+          <h2>Factuur maken</h2>
+          <p class="muted">Vul klant, omschrijving, bedrag en btw in. Daarna kun je de factuur op briefpapier openen of als pdf printen.</p>
+        </div>
+        <div class="offer-editor-head-meta">
+          <span class="offer-number-preview">Factuurnummer <strong>${huidigVolgendFactuurNummer()}</strong></span>
+          <span class="offer-editor-badge">Open</span>
+        </div>
+      </div>
+
+      <div class="offer-editor-meta">
+        <label>Klant
+          ${
+            data.klanten.length
+              ? `<select name="klant" required>${data.klanten.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>`
+              : `<span class="muted">Nog geen klant. Voeg eerst een contact toe.</span>`
+          }
+        </label>
+        <label>Factuurdatum
+          <input name="dag" type="date" value="${iso(new Date())}" required>
+        </label>
+      </div>
+
+      <label>Omschrijving
+        <textarea name="titel" data-spell-page rows="3" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: Schilderwerk woonkamer volgens afspraak" required></textarea>
+      </label>
+
+      <div class="grid-2">
+        <label>Bedrag excl. btw
+          <input name="bedrag" type="number" min="0" step="0.01" placeholder="0,00" required>
+        </label>
+        <label>BTW
+          <select name="btw">
+            <option value="21">21%</option>
+            <option value="9">9%</option>
+            <option value="0">0%</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="offer-editor-footer">
+        <p class="muted" style="margin:0">De factuur wordt opgeslagen als openstaand.</p>
+        <button class="btn" type="submit">Factuur opslaan</button>
+      </div>
+    </form>` : ""}
+
+    ${!soort ? `
+      <section class="card" style="margin-top:18px">
+        <p class="kicker">Nieuwe documenten</p>
+        <h3>Kies hierboven wat je wilt maken.</h3>
+        <p class="muted">Offerte en factuur hebben ieder hun eigen invoerscherm.</p>
+      </section>
+    ` : ""}
+
     <h2 style="margin-top:22px">Offertes</h2>
     <div class="list" style="margin:10px 0 24px">
       ${data.offertes
@@ -1662,6 +1762,37 @@ function bind(root) {
     updateOfferTotals();
   }
 
+  const invoiceForm = root.querySelector("form[data-factuur-editor]");
+  invoiceForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const formData = new FormData(invoiceForm);
+    const klantId = String(formData.get("klant") || "");
+    const titel = String(formData.get("titel") || "").trim();
+    const bedrag = Math.max(0, Number(formData.get("bedrag") || 0));
+    const btwRaw = Number(formData.get("btw") || 21);
+    const btw = [0, 9, 21].includes(btwRaw) ? btwRaw : 21;
+    const dag = String(formData.get("dag") || iso(new Date()));
+
+    if (!klantId) return toast("Kies eerst een klant");
+    if (!titel) return toast("Geef de factuur een omschrijving");
+    if (!(bedrag > 0)) return toast("Vul een bedrag groter dan 0 in");
+
+    data.facturen.unshift({
+      id: "f" + Date.now(),
+      nr: volgendeFactuurNummer(),
+      klant: klantId,
+      klus: "",
+      titel,
+      bedrag,
+      regels: [{ tekst: titel, bedrag, btw }],
+      status: "open",
+      dag,
+    });
+
+    toast("Factuur opgeslagen");
+    persist();
+  });
+
   root.querySelectorAll("[data-offerte-btw]").forEach((select) => {
     select.addEventListener("change", () => {
       const [offerteId, indexRaw] = String(select.dataset.offerteBtw || "").split("|");
@@ -1795,7 +1926,7 @@ function bind(root) {
         : [{ tekst: k.title, bedrag: k.begroot, btw: 21 }];
       data.facturen.unshift({
         id: "f" + Date.now(),
-        nr: "FAC-" + (880 + data.facturen.length),
+        nr: volgendeFactuurNummer(),
         klant: k.klant,
         klus: k.id,
         titel: k.title,

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://vakento.nl/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://vakento.nl/bedrijfssoftware-zzp.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://vakento.nl/offerte-factuur-software-zzp.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://vakento.nl/urenregistratie-zzp.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://vakento.nl/bonnen-scannen-boekhouding.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://vakento.nl/cookies.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://vakento.nl/</loc><lastmod>2026-09-24</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://vakento.nl/bedrijfssoftware-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://vakento.nl/software-voor-vakmensen.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://vakento.nl/offerte-factuur-software-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://vakento.nl/urenregistratie-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://vakento.nl/planning-software-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://vakento.nl/bonnen-scannen-boekhouding.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://vakento.nl/klantportaal-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vakento.nl/ai-assistent-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>

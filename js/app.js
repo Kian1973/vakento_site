@@ -35,7 +35,7 @@ import {
   htmlFactuur,
   htmlDoc,
   openPapier,
-} from "./papier.js?v=btw1";
+} from "./papier.js?v=offerte1";
 import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";

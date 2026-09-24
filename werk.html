@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/vakento.css?v=workspace2">
+  <link rel="stylesheet" href="css/vakento.css?v=simple1">
   <style>
     .workspace-shell{min-height:100dvh}
     .workspace-sidebar{
@@ -106,6 +106,43 @@
       .workspace-topbar .top-name{display:none}
       .app-body .stage h1{font-size:2rem}
     }
+  
+    .simple-nav-label{margin:8px 10px 10px;color:#8a94a3;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+    .workspace-nav.simple-nav{display:grid!important;gap:6px;padding:14px!important}
+    .workspace-nav.simple-nav a{
+      min-height:48px;padding:12px 13px!important;border-radius:12px!important;
+      font-size:.98rem!important;font-weight:650!important
+    }
+    .workspace-nav.simple-nav a .nav-icon{
+      width:28px;height:28px;display:grid;place-items:center;border-radius:9px;
+      background:#f3f6fa;font-size:15px;flex:0 0 28px
+    }
+    .workspace-nav.simple-nav a.active .nav-icon{background:rgba(255,255,255,.22)}
+    .simple-help{margin:10px 14px 16px;padding:12px;border-radius:12px;background:#f7f9fb;color:#66717e;font-size:.78rem;line-height:1.45}
+    .simple-help strong{display:block;color:#303946;margin-bottom:3px}
+    .simple-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+    .simple-action{
+      display:grid;gap:6px;min-height:118px;padding:18px;border:1px solid var(--line);
+      border-radius:16px;background:#fff;text-decoration:none;color:inherit;cursor:pointer;text-align:left
+    }
+    button.simple-action{font:inherit;width:100%}
+    .simple-action:hover{border-color:rgba(30,90,166,.35);box-shadow:0 8px 22px rgba(18,24,38,.06)}
+    .simple-action .simple-icon{font-size:1.45rem}
+    .simple-action strong{font-size:1.05rem}
+    .simple-action small{color:var(--muted);line-height:1.35}
+    .simple-title{margin-bottom:4px!important}
+    .simple-subtitle{font-size:1rem;max-width:60ch}
+    .simple-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .simple-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+    .simple-card h3{margin:3px 0 7px}
+    .simple-card p{margin:0;color:var(--muted)}
+    .simple-card .actions{margin-top:14px}
+    .simple-more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .simple-more-link{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;text-decoration:none;color:inherit}
+    .simple-more-link strong{display:block;margin-bottom:4px}
+    .simple-more-link span{display:block;color:var(--muted);font-size:.86rem}
+    @media(max-width:900px){.simple-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.simple-more-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.simple-actions,.simple-grid,.simple-more-grid{grid-template-columns:1fr}.simple-action{min-height:94px}.workspace-topbar .top-actions .btn:first-of-type{display:none}}
   </style>
 </head>
 <body class="app-body">
@@ -116,46 +153,15 @@
         <small>Werkplaats</small>
       </div>
 
-      <nav class="app-nav workspace-nav">
-        <div class="nav-group">
-          <p class="nav-title">Overzicht</p>
-          <a href="#/" data-home><span class="nav-dot"></span>Overzicht</a>
-          <a href="#/bord"><span class="nav-dot"></span>Planning</a>
-          <a href="#/klussen"><span class="nav-dot"></span>Klussen</a>
-        </div>
-
-        <div class="nav-group">
-          <p class="nav-title">Relaties</p>
-          <a href="#/contacten"><span class="nav-dot"></span>Contacten</a>
-          <a href="#/ploeg"><span class="nav-dot"></span>Ploeg</a>
-        </div>
-
-        <div class="nav-group">
-          <p class="nav-title">Administratie</p>
-          <a href="#/papier"><span class="nav-dot"></span>Offertes &amp; facturen</a>
-          <a href="#/inkoop"><span class="nav-dot"></span>Inkoop</a>
-          <a href="#/uren"><span class="nav-dot"></span>Uren</a>
-          <a href="#/boekhouding"><span class="nav-dot"></span>Boekhouding</a>
-          <a href="#/winst"><span class="nav-dot"></span>Winst</a>
-          <a href="#/geld"><span class="nav-dot"></span>Openstaand</a>
-        </div>
-
-        <div class="nav-group">
-          <p class="nav-title">Werk</p>
-          <a href="#/stam"><span class="nav-dot"></span>Artikelen &amp; prijzen</a>
-          <a href="#/calculatie"><span class="nav-dot"></span>Calculatie</a>
-          <a href="#/taken"><span class="nav-dot"></span>Taken</a>
-          <a href="#/spullen"><span class="nav-dot"></span>Materiaal</a>
-          <a href="#/cloud"><span class="nav-dot"></span>Cloud</a>
-        </div>
-
-        <div class="nav-group">
-          <p class="nav-title">Slim</p>
-          <a href="#/brein"><span class="nav-dot"></span>AI-assistent</a>
-          <a href="#/slim"><span class="nav-dot"></span>Slim werken</a>
-          <a href="#/rompslomp"><span class="nav-dot"></span>Overstappen</a>
-        </div>
+      <nav class="app-nav workspace-nav simple-nav">
+        <p class="simple-nav-label">Hoofdmenu</p>
+        <a href="#/" data-home><span class="nav-icon">⌂</span>Vandaag</a>
+        <a href="#/klussen"><span class="nav-icon">▤</span>Klussen</a>
+        <a href="#/geld-overzicht"><span class="nav-icon">€</span>Geld</a>
+        <a href="#/cloud"><span class="nav-icon">☁</span>Bestanden</a>
+        <a href="#/meer"><span class="nav-icon">•••</span>Meer</a>
       </nav>
+      <div class="simple-help"><strong>Niet zoeken, gewoon beginnen.</strong>De meest gebruikte dingen staan hierboven. De rest vind je onder Meer.</div>
 
       <div class="workspace-account">
         <a href="/account.html">Mijn account</a>
@@ -171,33 +177,17 @@
           <details class="mobile-menu">
             <summary>Menu</summary>
             <nav class="mobile-nav">
-              <p>Overzicht</p>
-              <a href="#/" data-home>Overzicht</a>
-              <a href="#/bord">Planning</a>
+              <a href="#/" data-home>Vandaag</a>
               <a href="#/klussen">Klussen</a>
-              <p>Administratie</p>
-              <a href="#/contacten">Contacten</a>
-              <a href="#/papier">Offertes &amp; facturen</a>
-              <a href="#/inkoop">Inkoop</a>
-              <a href="#/uren">Uren</a>
-              <a href="#/boekhouding">Boekhouding</a>
-              <a href="#/winst">Winst</a>
-              <p>Werk</p>
-              <a href="#/stam">Artikelen &amp; prijzen</a>
-              <a href="#/calculatie">Calculatie</a>
-              <a href="#/taken">Taken</a>
-              <a href="#/spullen">Materiaal</a>
-              <a href="#/cloud">Cloud</a>
-              <p>Slim</p>
-              <a href="#/brein">AI-assistent</a>
-              <a href="#/slim">Slim werken</a>
-              <a href="#/rompslomp">Overstappen van Rompslomp</a>
+              <a href="#/geld-overzicht">Geld</a>
+              <a href="#/cloud">Bestanden</a>
+              <a href="#/meer">Meer</a>
               <p>Account</p>
               <a href="/account.html">Mijn account</a>
               <a href="/logout.html?v=2">Uitloggen</a>
             </nav>
           </details>
-          <strong class="top-name">Mijn Vakento</strong>
+          <strong class="top-name">Vakento</strong>
         </div>
         <div class="top-actions">
           <a class="btn btn-ghost" href="/app.html#bon">Bon scannen</a>
@@ -210,16 +200,16 @@
   </div>
 
   <nav class="bottom">
-    <a href="#/" data-home>Overzicht</a>
-    <a href="#/bord">Planning</a>
+    <a href="#/" data-home>Vandaag</a>
     <a href="#/klussen">Klussen</a>
-    <a href="#/papier">Facturen</a>
-    <a href="#/uren">Uren</a>
+    <a href="#/geld-overzicht">Geld</a>
+    <a href="#/cloud">Bestanden</a>
+    <a href="#/meer">Meer</a>
   </nav>
 
   <script src="/js/self-heal.js?v=1"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script type="module" src="js/gate.js?v=workspace2"></script>
+  <script type="module" src="js/gate.js?v=simple1"></script>
   <script src="js/cookies.js?v=cookie1"></script>
   <script src="/js/max.js?v=max1"></script>
   <script src="/js/i18n.js?v=2"></script>

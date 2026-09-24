@@ -1,6 +1,6 @@
 /** Vakverstand in de browser. Werkt altijd. Server-AI maakt de taal scherper als die aan staat. */
 
-const TARIEF = 72;
+const TARIEF_INCL_BTW = 65;
 const VOORRIJDEN = 45;
 
 const PACKS = [
@@ -89,7 +89,7 @@ export function offerteUitTekst(text, plaats = "Achterhoek") {
     bedrag,
     spullen: pack.spullen,
     risico: pack.risico,
-    toelichting: `Op basis van vakregels, geen gok uit de lucht. ${pack.uren} uur ingeschat.`,
+    toelichting: `Op basis van vakregels, geen gok uit de lucht. ${pack.uren} uur ingeschat. Arbeid staat op €${TARIEF_INCL_BTW.toFixed(2)} per uur inclusief btw.`,
     bron: "vakverstand",
   };
 }

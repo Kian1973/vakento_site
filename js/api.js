@@ -98,7 +98,7 @@ export async function me() {
 }
 
 export function euro(n) {
-  return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(n);
+  return new Intl.NumberFormat(window.VakentoI18n?.locale || "nl-NL", { style: "currency", currency: "EUR" }).format(n);
 }
 
 export function gb(bytes) {

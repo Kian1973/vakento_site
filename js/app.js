@@ -54,6 +54,8 @@ const routes = {
   "#/klussen": viewKlussen,
   "#/contacten": () => viewContacten(data),
   "#/papier": viewPapier,
+  "#/offertes": () => viewPapier("offerte"),
+  "#/facturen": () => viewPapier("factuur"),
   "#/uren": viewUren,
   "#/ploeg": viewPloeg,
   "#/spullen": viewSpullen,
@@ -134,7 +136,7 @@ function papierSoort() {
 
 function nav(hash) {
   document.querySelectorAll(".app-nav a, .bottom a").forEach((a) => {
-    a.classList.toggle("active", a.getAttribute("href") === hash || (hash === "#/" && a.dataset.home));
+    a.classList.toggle("active", a.getAttribute("href") === hash || a.dataset.route === hash || (hash === "#/" && a.dataset.home));
   });
   document.querySelectorAll(".nav-more").forEach((el) => {
     el.open = false;
@@ -282,7 +284,7 @@ function viewVandaag() {
         <p class="kicker">Offertes</p>
         <h3>${offertes.length} wacht${offertes.length === 1 ? "" : "en"} op akkoord</h3>
         <p>Bekijk wat nog bij de klant ligt.</p>
-        <div class="actions"><a class="btn btn-ghost" href="#/papier">Open offertes</a></div>
+        <div class="actions"><a class="btn btn-ghost" href="/offertes.html">Open offertes</a></div>
       </section>
     </div>`;
 }
@@ -1003,25 +1005,30 @@ function offerteRegelsUitEditor(form) {
   }).filter((r) => r.tekst);
 }
 
-function viewPapier() {
+function viewPapier(vasteSoort = "") {
   const p = papierVan(data);
-  const soort = papierSoort();
+  const soort = vasteSoort || papierSoort();
+  const lossePagina = vasteSoort === "offerte" || vasteSoort === "factuur";
   return `
-    <div class="row"><div><p class="kicker">Papier</p><h1>Wat wil je maken?</h1><p class="muted">Kies eerst een offerte of een factuur.</p></div>
+    <div class="row"><div>
+      <p class="kicker">${soort === "offerte" ? "Offertes" : soort === "factuur" ? "Facturen" : "Administratie"}</p>
+      <h1>${soort === "offerte" ? "Offertes" : soort === "factuur" ? "Facturen" : "Wat wil je maken?"}</h1>
+      <p class="muted">${soort === "offerte" ? "Maak zelf een offerte of gebruik Vakento AI." : soort === "factuur" ? "Maak en beheer je facturen op één plek." : "Kies een offerte of een factuur."}</p>
+    </div>
       <button class="btn btn-ghost" data-act="klant">Klant toevoegen</button></div>
 
-    <div class="simple-actions" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px">
-      <a class="simple-action" href="#/papier?soort=offerte" style="min-height:105px;${soort === "offerte" ? "border-color:rgba(30,90,166,.55);box-shadow:0 8px 22px rgba(18,24,38,.08)" : ""}">
+    ${!lossePagina ? `<div class="simple-actions" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px">
+      <a class="simple-action" href="/offertes.html" style="min-height:105px">
         <span class="simple-icon">✎</span>
-        <strong>Offerte maken</strong>
-        <small>Maak zelf een offerte of gebruik Vakento AI.</small>
+        <strong>Offertes</strong>
+        <small>Zelf maken of met Vakento AI.</small>
       </a>
-      <a class="simple-action" href="#/papier?soort=factuur" style="min-height:105px;${soort === "factuur" ? "border-color:rgba(30,90,166,.55);box-shadow:0 8px 22px rgba(18,24,38,.08)" : ""}">
+      <a class="simple-action" href="/facturen.html" style="min-height:105px">
         <span class="simple-icon">€</span>
-        <strong>Factuur maken</strong>
-        <small>Maak direct een factuur voor een klant.</small>
+        <strong>Facturen</strong>
+        <small>Nieuwe factuur maken en betalingen beheren.</small>
       </a>
-    </div>
+    </div>` : ""}
 
     <div class="grid-2 papier-set">
       <form class="card stack" data-papier>
@@ -1198,6 +1205,7 @@ function viewPapier() {
       </section>
     ` : ""}
 
+    <section style="${vasteSoort === "factuur" ? "display:none" : ""}">
     <h2 style="margin-top:22px">Offertes</h2>
     <div class="list" style="margin:10px 0 24px">
       ${data.offertes
@@ -1248,6 +1256,8 @@ function viewPapier() {
         })
         .join("")}
     </div>
+    </section>
+    <section style="${vasteSoort === "offerte" ? "display:none" : ""}">
     <h2>Facturen</h2>
     <div class="list">
       ${data.facturen
@@ -1259,7 +1269,8 @@ function viewPapier() {
           </div></article>`
         )
         .join("")}
-    </div>`;
+    </div>
+    </section>`;
 }
 
 function viewUren() {
@@ -1363,7 +1374,7 @@ function viewBrein() {
       </div>
     </div>
     <div class="grid-3">
-      <article class="card"><h3>Offerte</h3><p class="muted">Zin van de klant → meetstaat + prijs.</p><a class="btn" href="#/papier">Naar papier</a></article>
+      <article class="card"><h3>Offerte</h3><p class="muted">Zin van de klant → meetstaat + prijs.</p><a class="btn" href="/offertes.html">Naar offertes</a></article>
       <article class="card"><h3>Week</h3><p class="muted">Vrije vakken vullen met open klussen.</p><a class="btn" href="#/bord">Naar bord</a></article>
       <article class="card"><h3>Bon</h3><p class="muted">Uren worden een tekst voor de klant.</p><a class="btn" href="#/spullen">Naar bonnen</a></article>
     </div>
@@ -1897,7 +1908,7 @@ function bind(root) {
         dag: iso(new Date()),
       });
       toast("Factuur klaar");
-      location.hash = "#/papier";
+      location.href = "/facturen.html";
       persist();
     })
   );
@@ -2214,7 +2225,11 @@ function bind(root) {
 
 function render() {
   data = load();
-  const hash = (location.hash || "#/").split("?")[0];
+  const pad = String(location.pathname || "").toLowerCase();
+  const standaardHash = pad.endsWith("/offertes.html") ? "#/offertes"
+    : pad.endsWith("/facturen.html") ? "#/facturen"
+    : "#/";
+  const hash = (location.hash || standaardHash).split("?")[0];
   nav(hash);
   const view = routes[hash] || viewVandaag;
   const root = $("#stage");

@@ -1544,78 +1544,77 @@ function bind(root) {
 
     offerForm.querySelector("[data-offer-spelling]")?.addEventListener("click", async (e) => {
       const btn = e.currentTarget;
-      const rows = [...offerForm.querySelectorAll("[data-offer-line]")];
-      const payload = {
-        titel: String(offerForm.elements.titel?.value || ""),
-        intro: String(offerForm.elements.intro?.value || ""),
-        opmerkingen: String(offerForm.elements.opmerkingen?.value || ""),
-        regels: rows.map((row) => ({
-          tekst: String(row.querySelector('[name="regel_tekst"]')?.value || ""),
-          extra: String(row.querySelector('[name="regel_extra"]')?.value || "")
-        }))
-      };
+      const fields = [
+        offerForm.elements.titel,
+        offerForm.elements.intro,
+        ...[...offerForm.querySelectorAll("[data-offer-line]")].flatMap((row) => [
+          row.querySelector('[name="regel_tekst"]'),
+          row.querySelector('[name="regel_extra"]')
+        ]),
+        offerForm.elements.opmerkingen
+      ].filter(Boolean);
 
-      const heeftTekst =
-        payload.titel.trim() ||
-        payload.intro.trim() ||
-        payload.opmerkingen.trim() ||
-        payload.regels.some((r) => r.tekst.trim() || r.extra.trim());
-
-      if (!heeftTekst) {
+      const filled = fields.filter((field) => String(field.value || "").trim());
+      if (!filled.length) {
         toast("Vul eerst tekst in");
         return;
       }
 
-      const oudLabel = btn.textContent;
+      const numbers = (text) => String(text || "").match(/\d+(?:[.,]\d+)*/g) || [];
+      const stripHtml = (text) => {
+        const raw = String(text || "").trim();
+        if (!raw) return "";
+        const box = document.createElement("div");
+        box.innerHTML = raw;
+        return (box.textContent || box.innerText || raw).trim();
+      };
+
+      const improve = async (original) => {
+        const prompt =
+          "Verbeter alleen de Nederlandse spelling, grammatica en leestekens van onderstaande tekst. " +
+          "Behoud exact dezelfde betekenis, namen en alle getallen. Voeg niets toe en haal niets inhoudelijks weg. " +
+          "Geef alleen de verbeterde tekst terug, zonder uitleg, aanhalingstekens, labels of markdown.\n\nTekst:\n" +
+          original;
+
+        const out = await verrijkMetServer("vraag", { tekst: original }, {
+          vraag: prompt,
+          soort: "spelling_offerte"
+        });
+
+        const corrected = stripHtml(out?.tekst || original);
+        if (!corrected) return original;
+
+        // Veiligheid: bedragen, aantallen en andere getallen mogen nooit veranderen.
+        if (JSON.stringify(numbers(corrected)) !== JSON.stringify(numbers(original))) return original;
+        return corrected;
+      };
+
+      const oldLabel = btn.textContent;
       btn.disabled = true;
-      btn.textContent = "Spelling controleren…";
+      btn.textContent = "Spelling verbeteren…";
 
-      const vraag =
-        "Verbeter uitsluitend de Nederlandse spelling, grammatica en leestekens van deze offerte. " +
-        "Verander geen namen, aantallen, bedragen, prijzen, btw-percentages of inhoudelijke betekenis. " +
-        "Maak de tekst zakelijk en natuurlijk Nederlands. " +
-        "Geef ALLEEN geldige JSON terug, zonder markdown of uitleg, exact met deze structuur: " +
-        '{"titel":"...","intro":"...","opmerkingen":"...","regels":[{"tekst":"...","extra":"..."}]}. ' +
-        "Behoud exact hetzelfde aantal regels. Invoer: " + JSON.stringify(payload);
-
+      let changed = 0;
       try {
-        const out = await verrijkMetServer("vraag", { tekst: "" }, { vraag });
-        let raw = String(out?.tekst || "").trim();
-
-        raw = raw
-          .replace(/^\`\`\`(?:json)?\s*/i, "")
-          .replace(/\s*\`\`\`$/i, "")
-          .trim();
-
-        const first = raw.indexOf("{");
-        const last = raw.lastIndexOf("}");
-        if (first >= 0 && last > first) raw = raw.slice(first, last + 1);
-
-        if (!raw) throw new Error("Geen antwoord van AI");
-        const fixed = JSON.parse(raw);
-
-        if (typeof fixed.titel === "string") offerForm.elements.titel.value = fixed.titel;
-        if (typeof fixed.intro === "string") offerForm.elements.intro.value = fixed.intro;
-        if (typeof fixed.opmerkingen === "string") offerForm.elements.opmerkingen.value = fixed.opmerkingen;
-
-        if (Array.isArray(fixed.regels)) {
-          rows.forEach((row, i) => {
-            const r = fixed.regels[i];
-            if (!r) return;
-            const tekst = row.querySelector('[name="regel_tekst"]');
-            const extra = row.querySelector('[name="regel_extra"]');
-            if (tekst && typeof r.tekst === "string") tekst.value = r.tekst;
-            if (extra && typeof r.extra === "string") extra.value = r.extra;
-          });
+        for (const field of filled) {
+          const original = String(field.value || "").trim();
+          const corrected = await improve(original);
+          if (corrected && corrected !== original) {
+            field.value = corrected;
+            changed += 1;
+          }
         }
 
-        toast("Spelling en grammatica verbeterd");
+        if (changed) {
+          toast("Spelling verbeterd in " + changed + (changed === 1 ? " veld" : " velden"));
+        } else {
+          toast("Geen spellingswijzigingen gevonden");
+        }
       } catch (err) {
         console.error("Vakento spellingcontrole:", err);
-        toast("Spellingcontrole lukt nu niet. Controleer of Vakento AI actief is.");
+        toast("Spelling verbeteren is niet bereikbaar");
       } finally {
         btn.disabled = false;
-        btn.textContent = oudLabel;
+        btn.textContent = oldLabel;
       }
     });
 

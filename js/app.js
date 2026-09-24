@@ -17,7 +17,7 @@ import {
   planWeek,
   werkbonUitUren,
   verrijkMetServer,
-} from "./brein.js?v=offerte2";
+} from "./brein.js?v=offerte-ai-fix-1";
 import {
   viewInkoop,
   viewStam,
@@ -1571,74 +1571,94 @@ function bind(root) {
       updateOfferTotals();
     });
 
-    offerForm.querySelector("[data-offer-ai]")?.addEventListener("click", async () => {
+    offerForm.querySelector("[data-offer-ai]")?.addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
       const formData = new FormData(offerForm);
       const vraag = String(formData.get("vraag") || "").trim();
       if (!vraag) return toast("Beschrijf eerst de opdracht");
 
       const btwCategorie = String(formData.get("btwCategorie") || "standaard21");
+      const oldLabel = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Offerte berekenen…";
       toast("Vakento berekent de offerte");
 
-      const local = offerteUitTekst(vraag, data.place);
-      const out = await verrijkMetServer("offerte", local, {
-        vraag,
-        plaats:data.place,
-        uurtariefInclBtw:65,
-        prijsVoorkeur:"inclusief btw"
-      });
-      const bronRegels = out.regels || local.regels || [];
+      try {
+        const local = offerteUitTekst(vraag, data.place);
+        const out = await verrijkMetServer("offerte", local, {
+          vraag,
+          plaats:data.place,
+          uurtariefInclBtw:65,
+          prijsVoorkeur:"inclusief btw"
+        });
+        const bronRegels = Array.isArray(out?.regels) && out.regels.length
+          ? out.regels
+          : (Array.isArray(local?.regels) ? local.regels : []);
 
-      const regelBtw = (r) => {
-        const tekst = String(r?.tekst || "").toLowerCase();
-        if (btwCategorie === "standaard21") return 21;
-        if (["schilder9","stukadoor9","behang9","schoonmaak9"].includes(btwCategorie)) return 9;
-        if (btwCategorie === "isolatieMix") {
-          return /(materiaal|isolatieplaat|isolatiemateriaal|pir|pur|glaswol|steenwol|eps|xps|folie|regelwerk|bevestiging)/i.test(tekst) ? 21 : 9;
+        const regelBtw = (r) => {
+          const tekst = String(r?.tekst || "").toLowerCase();
+          if (btwCategorie === "standaard21") return 21;
+          if (["schilder9","stukadoor9","behang9","schoonmaak9"].includes(btwCategorie)) return 9;
+          if (btwCategorie === "isolatieMix") {
+            return /(materiaal|isolatieplaat|isolatiemateriaal|pir|pur|glaswol|steenwol|eps|xps|folie|regelwerk|bevestiging)/i.test(tekst) ? 21 : 9;
+          }
+          return 21;
+        };
+
+        if (offerForm.elements.titel) {
+          offerForm.elements.titel.value = out?.titel || local?.titel || vraag.slice(0,80);
         }
-        return 21;
-      };
 
-      offerForm.elements.titel.value = out.titel || local.titel || vraag.slice(0,80);
-      if (linesBox) {
-        linesBox.innerHTML = bronRegels.map((r) => {
-          const btw = regelBtw(r);
-          const tekst = String(r?.tekst || "");
-          const uurMatch = tekst.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:uur|u\b)/i);
-          const eenheid = String(r.eenheid || (uurMatch ? "uur" : "st"));
-          const aantal = Number(r.aantal || (uurMatch ? uurMatch[1].replace(",", ".") : 1)) || 1;
-          const isArbeid = eenheid === "uur" || /\b(arbeid|uren|uurtarief)\b/i.test(tekst);
+        if (linesBox) {
+          linesBox.innerHTML = bronRegels.map((r) => {
+            const btw = regelBtw(r);
+            const tekst = String(r?.tekst || "");
+            const uurMatch = tekst.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:uur|u\b)/i);
+            const eenheid = String(r?.eenheid || (uurMatch ? "uur" : "st"));
+            const aantal = Number(r?.aantal || (uurMatch ? uurMatch[1].replace(",", ".") : 1)) || 1;
+            const isArbeid = eenheid === "uur" || /\b(arbeid|uren|uurtarief)\b/i.test(tekst);
 
-          if (isArbeid) {
+            if (isArbeid) {
+              const serverPrijsIncl = Number(r?.stukprijsInclBtw ?? r?.prijsInclBtw);
+              return offerteEditorRegel({
+                tekst: r?.tekst || "Arbeid",
+                extra: r?.extra || "Uurtarief € 65,00 inclusief btw",
+                aantal,
+                eenheid:"uur",
+                stukprijsInclBtw:Number.isFinite(serverPrijsIncl) && serverPrijsIncl > 0 ? serverPrijsIncl : 65,
+                prijsInvoer:"incl",
+                btw
+              });
+            }
+
+            const prijsIncl = Number(r?.stukprijsInclBtw ?? r?.prijsInclBtw);
+            const bedrag = Number(r?.bedrag || 0);
+            const prijsExcl = Number(r?.stukprijs ?? (aantal ? bedrag / aantal : 0));
             return offerteEditorRegel({
-              tekst: r.tekst || "Arbeid",
-              extra: r.extra || "Uurtarief € 65,00 inclusief btw",
+              tekst:r?.tekst || "",
+              extra:r?.extra || "",
               aantal,
-              eenheid:"uur",
-              stukprijsInclBtw:65,
-              prijsInvoer:"incl",
+              eenheid,
+              stukprijsInclBtw:Number.isFinite(prijsIncl) ? prijsIncl : undefined,
+              stukprijs:Number.isFinite(prijsExcl) ? prijsExcl : 0,
+              prijsInvoer:Number.isFinite(prijsIncl) ? "incl" : "excl",
               btw
             });
-          }
-
-          const prijsIncl = Number(r.stukprijsInclBtw ?? r.prijsInclBtw);
-          const prijsExcl = Number(r.stukprijs ?? (Number(r.bedrag) / aantal));
-          return offerteEditorRegel({
-            tekst:r.tekst || "",
-            extra:r.extra || "",
-            aantal,
-            eenheid,
-            stukprijsInclBtw:Number.isFinite(prijsIncl) ? prijsIncl : undefined,
-            stukprijs:Number.isFinite(prijsExcl) ? prijsExcl : 0,
-            prijsInvoer:Number.isFinite(prijsIncl) ? "incl" : "excl",
-            btw
+          }).join("") || offerteEditorRegel({
+            aantal:1, eenheid:"st", stukprijsInclBtw:0, prijsInvoer:"incl", btw:21
           });
-        }).join("") || offerteEditorRegel({
-          aantal:1, eenheid:"st", stukprijsInclBtw:0, prijsInvoer:"incl", btw:21
-        });
-      }
+        }
 
-      updateOfferTotals();
-      toast("Offerte berekend. Controleer de regels.");
+        updateOfferTotals();
+        toast("Offerteregels zijn ingevuld. Controleer de bedragen.");
+      } catch (err) {
+        console.error("Vakento AI-offerte:", err);
+        window.VakentoHeal?.report?.(err, { kind:"offerte-ai" });
+        toast("Offerte berekenen is niet gelukt");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldLabel;
+      }
     });
 
 

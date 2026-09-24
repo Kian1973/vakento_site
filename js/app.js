@@ -61,6 +61,8 @@ const routes = {
   "#/inkoop": () => viewInkoop(data),
   "#/stam": () => viewStam(data),
   "#/geld": () => viewGeld(data),
+  "#/geld-overzicht": viewGeldOverzicht,
+  "#/meer": viewMeer,
   "#/boekhouding": viewBoekhouding,
   "#/calculatie": () => viewCalc(data),
   "#/taken": () => viewTaken(data),
@@ -139,82 +141,166 @@ function viewStart() {
 
 function viewVandaag() {
   if (isLeeg()) return viewStart();
+
   const today = iso(new Date());
   const inzet = data.inzet.filter((i) => i.day === today);
   const openFact = data.facturen.filter((f) => f.status === "open");
   const offertes = data.offertes.filter((o) => o.status === "verstuurd");
-  const missingHours = roster.filter((p) => !data.uren.some((u) => u.person === p.id && u.day === today));
-  const low = data.materiaal.filter((m) => m.voorraad <= m.min);
   const openAmount = openFact.reduce((a, f) => a + Number(f.bedrag || 0), 0);
-
-  const alerts =
-    openFact.slice(0, 4).map((f) =>
-      `<article class="item"><strong>Factuur ${f.nr}</strong><span>${euro(f.bedrag)} open sinds ${f.dag}</span></article>`
-    ).join("") +
-    offertes.slice(0, 3).map((o) =>
-      `<article class="item"><strong>Offerte ${o.nr}</strong><span>${o.titel} · wacht op akkoord</span></article>`
-    ).join("") +
-    missingHours.slice(0, 2).map((p) =>
-      `<article class="item"><strong>Uren ontbreken</strong><span>${p.name} heeft vandaag nog niets ingevuld.</span></article>`
-    ).join("") +
-    low.slice(0, 2).map((m) =>
-      `<article class="item"><strong>Voorraad laag</strong><span>${m.naam}: ${m.voorraad}</span></article>`
-    ).join("");
 
   const todayRows = inzet.length
     ? inzet.slice(0, 6).map((i) => {
         const k = klus(data, i.klus);
         const c = klant(data, k.klant);
-        return `<article class="item"><strong>${k.title}</strong><span>${person(i.person).name} · ${c.name}${c.plaats ? " · " + c.plaats : ""}</span></article>`;
+        return `<article class="item">
+          <strong>${k.title}</strong>
+          <span>${c.name}${c.plaats ? " · " + c.plaats : ""}</span>
+          <div class="actions" style="margin-top:8px">
+            <a class="btn btn-ghost" href="#/klussen">Open klus</a>
+            <a class="btn btn-ghost" href="#/uren">Uren boeken</a>
+          </div>
+        </article>`;
       }).join("")
-    : '<article class="item"><strong>Nog niets gepland</strong><span>Open Planning om een klus in te plannen.</span></article>';
+    : '<article class="item"><strong>Nog niets gepland</strong><span>Ga naar Planning via Meer als je werk wilt inplannen.</span></article>';
 
   return `
     <div class="row">
       <div>
-        <p class="kicker">${data.place || "Werkplaats"}</p>
-        <h1>Overzicht</h1>
-        <p class="muted">${data.firm} · ${new Date().toLocaleDateString("nl-NL", { weekday:"long", day:"numeric", month:"long" })}</p>
+        <p class="kicker">${data.place || "Vakento"}</p>
+        <h1 class="simple-title">Vandaag</h1>
+        <p class="muted simple-subtitle">Wat wil je doen? Kies gewoon één van de grote knoppen.</p>
       </div>
-      <div class="dashboard-actions">
-        <a class="btn" href="#/papier">Nieuwe factuur</a>
-        <a class="btn btn-ghost" href="#/uren">Uren boeken</a>
-        <a class="btn btn-ghost" href="/app.html#bon">Bon scannen</a>
+    </div>
+
+    <div class="simple-actions">
+      <button class="simple-action" data-act="klus">
+        <span class="simple-icon">＋</span>
+        <strong>Nieuwe klus</strong>
+        <small>Maak een klant of opdracht aan.</small>
+      </button>
+      <a class="simple-action" href="#/uren">
+        <span class="simple-icon">◷</span>
+        <strong>Uren boeken</strong>
+        <small>Zet gewerkte tijd bij de juiste klus.</small>
+      </a>
+      <a class="simple-action" href="/app.html#bon">
+        <span class="simple-icon">▣</span>
+        <strong>Bon scannen</strong>
+        <small>Maak een foto en bewaar de bon.</small>
+      </a>
+      <a class="simple-action" href="#/papier">
+        <span class="simple-icon">€</span>
+        <strong>Offerte of factuur</strong>
+        <small>Maak snel een document voor een klant.</small>
+      </a>
+    </div>
+
+    <div class="simple-grid">
+      <section class="simple-card">
+        <p class="kicker">Vandaag</p>
+        <h3>Gepland werk</h3>
+        <div class="list">${todayRows}</div>
+      </section>
+
+      <section class="simple-card">
+        <p class="kicker">Geld</p>
+        <h3>${openFact.length ? openFact.length + " openstaande factuur/facturen" : "Geen openstaande facturen"}</h3>
+        <p>${openFact.length ? "Nog te ontvangen: " + euro(openAmount) : "Je administratie is op dit punt bijgewerkt."}</p>
+        <div class="actions">
+          <a class="btn btn-ghost" href="#/geld-overzicht">Bekijk geld</a>
+        </div>
+      </section>
+    </div>
+
+    <div class="simple-grid" style="margin-top:14px">
+      <section class="simple-card">
+        <p class="kicker">Klussen</p>
+        <h3>${data.klussen.length} klus${data.klussen.length === 1 ? "" : "sen"}</h3>
+        <p>Alle klanten, werk, uren en documenten bij elkaar.</p>
+        <div class="actions"><a class="btn btn-ghost" href="#/klussen">Open klussen</a></div>
+      </section>
+
+      <section class="simple-card">
+        <p class="kicker">Offertes</p>
+        <h3>${offertes.length} wacht${offertes.length === 1 ? "" : "en"} op akkoord</h3>
+        <p>Bekijk wat nog bij de klant ligt.</p>
+        <div class="actions"><a class="btn btn-ghost" href="#/papier">Open offertes</a></div>
+      </section>
+    </div>`;
+}
+
+function viewGeldOverzicht() {
+  const openFact = data.facturen.filter((f) => f.status === "open");
+  const openAmount = openFact.reduce((a, f) => a + Number(f.bedrag || 0), 0);
+  const paid = data.facturen.filter((f) => f.status === "betaald");
+  const paidAmount = paid.reduce((a, f) => a + Number(f.bedrag || 0), 0);
+
+  return `
+    <div class="row">
+      <div>
+        <p class="kicker">Geld</p>
+        <h1 class="simple-title">Alles rondom geld.</h1>
+        <p class="muted simple-subtitle">Je hoeft niet te weten waar boekhouding of openstaand zit. Kies wat je wilt doen.</p>
       </div>
     </div>
 
     <div class="stat-grid">
-      <div class="stat"><span class="muted">Openstaande facturen</span><b>${euro(openAmount)}</b></div>
-      <div class="stat"><span class="muted">Offertes wachten</span><b>${offertes.length}</b></div>
-      <div class="stat"><span class="muted">Vandaag gepland</span><b>${inzet.length}</b></div>
-      <div class="stat"><span class="muted">Contacten</span><b>${data.klanten.length}</b></div>
+      <div class="stat"><span class="muted">Nog te ontvangen</span><b>${euro(openAmount)}</b></div>
+      <div class="stat"><span class="muted">Betaald</span><b>${euro(paidAmount)}</b></div>
+      <div class="stat"><span class="muted">Facturen open</span><b>${openFact.length}</b></div>
+      <div class="stat"><span class="muted">Bonnen / inkoop</span><b>${data.inkoop?.length || 0}</b></div>
     </div>
 
-    <div class="quick-links">
-      <a class="quick-link" href="#/contacten"><strong>Contacten</strong><small>Klanten en leveranciers</small></a>
-      <a class="quick-link" href="#/papier"><strong>Offertes & facturen</strong><small>Verkoopadministratie</small></a>
-      <a class="quick-link" href="#/boekhouding"><strong>Boekhouding</strong><small>Inkoop, btw en export</small></a>
-      <a class="quick-link" href="#/cloud"><strong>Cloud</strong><small>Documenten en foto's</small></a>
+    <div class="simple-actions">
+      <a class="simple-action" href="#/papier">
+        <span class="simple-icon">€</span>
+        <strong>Offertes & facturen</strong>
+        <small>Maken, bekijken en versturen.</small>
+      </a>
+      <a class="simple-action" href="#/geld">
+        <span class="simple-icon">!</span>
+        <strong>Openstaand</strong>
+        <small>Zie wat klanten nog moeten betalen.</small>
+      </a>
+      <a class="simple-action" href="#/boekhouding">
+        <span class="simple-icon">▦</span>
+        <strong>Boekhouding</strong>
+        <small>Bonnen, btw en export voor boekhouder.</small>
+      </a>
+      <a class="simple-action" href="#/winst">
+        <span class="simple-icon">↗</span>
+        <strong>Winst</strong>
+        <small>Bekijk opbrengst en kosten per klus.</small>
+      </a>
+    </div>
+  `;
+}
+
+function viewMeer() {
+  return `
+    <div class="row">
+      <div>
+        <p class="kicker">Meer</p>
+        <h1 class="simple-title">Alle overige functies.</h1>
+        <p class="muted simple-subtitle">Alleen openen als je iets specifieks nodig hebt.</p>
+      </div>
     </div>
 
-    <div class="dashboard-grid">
-      <section class="dashboard-panel">
-        <div class="row">
-          <div><p class="kicker">Vandaag</p><h2>Planning</h2></div>
-          <a class="btn btn-ghost" href="#/bord">Open planning</a>
-        </div>
-        <div class="list">${todayRows}</div>
-      </section>
-
-      <section class="dashboard-panel">
-        <div class="row">
-          <div><p class="kicker">Aandacht</p><h2>Te doen</h2></div>
-        </div>
-        <div class="list">${alerts || '<article class="item"><strong>Alles bijgewerkt</strong><span>Geen dringende aandachtspunten.</span></article>'}</div>
-      </section>
+    <div class="simple-more-grid">
+      <a class="simple-more-link" href="#/bord"><strong>Planning</strong><span>Plan klussen en medewerkers.</span></a>
+      <a class="simple-more-link" href="#/contacten"><strong>Contacten</strong><span>Klanten en leveranciers.</span></a>
+      <a class="simple-more-link" href="#/inkoop"><strong>Inkoop</strong><span>Leveranciers en inkopen.</span></a>
+      <a class="simple-more-link" href="#/stam"><strong>Artikelen & prijzen</strong><span>Vaste diensten en materialen.</span></a>
+      <a class="simple-more-link" href="#/calculatie"><strong>Calculatie</strong><span>Kosten en toeslagen vooraf.</span></a>
+      <a class="simple-more-link" href="#/taken"><strong>Taken</strong><span>Korte opdrachten en acties.</span></a>
+      <a class="simple-more-link" href="#/spullen"><strong>Materiaal</strong><span>Voorraad en spullen.</span></a>
+      <a class="simple-more-link" href="#/slim"><strong>Slim werken</strong><span>Werkbon, meerwerk en AI-hulp.</span></a>
+      <a class="simple-more-link" href="#/brein"><strong>AI-assistent</strong><span>Vraag Vakento om hulp.</span></a>
+      <a class="simple-more-link" href="#/rompslomp"><strong>Overstappen</strong><span>Gegevens importeren uit Rompslomp.</span></a>
+      <a class="simple-more-link" href="/account.html"><strong>Mijn account</strong><span>Abonnement en app.</span></a>
+      <a class="simple-more-link" href="/diagnose.html"><strong>Systeemcontrole</strong><span>Alleen nodig bij problemen.</span></a>
     </div>
-
-    <div class="card" id="briefing-out" hidden style="margin-top:16px"></div>`;
+  `;
 }
 
 function viewBord() {
@@ -248,7 +334,7 @@ function viewBord() {
     </div>
     <div class="week">
       <div></div>
-      ${days.map((d) => `<div class="head">${d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric" })}</div>`).join("")}
+      ${days.map((d) => `<div class="head">${d.toLocaleDateString(window.VakentoI18n?.locale || "nl-NL", { weekday: "short", day: "numeric" })}</div>`).join("")}
       ${cells}
     </div>`;
 }
@@ -315,7 +401,7 @@ function bookRound(v) {
   return Math.round((bookNum(v) + Number.EPSILON) * 100) / 100;
 }
 function bookMoney(v) {
-  return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(bookRound(v));
+  return new Intl.NumberFormat(window.VakentoI18n?.locale || "nl-NL", { style: "currency", currency: "EUR" }).format(bookRound(v));
 }
 function invoiceBookCalc(f) {
   const regels = (f.regels?.length ? f.regels : [{ tekst: f.titel, bedrag: f.bedrag, btw: f.btw || 21 }])

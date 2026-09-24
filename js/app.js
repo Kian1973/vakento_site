@@ -17,7 +17,7 @@ import {
   planWeek,
   werkbonUitUren,
   verrijkMetServer,
-} from "./brein.js";
+} from "./brein.js?v=offerte2";
 import {
   viewInkoop,
   viewStam,
@@ -868,13 +868,34 @@ async function saveReceiptCorrectionToCloud(row) {
 }
 
 
+
 function offerteEditorRegel(r = {}) {
   const aantal = Number(r.aantal ?? 1) || 1;
-  const stukprijs = Number(r.stukprijs ?? r.bedrag ?? 0) || 0;
   const btw = [0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21;
+  const factor = 1 + btw / 100;
   const eenheid = String(r.eenheid || "st");
-  const bedrag = aantal * stukprijs;
-  return `<div class="offer-editor-line" data-offer-line>
+  const prijsInvoer = r.prijsInvoer === "excl" ? "excl" : "incl";
+
+  let stukprijsExcl = Number(r.stukprijs);
+  let stukprijsIncl = Number(r.stukprijsInclBtw ?? r.prijsInclBtw);
+
+  if (!Number.isFinite(stukprijsExcl)) {
+    const legacy = Number(r.bedrag);
+    stukprijsExcl = Number.isFinite(legacy) ? legacy / aantal : NaN;
+  }
+  if (!Number.isFinite(stukprijsIncl) && Number.isFinite(stukprijsExcl)) {
+    stukprijsIncl = stukprijsExcl * factor;
+  }
+  if (!Number.isFinite(stukprijsExcl) && Number.isFinite(stukprijsIncl)) {
+    stukprijsExcl = stukprijsIncl / factor;
+  }
+  if (!Number.isFinite(stukprijsExcl)) stukprijsExcl = 0;
+  if (!Number.isFinite(stukprijsIncl)) stukprijsIncl = 0;
+
+  const bedragExcl = aantal * stukprijsExcl;
+  const bedragIncl = aantal * stukprijsIncl;
+
+  return `<div class="offer-editor-line" data-offer-line data-price-mode="${prijsInvoer}">
     <div class="offer-editor-description">
       <label>Omschrijving
         <input name="regel_tekst" value="${esc(r.tekst || "")}" placeholder="Bijvoorbeeld: schilderen kozijnen" spellcheck="true" lang="nl" autocapitalize="sentences" required>
@@ -892,7 +913,10 @@ function offerteEditorRegel(r = {}) {
       </select>
     </label>
     <label>Prijs excl. btw
-      <input name="regel_prijs" type="number" min="0" step="0.01" value="${stukprijs.toFixed(2)}">
+      <input name="regel_prijs_excl" type="number" min="0" step="0.01" value="${stukprijsExcl.toFixed(2)}" inputmode="decimal">
+    </label>
+    <label class="offer-price-incl">Prijs incl. btw
+      <input name="regel_prijs_incl" type="number" min="0" step="0.01" value="${stukprijsIncl.toFixed(2)}" inputmode="decimal">
     </label>
     <label>BTW
       <select name="regel_btw">
@@ -902,8 +926,9 @@ function offerteEditorRegel(r = {}) {
       </select>
     </label>
     <div class="offer-editor-line-total">
-      <span>Regeltotaal</span>
-      <strong data-offer-line-total>${euro(bedrag)}</strong>
+      <span>Regeltotaal incl.</span>
+      <strong data-offer-line-total>${euro(bedragIncl)}</strong>
+      <small data-offer-line-excl>${euro(bedragExcl)} excl.</small>
     </div>
     <button class="offer-line-remove" type="button" data-offer-remove aria-label="Regel verwijderen">×</button>
   </div>`;
@@ -912,15 +937,24 @@ function offerteEditorRegel(r = {}) {
 function offerteRegelsUitEditor(form) {
   return [...form.querySelectorAll("[data-offer-line]")].map((row) => {
     const aantal = Math.max(0, Number(row.querySelector('[name="regel_aantal"]')?.value || 0));
-    const stukprijs = Math.max(0, Number(row.querySelector('[name="regel_prijs"]')?.value || 0));
+    const btw = Number(row.querySelector('[name="regel_btw"]')?.value || 21);
+    const factor = 1 + btw / 100;
+    const mode = row.dataset.priceMode === "excl" ? "excl" : "incl";
+    const inputExcl = Math.max(0, Number(row.querySelector('[name="regel_prijs_excl"]')?.value || 0));
+    const inputIncl = Math.max(0, Number(row.querySelector('[name="regel_prijs_incl"]')?.value || 0));
+    const stukprijs = mode === "incl" ? inputIncl / factor : inputExcl;
+    const stukprijsInclBtw = mode === "incl" ? inputIncl : inputExcl * factor;
     return {
       tekst: String(row.querySelector('[name="regel_tekst"]')?.value || "").trim(),
       extra: String(row.querySelector('[name="regel_extra"]')?.value || "").trim(),
       aantal,
       eenheid: String(row.querySelector('[name="regel_eenheid"]')?.value || "st"),
-      stukprijs,
+      stukprijs: Math.round(stukprijs * 10000) / 10000,
+      stukprijsInclBtw: Math.round(stukprijsInclBtw * 100) / 100,
+      prijsInvoer: mode,
       bedrag: Math.round(aantal * stukprijs * 100) / 100,
-      btw: Number(row.querySelector('[name="regel_btw"]')?.value || 21),
+      bedragInclBtw: Math.round(aantal * stukprijsInclBtw * 100) / 100,
+      btw,
     };
   }).filter((r) => r.tekst);
 }
@@ -996,7 +1030,7 @@ function viewPapier() {
       </div>
 
       <div class="offer-editor-lines" data-offer-lines>
-        ${offerteEditorRegel({ aantal: 1, eenheid: "st", stukprijs: 0, btw: 21 })}
+        ${offerteEditorRegel({ aantal: 1, eenheid: "st", stukprijsInclBtw: 0, prijsInvoer: "incl", btw: 21 })}
       </div>
 
       <div class="offer-editor-ai">
@@ -1296,42 +1330,75 @@ function bind(root) {
     persist();
   });
 
+
   const offerForm = root.querySelector("form[data-offerte-editor]");
   if (offerForm) {
     const linesBox = offerForm.querySelector("[data-offer-lines]");
 
-    const updateOfferTotals = () => {
+    const syncOfferRow = (row, changedName = "") => {
+      if (!row) return;
+      if (changedName === "regel_prijs_excl") row.dataset.priceMode = "excl";
+      if (changedName === "regel_prijs_incl") row.dataset.priceMode = "incl";
+
+      const mode = row.dataset.priceMode === "excl" ? "excl" : "incl";
+      const btw = Number(row.querySelector('[name="regel_btw"]')?.value || 21);
+      const factor = 1 + btw / 100;
+      const exclInput = row.querySelector('[name="regel_prijs_excl"]');
+      const inclInput = row.querySelector('[name="regel_prijs_incl"]');
+      const aantal = Math.max(0, Number(row.querySelector('[name="regel_aantal"]')?.value || 0));
+
+      let excl = Math.max(0, Number(exclInput?.value || 0));
+      let incl = Math.max(0, Number(inclInput?.value || 0));
+
+      if (mode === "incl") {
+        excl = factor ? incl / factor : incl;
+        if (exclInput) exclInput.value = excl.toFixed(2);
+      } else {
+        incl = excl * factor;
+        if (inclInput) inclInput.value = incl.toFixed(2);
+      }
+
+      const totalIncl = row.querySelector("[data-offer-line-total]");
+      const totalExcl = row.querySelector("[data-offer-line-excl]");
+      if (totalIncl) totalIncl.textContent = euro(aantal * incl);
+      if (totalExcl) totalExcl.textContent = euro(aantal * excl) + " excl.";
+    };
+
+    const updateOfferTotals = (source = null) => {
+      if (source?.closest?.("[data-offer-line]")) {
+        syncOfferRow(source.closest("[data-offer-line]"), source.name || "");
+      } else {
+        offerForm.querySelectorAll("[data-offer-line]").forEach((row) => syncOfferRow(row));
+      }
+
       const regels = offerteRegelsUitEditor(offerForm);
       const excl = regels.reduce((sum, r) => sum + Number(r.bedrag || 0), 0);
-      const vat = regels.reduce((sum, r) => sum + Number(r.bedrag || 0) * Number(r.btw || 0) / 100, 0);
-
-      offerForm.querySelectorAll("[data-offer-line]").forEach((row) => {
-        const aantal = Math.max(0, Number(row.querySelector('[name="regel_aantal"]')?.value || 0));
-        const stukprijs = Math.max(0, Number(row.querySelector('[name="regel_prijs"]')?.value || 0));
-        const total = row.querySelector("[data-offer-line-total]");
-        if (total) total.textContent = euro(aantal * stukprijs);
-      });
+      const incl = regels.reduce((sum, r) => sum + Number(r.bedragInclBtw || 0), 0);
+      const vat = incl - excl;
 
       const exclEl = offerForm.querySelector("[data-offer-excl]");
       const vatEl = offerForm.querySelector("[data-offer-vat]");
       const inclEl = offerForm.querySelector("[data-offer-incl]");
       if (exclEl) exclEl.textContent = euro(excl);
       if (vatEl) vatEl.textContent = euro(vat);
-      if (inclEl) inclEl.textContent = euro(excl + vat);
+      if (inclEl) inclEl.textContent = euro(incl);
     };
 
     offerForm.querySelector("[data-offer-add]")?.addEventListener("click", () => {
-      linesBox?.insertAdjacentHTML("beforeend", offerteEditorRegel({ aantal:1, eenheid:"st", stukprijs:0, btw:21 }));
+      linesBox?.insertAdjacentHTML("beforeend", offerteEditorRegel({
+        aantal:1, eenheid:"st", stukprijsInclBtw:0, prijsInvoer:"incl", btw:21
+      }));
       updateOfferTotals();
       linesBox?.lastElementChild?.querySelector('[name="regel_tekst"]')?.focus();
     });
 
     offerForm.addEventListener("input", (e) => {
-      if (e.target.closest("[data-offer-line]")) updateOfferTotals();
+      if (e.target.closest("[data-offer-line]")) updateOfferTotals(e.target);
     });
     offerForm.addEventListener("change", (e) => {
-      if (e.target.closest("[data-offer-line]")) updateOfferTotals();
+      if (e.target.closest("[data-offer-line]")) updateOfferTotals(e.target);
     });
+
     offerForm.addEventListener("click", (e) => {
       const remove = e.target.closest("[data-offer-remove]");
       if (!remove) return;
@@ -1341,7 +1408,9 @@ function bind(root) {
         row.querySelector('[name="regel_tekst"]').value = "";
         row.querySelector('[name="regel_extra"]').value = "";
         row.querySelector('[name="regel_aantal"]').value = "1";
-        row.querySelector('[name="regel_prijs"]').value = "0.00";
+        row.querySelector('[name="regel_prijs_excl"]').value = "0.00";
+        row.querySelector('[name="regel_prijs_incl"]').value = "0.00";
+        row.dataset.priceMode = "incl";
       } else {
         remove.closest("[data-offer-line]")?.remove();
       }
@@ -1354,10 +1423,15 @@ function bind(root) {
       if (!vraag) return toast("Beschrijf eerst de opdracht");
 
       const btwCategorie = String(formData.get("btwCategorie") || "standaard21");
-      toast("Vakento vult de offerte");
+      toast("Vakento berekent de offerte");
 
       const local = offerteUitTekst(vraag, data.place);
-      const out = await verrijkMetServer("offerte", local, { vraag, plaats:data.place });
+      const out = await verrijkMetServer("offerte", local, {
+        vraag,
+        plaats:data.place,
+        uurtariefInclBtw:65,
+        prijsVoorkeur:"inclusief btw"
+      });
       const bronRegels = out.regels || local.regels || [];
 
       const regelBtw = (r) => {
@@ -1372,17 +1446,45 @@ function bind(root) {
 
       offerForm.elements.titel.value = out.titel || local.titel || vraag.slice(0,80);
       if (linesBox) {
-        linesBox.innerHTML = bronRegels.map((r) => offerteEditorRegel({
-          tekst:r.tekst || "",
-          extra:r.extra || "",
-          aantal:Number(r.aantal || 1),
-          eenheid:r.eenheid || "st",
-          stukprijs:Number(r.stukprijs ?? r.bedrag ?? 0),
-          btw:regelBtw(r)
-        })).join("") || offerteEditorRegel({ aantal:1, eenheid:"st", stukprijs:0, btw:21 });
+        linesBox.innerHTML = bronRegels.map((r) => {
+          const btw = regelBtw(r);
+          const tekst = String(r?.tekst || "");
+          const uurMatch = tekst.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:uur|u\b)/i);
+          const eenheid = String(r.eenheid || (uurMatch ? "uur" : "st"));
+          const aantal = Number(r.aantal || (uurMatch ? uurMatch[1].replace(",", ".") : 1)) || 1;
+          const isArbeid = eenheid === "uur" || /\b(arbeid|uren|uurtarief)\b/i.test(tekst);
+
+          if (isArbeid) {
+            return offerteEditorRegel({
+              tekst: r.tekst || "Arbeid",
+              extra: r.extra || "Uurtarief € 65,00 inclusief btw",
+              aantal,
+              eenheid:"uur",
+              stukprijsInclBtw:65,
+              prijsInvoer:"incl",
+              btw
+            });
+          }
+
+          const prijsIncl = Number(r.stukprijsInclBtw ?? r.prijsInclBtw);
+          const prijsExcl = Number(r.stukprijs ?? (Number(r.bedrag) / aantal));
+          return offerteEditorRegel({
+            tekst:r.tekst || "",
+            extra:r.extra || "",
+            aantal,
+            eenheid,
+            stukprijsInclBtw:Number.isFinite(prijsIncl) ? prijsIncl : undefined,
+            stukprijs:Number.isFinite(prijsExcl) ? prijsExcl : 0,
+            prijsInvoer:Number.isFinite(prijsIncl) ? "incl" : "excl",
+            btw
+          });
+        }).join("") || offerteEditorRegel({
+          aantal:1, eenheid:"st", stukprijsInclBtw:0, prijsInvoer:"incl", btw:21
+        });
       }
+
       updateOfferTotals();
-      toast("Offerte ingevuld. Controleer de regels.");
+      toast("Offerte berekend. Controleer de regels.");
     });
 
     offerForm.addEventListener("submit", (e) => {

@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://vakento.nl/</loc><lastmod>2026-09-24</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://vakento.nl/</loc>
+    <lastmod>2026-09-24</lastmod>
+    <changefreq>weekly</changefreq><priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="nl-NL" href="https://vakento.nl/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vakento.nl/en/"/>
+    <xhtml:link rel="alternate" hreflang="de-DE" href="https://vakento.nl/de/"/>
+    <xhtml:link rel="alternate" hreflang="pl-PL" href="https://vakento.nl/pl/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vakento.nl/"/>
+  </url>
+  <url><loc>https://vakento.nl/en/</loc><lastmod>2026-09-24</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://vakento.nl/de/</loc><lastmod>2026-09-24</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://vakento.nl/pl/</loc><lastmod>2026-09-24</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://vakento.nl/bedrijfssoftware-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://vakento.nl/software-voor-vakmensen.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://vakento.nl/offerte-factuur-software-zzp.html</loc><lastmod>2026-09-24</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>

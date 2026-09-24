@@ -111,6 +111,14 @@ export function load() {
       data.klanten ||= [];
       data.klussen ||= [];
       data.offertes ||= [];
+      if (!Number.isFinite(Number(data.nextOfferteNummer))) {
+        const hoogste = data.offertes.reduce((max, offerte) => {
+          const match = String(offerte?.nr || "").match(/(?:^|\D)(\d+)$/);
+          const n = match ? Number(match[1]) : 0;
+          return Number.isFinite(n) ? Math.max(max, n) : max;
+        }, 1039);
+        data.nextOfferteNummer = Math.max(1040, hoogste + 1);
+      }
       data.facturen ||= [];
       data.uren ||= [];
       data.verlof ||= [];

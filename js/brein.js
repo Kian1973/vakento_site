@@ -76,10 +76,10 @@ function packFor(text) {
 
 export function offerteUitTekst(text, plaats = "Achterhoek") {
   const pack = packFor(text);
-  const arbeid = Math.round(pack.uren * TARIEF);
+  const arbeid = Math.round(pack.uren * TARIEF_INCL_BTW);
   const regels = [
     ...pack.regels,
-    { tekst: `Arbeid ${pack.uren} uur à €${TARIEF}`, bedrag: arbeid },
+    { tekst: `Arbeid ${pack.uren} uur à €${TARIEF_INCL_BTW}`, bedrag: arbeid },
     { tekst: `Voorrijden ${plaats}`, bedrag: VOORRIJDEN },
   ];
   const bedrag = regels.reduce((a, r) => a + r.bedrag, 0);

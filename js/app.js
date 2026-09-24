@@ -1541,6 +1541,84 @@ function bind(root) {
       toast("Offerte berekend. Controleer de regels.");
     });
 
+
+    offerForm.querySelector("[data-offer-spelling]")?.addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      const rows = [...offerForm.querySelectorAll("[data-offer-line]")];
+      const payload = {
+        titel: String(offerForm.elements.titel?.value || ""),
+        intro: String(offerForm.elements.intro?.value || ""),
+        opmerkingen: String(offerForm.elements.opmerkingen?.value || ""),
+        regels: rows.map((row) => ({
+          tekst: String(row.querySelector('[name="regel_tekst"]')?.value || ""),
+          extra: String(row.querySelector('[name="regel_extra"]')?.value || "")
+        }))
+      };
+
+      const heeftTekst =
+        payload.titel.trim() ||
+        payload.intro.trim() ||
+        payload.opmerkingen.trim() ||
+        payload.regels.some((r) => r.tekst.trim() || r.extra.trim());
+
+      if (!heeftTekst) {
+        toast("Vul eerst tekst in");
+        return;
+      }
+
+      const oudLabel = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Spelling controleren…";
+
+      const vraag =
+        "Verbeter uitsluitend de Nederlandse spelling, grammatica en leestekens van deze offerte. " +
+        "Verander geen namen, aantallen, bedragen, prijzen, btw-percentages of inhoudelijke betekenis. " +
+        "Maak de tekst zakelijk en natuurlijk Nederlands. " +
+        "Geef ALLEEN geldige JSON terug, zonder markdown of uitleg, exact met deze structuur: " +
+        '{"titel":"...","intro":"...","opmerkingen":"...","regels":[{"tekst":"...","extra":"..."}]}. ' +
+        "Behoud exact hetzelfde aantal regels. Invoer: " + JSON.stringify(payload);
+
+      try {
+        const out = await verrijkMetServer("vraag", { tekst: "" }, { vraag });
+        let raw = String(out?.tekst || "").trim();
+
+        raw = raw
+          .replace(/^\`\`\`(?:json)?\s*/i, "")
+          .replace(/\s*\`\`\`$/i, "")
+          .trim();
+
+        const first = raw.indexOf("{");
+        const last = raw.lastIndexOf("}");
+        if (first >= 0 && last > first) raw = raw.slice(first, last + 1);
+
+        if (!raw) throw new Error("Geen antwoord van AI");
+        const fixed = JSON.parse(raw);
+
+        if (typeof fixed.titel === "string") offerForm.elements.titel.value = fixed.titel;
+        if (typeof fixed.intro === "string") offerForm.elements.intro.value = fixed.intro;
+        if (typeof fixed.opmerkingen === "string") offerForm.elements.opmerkingen.value = fixed.opmerkingen;
+
+        if (Array.isArray(fixed.regels)) {
+          rows.forEach((row, i) => {
+            const r = fixed.regels[i];
+            if (!r) return;
+            const tekst = row.querySelector('[name="regel_tekst"]');
+            const extra = row.querySelector('[name="regel_extra"]');
+            if (tekst && typeof r.tekst === "string") tekst.value = r.tekst;
+            if (extra && typeof r.extra === "string") extra.value = r.extra;
+          });
+        }
+
+        toast("Spelling en grammatica verbeterd");
+      } catch (err) {
+        console.error("Vakento spellingcontrole:", err);
+        toast("Spellingcontrole lukt nu niet. Controleer of Vakento AI actief is.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oudLabel;
+      }
+    });
+
     offerForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const formData = new FormData(offerForm);

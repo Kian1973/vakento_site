@@ -5,56 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#1e5aa6">
-  <title>Mijn account | Vakento</title>
+  <title>Inloggen of registreren | Vakento</title>
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="stylesheet" href="css/vakento.css?v=account5">
+  <link rel="stylesheet" href="css/vakento.css?v=account-simple1">
   <link rel="stylesheet" href="css/vakento-public.css?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    .account-login-page{min-height:calc(100vh - 90px);display:grid;place-items:start center;padding:56px 16px}
-    .account-login-card{width:min(620px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px}
-    .account-login-card h1{margin:8px 0 18px;max-width:none;font-size:clamp(2rem,5vw,3rem)}
+    .account-page{min-height:calc(100dvh - 72px);display:grid;place-items:start center;padding:38px 16px 64px}
+    .account-card{width:min(520px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:0 14px 40px rgba(18,24,38,.06)}
+    .account-card h1{margin:5px 0 8px;max-width:none;font-size:clamp(2rem,6vw,2.8rem);line-height:1}
+    .account-intro{margin-bottom:20px}
+    .auth-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:#eef2f7;border-radius:14px;margin-bottom:22px}
+    .auth-switch button{border:0;border-radius:10px;padding:11px 10px;background:transparent;color:var(--muted);font-weight:700;cursor:pointer}
+    .auth-switch button.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(18,24,38,.08)}
+    .auth-form{display:grid;gap:14px}
+    .auth-form label{display:grid;gap:6px;font-size:.9rem}
+    .auth-form input{min-height:50px;padding:12px 14px;border-radius:12px;font-size:1rem}
+    .auth-form .btn{min-height:50px;width:100%;font-size:1rem}
+    .password-row{position:relative}
+    .password-row input{padding-right:76px}
+    .password-toggle{position:absolute;right:8px;bottom:7px;height:36px;padding:0 9px;border:0;background:#eef2f7;border-radius:8px;color:var(--ink);font-size:.78rem;font-weight:700;cursor:pointer}
+    .auth-note{padding:12px 13px;border-radius:12px;background:#f5f8fb;color:var(--muted);font-size:.86rem;line-height:1.45}
+    .auth-help{text-align:center;margin-top:13px;color:var(--muted);font-size:.86rem}
+    .text-button{border:0;background:transparent;color:var(--moss);font:inherit;font-weight:700;cursor:pointer;padding:0}
     .account-section{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
     .account-app-card{margin-top:12px;padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#f8fbff 0%,#fff 100%)}
     .account-app-card h2{margin:4px 0 8px;font-size:1.45rem}
     .account-app-actions{display:grid;gap:9px;margin-top:14px}
     .account-app-actions .btn{width:100%;text-align:center;justify-content:center}
     .account-back{font-size:.92rem;text-decoration:none}
+    .simple-error{padding:10px 12px;border-radius:10px;background:#fff1ec;color:#9f3415}
+    @media(max-width:520px){
+      .account-page{padding:22px 12px 54px}
+      .account-card{padding:20px;border-radius:18px}
+      .site-top{padding-left:4px;padding-right:4px}
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="wrap site-top">
-      <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
-      <a class="account-back" href="/werk.html">Naar Vakento</a>
+      <a class="logo" href="/"><span class="mark">V</span> Vakento</a>
+      <a class="account-back" href="/">Terug</a>
     </div>
   </header>
 
-  <main class="account-login-page">
-    <section class="account-login-card" data-login-view hidden>
-      <p class="kicker">Mijn account</p>
-      <h1>Direct naar je eigen Vakento.</h1>
+  <main class="account-page">
+    <section class="account-card" data-login-view hidden>
+      <div class="account-intro">
+        <p class="kicker">Vakento</p>
+        <h1>Welkom.</h1>
+        <p class="muted">Inloggen of nieuw beginnen. Meer is er niet nodig.</p>
+      </div>
 
-      <form class="stack" data-login>
-        <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
-        <label>Wachtwoord<input name="password" type="password" required autocomplete="current-password"></label>
-        <button class="btn" type="submit">Mijn account</button>
-        <button class="btn btn-ghost" type="button" data-forgot-open>Wachtwoord vergeten?</button>
-        <p class="warn" data-err hidden></p>
-      </form>
-      <form class="stack" data-forgot hidden style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
-        <p class="kicker">Wachtwoord herstellen</p>
-        <p class="muted">Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord te kiezen.</p>
-        <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
-        <button class="btn" type="submit">Herstellink versturen</button>
+      <div class="auth-switch" role="tablist" aria-label="Accountkeuze">
+        <button type="button" data-auth-mode="login" class="active" role="tab" aria-selected="true">Inloggen</button>
+        <button type="button" data-auth-mode="register" role="tab" aria-selected="false">Nieuw account</button>
+      </div>
+
+      <div data-auth-panel="login">
+        <form class="auth-form" data-login>
+          <label>E-mailadres
+            <input name="email" type="email" required autocomplete="email" inputmode="email" placeholder="naam@bedrijf.nl">
+          </label>
+          <label class="password-row">Wachtwoord
+            <input name="password" type="password" required autocomplete="current-password" placeholder="Je wachtwoord">
+            <button class="password-toggle" type="button" data-toggle-password>Toon</button>
+          </label>
+          <button class="btn" type="submit">Inloggen</button>
+          <p class="simple-error" data-err hidden></p>
+        </form>
+        <p class="auth-help"><button class="text-button" type="button" data-forgot-open>Wachtwoord vergeten?</button></p>
+      </div>
+
+      <div data-auth-panel="register" hidden>
+        <form class="auth-form" data-register>
+          <div class="auth-note"><strong>3 dagen gratis.</strong> Geen betaalgegevens nodig om te beginnen.</div>
+          <label>Bedrijfsnaam of je naam
+            <input name="name" required autocomplete="organization" placeholder="Bijvoorbeeld Jansen Schilderwerken">
+          </label>
+          <label>E-mailadres
+            <input name="email" type="email" required autocomplete="email" inputmode="email" placeholder="naam@bedrijf.nl">
+          </label>
+          <label class="password-row">Kies een wachtwoord
+            <input name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="Minimaal 8 tekens">
+            <button class="password-toggle" type="button" data-toggle-password>Toon</button>
+          </label>
+          <button class="btn" type="submit">Account maken en beginnen</button>
+          <p class="simple-error" data-err hidden></p>
+        </form>
+        <p class="auth-help">Heb je al een account? <button class="text-button" type="button" data-go-login>Inloggen</button></p>
+      </div>
+
+      <form class="auth-form" data-forgot hidden style="margin-top:4px">
+        <p class="kicker">Wachtwoord vergeten</p>
+        <h2>Nieuw wachtwoord aanvragen</h2>
+        <p class="muted">Vul alleen je e-mailadres in.</p>
+        <label>E-mailadres
+          <input name="email" type="email" required autocomplete="email" inputmode="email" placeholder="naam@bedrijf.nl">
+        </label>
+        <button class="btn" type="submit">Stuur herstellink</button>
         <button class="btn btn-ghost" type="button" data-forgot-cancel>Terug naar inloggen</button>
         <p class="muted" data-forgot-msg hidden></p>
       </form>
     </section>
 
-    <section class="account-login-card" data-account-view hidden>
+    <section class="account-card" data-account-view hidden>
       <p class="kicker">Mijn account</p>
       <h1>Je Vakento-account</h1>
       <div data-me><p class="muted">Account laden…</p></div>
@@ -62,7 +120,7 @@
         <p class="kicker">Vakento app</p>
         <div class="account-app-card">
           <h2>Vakento op je telefoon</h2>
-          <p class="muted">Scan bonnen met je camera, maak werkfoto's en sla alles direct op in de juiste Vakento Cloud-map.</p>
+          <p class="muted">Scan bonnen, maak werkfoto's en werk onderweg verder.</p>
           <div class="account-app-actions">
             <a class="btn" href="/app.html">Open Vakento app</a>
             <button class="btn btn-ghost" type="button" data-install-app>Installeer app op telefoon</button>
@@ -74,9 +132,9 @@
   </main>
 
   <script src="/js/self-heal.js?v=1"></script>
-  <script type="module" src="js/pay.js?v=clean2"></script>
+  <script type="module" src="js/pay.js?v=account-simple1"></script>
   <script src="/js/install-app.js?v=app3"></script>
   <script src="/js/max.js?v=max1"></script>
-  <script src="/js/i18n.js?v=2"></script>
+  <script src="/js/i18n.js?v=4"></script>
 </body>
 </html>

@@ -942,10 +942,10 @@ function offerteEditorRegel(r = {}) {
   return `<div class="offer-editor-line" data-offer-line data-price-mode="${prijsInvoer}">
     <div class="offer-editor-description">
       <label>Omschrijving
-        <input name="regel_tekst" data-spell-page value="${esc(r.tekst || "")}" placeholder="Bijvoorbeeld: schilderen kozijnen" spellcheck="true" lang="nl" autocapitalize="sentences" required>
+        <input name="regel_tekst" value="${esc(r.tekst || "")}" placeholder="Bijvoorbeeld: schilderen kozijnen" spellcheck="false" lang="nl" autocapitalize="sentences" required>
       </label>
       <label class="offer-extra-label">Extra informatie
-        <input name="regel_extra" data-spell-page value="${esc(r.extra || "")}" placeholder="Optioneel: materiaal, kleur, uitvoering..." spellcheck="true" lang="nl" autocapitalize="sentences">
+        <input name="regel_extra" value="${esc(r.extra || "")}" placeholder="Optioneel: materiaal, kleur, uitvoering..." spellcheck="false" lang="nl" autocapitalize="sentences">
       </label>
     </div>
     <label>Aantal
@@ -1038,7 +1038,7 @@ function viewPapier() {
         <label>KvK<input name="kvk" value="${esc(p.kvk)}"></label>
         <label>btw-nummer<input name="btw" value="${esc(p.btw)}"></label>
         <label>IBAN<input name="iban" value="${esc(p.iban)}"></label>
-        <label>Voettekst<textarea name="voet" data-spell-page rows="2" spellcheck="true" lang="nl" autocapitalize="sentences">${esc(p.voet)}</textarea></label>
+        <label>Voettekst<textarea name="voet" rows="2" spellcheck="false" lang="nl" autocapitalize="sentences">${esc(p.voet)}</textarea></label>
         <label>Logo (png, jpg, svg)<input name="logo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"></label>
         <div class="actions">
           <button class="btn" type="submit">Briefpapier bewaren</button>
@@ -1080,7 +1080,7 @@ function viewPapier() {
           }
         </label>
         <label>Titel
-          <input name="titel" data-spell-page placeholder="Bijvoorbeeld: Buitenschilderwerk woning" spellcheck="true" lang="nl" autocapitalize="sentences" required>
+          <input name="titel" placeholder="Bijvoorbeeld: Buitenschilderwerk woning" spellcheck="false" lang="nl" autocapitalize="sentences" required>
         </label>
         <label>Offertedatum
           <input name="datum" type="date" value="${iso(new Date())}">
@@ -1091,7 +1091,7 @@ function viewPapier() {
       </div>
 
       <label>Introductie
-        <textarea name="intro" data-spell-page rows="3" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: Hierbij ontvangt u onze offerte voor de afgesproken werkzaamheden."></textarea>
+        <textarea name="intro" rows="3" spellcheck="false" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: Hierbij ontvangt u onze offerte voor de afgesproken werkzaamheden."></textarea>
       </label>
 
       <div class="offer-editor-lines-head">
@@ -1108,7 +1108,7 @@ function viewPapier() {
 
       <div class="offer-editor-ai" data-offer-ai-panel hidden>
         <label>Sneller met Vakento AI
-          <textarea name="vraag" data-spell-page rows="2" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: plafond 44 m² spuiten, muren 42 m² schilderen en 3 kozijnen aflakken"></textarea>
+          <textarea name="vraag" rows="2" spellcheck="false" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: plafond 44 m² spuiten, muren 42 m² schilderen en 3 kozijnen aflakken"></textarea>
         </label>
         <label>BTW-categorie
           <select name="btwCategorie">
@@ -1124,7 +1124,7 @@ function viewPapier() {
       </div>
 
       <label>Opmerkingen / afspraken
-        <textarea name="opmerkingen" data-spell-page rows="3" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Planning, betaling, meerwerk of andere afspraken."></textarea>
+        <textarea name="opmerkingen" rows="3" spellcheck="false" lang="nl" autocapitalize="sentences" placeholder="Planning, betaling, meerwerk of andere afspraken."></textarea>
       </label>
 
       <div class="offer-editor-footer">
@@ -1134,7 +1134,6 @@ function viewPapier() {
           <span class="offer-editor-grand">Incl. btw <strong data-offer-incl>€ 0,00</strong></span>
         </div>
         <div class="actions">
-          <button class="btn btn-ghost" type="button" data-offer-spelling>Spelling hele pagina verbeteren</button>
           <button class="btn" type="submit">Opslaan als concept</button>
         </div>
 
@@ -1169,7 +1168,7 @@ function viewPapier() {
       </div>
 
       <label>Omschrijving
-        <textarea name="titel" data-spell-page rows="3" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: Schilderwerk woonkamer volgens afspraak" required></textarea>
+        <textarea name="titel" rows="3" spellcheck="false" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: Schilderwerk woonkamer volgens afspraak" required></textarea>
       </label>
 
       <div class="grid-2">
@@ -1672,75 +1671,6 @@ function bind(root) {
       }
     });
 
-
-    offerForm.querySelector("[data-offer-spelling]")?.addEventListener("click", async (e) => {
-      const btn = e.currentTarget;
-      const fields = [...root.querySelectorAll("[data-spell-page]")]
-        .filter((field) => !field.disabled && !field.readOnly);
-
-      const filled = fields.filter((field) => String(field.value || "").trim());
-      if (!filled.length) {
-        toast("Vul eerst tekst in");
-        return;
-      }
-
-      const numbers = (text) => String(text || "").match(/\d+(?:[.,]\d+)*/g) || [];
-      const stripHtml = (text) => {
-        const raw = String(text || "").trim();
-        if (!raw) return "";
-        const box = document.createElement("div");
-        box.innerHTML = raw;
-        return (box.textContent || box.innerText || raw).trim();
-      };
-
-      const improve = async (original) => {
-        const prompt =
-          "Verbeter alleen de Nederlandse spelling, grammatica en leestekens van onderstaande tekst. " +
-          "Behoud exact dezelfde betekenis, namen en alle getallen. Voeg niets toe en haal niets inhoudelijks weg. " +
-          "Geef alleen de verbeterde tekst terug, zonder uitleg, aanhalingstekens, labels of markdown.\n\nTekst:\n" +
-          original;
-
-        const out = await verrijkMetServer("vraag", { tekst: original }, {
-          vraag: prompt,
-          soort: "spelling_offerte"
-        });
-
-        const corrected = stripHtml(out?.tekst || original);
-        if (!corrected) return original;
-
-        // Veiligheid: bedragen, aantallen en andere getallen mogen nooit veranderen.
-        if (JSON.stringify(numbers(corrected)) !== JSON.stringify(numbers(original))) return original;
-        return corrected;
-      };
-
-      const oldLabel = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = "Hele pagina controleren…";
-
-      let changed = 0;
-      try {
-        for (const field of filled) {
-          const original = String(field.value || "").trim();
-          const corrected = await improve(original);
-          if (corrected && corrected !== original) {
-            field.value = corrected;
-            changed += 1;
-          }
-        }
-
-        if (changed) {
-          toast("Spelling verbeterd in " + changed + (changed === 1 ? " veld" : " velden"));
-        } else {
-          toast("Geen spellingswijzigingen gevonden");
-        }
-      } catch (err) {
-        console.error("Vakento spellingcontrole:", err);
-        toast("Spelling verbeteren is niet bereikbaar");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = oldLabel;
-      }
-    });
 
     offerForm.addEventListener("submit", (e) => {
       e.preventDefault();

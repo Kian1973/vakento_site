@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Offertes | Vakento</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    (() => {
+      const removeOldPostRoute = () => {
+        if (/^#\/post(?:\/|$)/.test(location.hash)) {
+          location.replace(location.pathname + location.search + "#/");
+        }
+      };
+      removeOldPostRoute();
+      addEventListener("hashchange", removeOldPostRoute);
+    })();
+  </script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/vakento.css?v=offerte6">
+  <style>
+    .workspace-shell{min-height:100dvh}
+    .workspace-sidebar{
+      position:fixed;inset:0 auto 0 0;width:248px;z-index:40;
+      display:flex;flex-direction:column;background:#fff;border-right:1px solid var(--line);
+      overflow-y:auto;overscroll-behavior:contain
+    }
+    .workspace-brand{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+    .workspace-brand .logo{font-size:1.18rem}
+    .workspace-brand small{display:block;margin:6px 0 0 44px;color:var(--muted);font-size:.76rem}
+    .workspace-nav{display:block!important;overflow:visible!important;padding:12px!important;flex:0 0 auto!important}
+    .workspace-nav .nav-group{display:grid;gap:3px;margin-bottom:14px}
+    .workspace-nav .nav-title{
+      margin:8px 9px 4px;font-size:.68rem;line-height:1;text-transform:uppercase;
+      letter-spacing:.09em;color:#8a94a3;font-weight:700
+    }
+    .workspace-nav a{
+      display:flex!important;align-items:center;gap:10px;width:100%;
+      padding:9px 10px!important;border-radius:9px!important;color:#3d4654!important;
+      text-decoration:none;font-size:.9rem!important;font-weight:500!important;background:transparent!important
+    }
+    .workspace-nav a:hover{background:#f3f6fa!important;color:var(--ink)!important}
+    .workspace-nav a.active{background:#e8f0fb!important;color:#174f94!important;font-weight:700!important}
+    .workspace-nav .nav-dot{
+      width:8px;height:8px;border-radius:50%;background:#c7d0dc;flex:0 0 8px
+    }
+    .workspace-nav a.active .nav-dot{background:var(--moss)}
+    .workspace-account{margin-top:auto;padding:12px;border-top:1px solid var(--line);display:grid;gap:4px}
+    .workspace-account a{
+      color:#3d4654;text-decoration:none;padding:9px 10px;border-radius:9px;font-size:.88rem
+    }
+    .workspace-account a:hover{background:#f3f6fa}
+    .workspace-account .logout{color:#8a2f22}
+    .workspace-main{min-height:100dvh;margin-left:248px}
+    .workspace-topbar{
+      position:sticky;top:0;z-index:25;display:flex;align-items:center;justify-content:space-between;
+      min-height:58px;padding:10px 22px;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--line)
+    }
+    .workspace-topbar strong{font-size:.92rem}
+    .workspace-topbar .top-actions{display:flex;gap:8px;align-items:center}
+    .workspace-topbar .btn{padding:8px 12px;font-size:.82rem;border-radius:9px}
+    .mobile-menu{display:none;position:relative}
+    .mobile-menu>summary{list-style:none;cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:#fff;font-weight:600}
+    .mobile-menu>summary::-webkit-details-marker{display:none}
+    .mobile-nav{
+      position:absolute;top:calc(100% + 8px);left:0;width:min(300px,86vw);max-height:70vh;overflow:auto;
+      background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 45px rgba(18,24,38,.16);padding:10px
+    }
+    .mobile-nav p{margin:10px 8px 4px;color:#8a94a3;text-transform:uppercase;font-size:.68rem;letter-spacing:.08em;font-weight:700}
+    .mobile-nav a{display:block;color:var(--ink);text-decoration:none;padding:9px 10px;border-radius:8px}
+    .mobile-nav a:hover,.mobile-nav a.active{background:#eef4fb;color:#174f94}
+    .stage{width:min(1180px,calc(100% - 40px));margin:24px auto 96px}
+    .app-body .stage h1{font-size:clamp(2rem,4vw,3rem);line-height:1.05;max-width:none}
+    .app-body .stage h2{font-size:1.45rem}
+    .dashboard-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:16px;margin-top:18px}
+    .dashboard-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+    .dashboard-panel .item{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:11px 0}
+    .dashboard-panel .item:last-child{border-bottom:0}
+    .quick-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+    .quick-link{
+      display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);
+      border-radius:13px;padding:14px;min-height:92px
+    }
+    .quick-link:hover{border-color:rgba(30,90,166,.35);box-shadow:0 8px 20px rgba(18,24,38,.05)}
+    .quick-link strong{display:block;margin-bottom:3px}
+    .quick-link small{color:var(--muted)}
+    .dashboard-actions{display:flex;gap:8px;flex-wrap:wrap}
+    @media(max-width:1050px){
+      .dashboard-grid{grid-template-columns:1fr}
+      .quick-links{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:899px){
+      .workspace-sidebar{display:none}
+      .workspace-main{margin-left:0}
+      .workspace-topbar{padding:9px 14px}
+      .mobile-menu{display:block}
+      .stage{width:min(100% - 24px,1180px);margin-top:16px}
+    }
+    @media(max-width:560px){
+      .quick-links{grid-template-columns:1fr 1fr}
+      .workspace-topbar .top-name{display:none}
+      .workspace-topbar{min-height:54px;padding:8px 10px}
+      .workspace-topbar .top-actions .btn{padding:9px 12px;font-size:.82rem}
+      .app-body .stage h1{font-size:2rem}
+    }
+  
+    .simple-nav-label{margin:8px 10px 10px;color:#8a94a3;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+    .workspace-nav.simple-nav{display:grid!important;gap:6px;padding:14px!important}
+    .workspace-nav.simple-nav a{
+      min-height:48px;padding:12px 13px!important;border-radius:12px!important;
+      font-size:.98rem!important;font-weight:650!important
+    }
+    .workspace-nav.simple-nav a .nav-icon{
+      width:28px;height:28px;display:grid;place-items:center;border-radius:9px;
+      background:#f3f6fa;font-size:15px;flex:0 0 28px
+    }
+    .workspace-nav.simple-nav a.active .nav-icon{background:rgba(255,255,255,.22)}
+    .simple-help{margin:10px 14px 16px;padding:12px;border-radius:12px;background:#f7f9fb;color:#66717e;font-size:.78rem;line-height:1.45}
+    .simple-help strong{display:block;color:#303946;margin-bottom:3px}
+    .simple-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+    .simple-action{
+      display:grid;gap:6px;min-height:118px;padding:18px;border:1px solid var(--line);
+      border-radius:16px;background:#fff;text-decoration:none;color:inherit;cursor:pointer;text-align:left
+    }
+    button.simple-action{font:inherit;width:100%}
+    .simple-action:hover{border-color:rgba(30,90,166,.35);box-shadow:0 8px 22px rgba(18,24,38,.06)}
+    .simple-action .simple-icon{font-size:1.45rem}
+    .simple-action strong{font-size:1.05rem}
+    .simple-action small{color:var(--muted);line-height:1.35}
+    .simple-title{margin-bottom:4px!important}
+    .simple-subtitle{font-size:1rem;max-width:60ch}
+    .simple-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .simple-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+    .simple-card h3{margin:3px 0 7px}
+    .simple-card p{margin:0;color:var(--muted)}
+    .simple-card .actions{margin-top:14px}
+    .simple-more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .simple-more-link{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;text-decoration:none;color:inherit}
+    .simple-more-link strong{display:block;margin-bottom:4px}
+    .simple-more-link span{display:block;color:var(--muted);font-size:.86rem}
+    .bottom{overflow:hidden}
+    .bottom a{min-width:0;display:grid;place-items:center;gap:1px;white-space:normal}
+    .bottom a span{font-size:1rem;line-height:1}
+    .bottom a strong{font-size:.68rem;line-height:1.05}
+    .bottom .bottom-primary{background:#e8f0fb;color:#174f94;border-radius:12px}
+    @media(max-width:900px){.simple-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.simple-more-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){
+      .simple-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .simple-grid,.simple-more-grid{grid-template-columns:1fr}
+      .simple-action{min-height:118px;padding:15px}
+      .simple-action strong{font-size:1rem}
+      .simple-action small{font-size:.78rem}
+      .stage{width:min(100% - 16px,1180px);margin-top:12px}
+    }
+    @media(max-width:350px){.simple-actions{grid-template-columns:1fr}}
+  </style>
+</head>
+<body class="app-body">
+  <div class="workspace-shell">
+    <aside class="workspace-sidebar">
+      <div class="workspace-brand">
+        <a class="logo" href="index.html"><span class="mark">V</span> Vakento</a>
+        <small>Offertes</small>
+      </div>
+
+      <nav class="app-nav workspace-nav simple-nav">
+        <p class="simple-nav-label">Hoofdmenu</p>
+        <a href="#/" data-home><span class="nav-icon">⌂</span>Vandaag</a>
+        <a href="#/klussen"><span class="nav-icon">▤</span>Klussen</a>
+        <a href="/offertes.html" data-route="#/offertes"><span class="nav-icon">✎</span>Offertes</a>
+        <a href="/facturen.html" data-route="#/facturen"><span class="nav-icon">€</span>Facturen</a>
+        <a href="#/geld-overzicht"><span class="nav-icon">◉</span>Geld</a>
+        <a href="#/cloud"><span class="nav-icon">☁</span>Bestanden</a>
+        <a href="#/meer"><span class="nav-icon">•••</span>Meer</a>
+      </nav>
+      <div class="simple-help"><strong>Niet zoeken, gewoon beginnen.</strong>De meest gebruikte dingen staan hierboven. De rest vind je onder Meer.</div>
+
+      <div class="workspace-account">
+        <a href="/account.html">Mijn account</a>
+        <a href="/app.html">Vakento app</a>
+        <a href="/diagnose.html">Systeemcontrole</a>
+        <a class="logout" href="/logout.html?v=2">Uitloggen</a>
+      </div>
+    </aside>
+
+    <div class="workspace-main">
+      <header class="workspace-topbar">
+        <div style="display:flex;align-items:center;gap:10px">
+          <details class="mobile-menu">
+            <summary>Menu</summary>
+            <nav class="mobile-nav">
+              <a href="#/" data-home>Vandaag</a>
+              <a href="#/klussen">Klussen</a>
+              <a href="/offertes.html" data-route="#/offertes">Offertes</a>
+              <a href="/facturen.html" data-route="#/facturen">Facturen</a>
+              <a href="#/geld-overzicht">Geld</a>
+              <a href="#/cloud">Bestanden</a>
+              <a href="#/meer">Meer</a>
+              <p>Account</p>
+              <a href="/account.html">Mijn account</a>
+              <a href="/logout.html?v=2">Uitloggen</a>
+            </nav>
+          </details>
+          <strong class="top-name">Vakento</strong>
+        </div>
+        <div class="top-actions">
+          <a class="btn" href="/app.html#bon">Bon scannen</a>
+        </div>
+      </header>
+
+      <main class="stage" id="stage"><p class="muted">Laden…</p></main>
+    </div>
+  </div>
+
+  <nav class="bottom" aria-label="Mobiel snelmenu">
+    <a href="#/" data-home><span>⌂</span><strong>Vandaag</strong></a>
+    <a href="/app.html#bon" class="bottom-primary"><span>📷</span><strong>Bon</strong></a>
+    <a href="#/uren"><span>◷</span><strong>Uren</strong></a>
+    <a href="#/klussen"><span>▤</span><strong>Klussen</strong></a>
+    <a href="#/meer"><span>•••</span><strong>Meer</strong></a>
+  </nav>
+
+  <script src="/js/self-heal.js?v=1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script type="module" src="js/gate.js?v=papier-split-1"></script>
+  <script src="js/cookies.js?v=cookie1"></script>
+  <script src="/js/max.js?v=max1"></script>
+  <script src="/js/i18n.js?v=5"></script>
+</body>
+</html>

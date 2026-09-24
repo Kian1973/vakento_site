@@ -136,7 +136,7 @@ export function save(data) {
 }
 
 export function euro(n) {
-  return new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+  return new Intl.NumberFormat(window.VakentoI18n?.locale || "nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
 }
 
 export function klant(data, id) {

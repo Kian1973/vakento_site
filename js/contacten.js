@@ -108,9 +108,9 @@ export function viewContacten(data) {
       </div>
     </div>
 
-    <div class="contacts-db-state" data-contacts-db-state>
+    <div class="contacts-db-state" data-contacts-db-state data-no-translate aria-live="polite">
       <span class="contacts-status-dot" aria-hidden="true"></span>
-      <span class="muted" data-contacts-db-text>Verbinden met de Vakento database…</span>
+      <span class="muted" data-contacts-db-text>Database controleren…</span>
     </div>
 
     <section class="contacts-controlbar">
@@ -203,8 +203,11 @@ export function bindContacten(root, { data, toast }) {
 
   const setState = (text, ok = true) => {
     if (!state) return;
-    state.querySelector("[data-contacts-db-text]").textContent = text;
+    const label = state.querySelector("[data-contacts-db-text]");
+    if (label) label.textContent = text;
+    state.title = text;
     state.classList.toggle("warn", !ok);
+    state.classList.toggle("ok", ok);
   };
 
   const renderRows = () => {
@@ -242,7 +245,7 @@ export function bindContacten(root, { data, toast }) {
           data.klanten = migrated;
           cache();
           renderRows();
-          setState(migrated.length + " bestaande contacten naar de Vakento database overgezet.");
+          setState("Database verbonden");
           return;
         }
       }
@@ -250,9 +253,9 @@ export function bindContacten(root, { data, toast }) {
       data.klanten = remote;
       cache();
       renderRows();
-      setState(data.klanten.length + " contacten veilig opgeslagen in Vakento.");
+      setState("Database verbonden");
     } catch (err) {
-      setState("Database nog niet bereikbaar. Contacten worden tijdelijk lokaal getoond.", false);
+      setState("Database niet bereikbaar · lokale contacten", false);
     }
   };
 
@@ -317,7 +320,7 @@ export function bindContacten(root, { data, toast }) {
       renderRows();
       dialog.close();
       toast(id ? "Contact bijgewerkt" : "Contact toegevoegd");
-      setState(data.klanten.length + " contacten veilig opgeslagen in Vakento.");
+      setState("Database verbonden");
     } catch (err) {
       setState(err.message || "Opslaan in database mislukt.", false);
       toast("Contact kon niet in de database worden opgeslagen");

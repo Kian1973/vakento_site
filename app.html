@@ -13,7 +13,7 @@
   <link rel="icon" href="/assets/vakento-app-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/vakento-app-icon.svg">
   <link rel="stylesheet" href="/css/vakento.css?v=app4">
-  <link rel="stylesheet" href="/css/vakento-app.css?v=app5">
+  <link rel="stylesheet" href="/css/vakento-app.css?v=phone1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
@@ -30,46 +30,66 @@
     </div>
   </header>
 
-  <main class="mobile-app-shell">
+  <main class="mobile-app-shell" id="top">
     <section class="app-welcome">
       <p class="kicker">Vakento <span data-plan-name>Pro</span></p>
-      <h1>Alles van je abonnement bij de hand.</h1>
-      <p class="muted" data-plan-description>Werk, administratie, bonnen, cloud en slimme ondersteuning vanaf je telefoon.</p>
+      <h1>Wat wil je doen?</h1>
+      <p class="muted" data-plan-description>De belangrijkste dingen voor onderweg staan direct op je startscherm.</p>
     </section>
 
-    <section class="app-scan-now" style="margin:14px 0">
-      <a class="btn app-big-btn" href="#bon" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:1.08rem;padding:16px">
-        <span aria-hidden="true">📷</span>
-        <strong>Bon scannen</strong>
+    <section class="app-home-launch">
+      <a class="app-scan-hero" href="#bon">
+        <span class="app-launch-icon" aria-hidden="true">📷</span>
+        <span>
+          <strong>Bon scannen</strong>
+          <small>Foto maken → automatisch uitlezen → bewaren</small>
+        </span>
+        <b aria-hidden="true">›</b>
       </a>
-      <p class="muted" style="margin:8px 0 0;text-align:center">Maak een foto van je kassabon en laat Vakento hem automatisch uitlezen.</p>
-    </section>
 
-    <section class="app-camera-permission">
-      <div>
-        <strong>Camera</strong>
-        <small>Bij de eerste keer kan je telefoon om cameratoegang vragen. Daarna opent Vakento de camera rechtstreeks.</small>
-      </div>
-    </section>
-
-    <section class="app-panel">
-      <div class="app-panel-head">
-        <div><p class="kicker">Hoofdmenu</p><h2>Belangrijkste onderdelen</h2></div>
-        <span class="app-badge" data-plan-badge>Pro</span>
-      </div>
-      <nav class="app-quick-grid" aria-label="Vakento hoofdmenu">
-        <a href="/werk.html#/" class="app-quick"><span>✓</span><strong>Vandaag</strong><small>Dagoverzicht</small></a>
-        <a href="/werk.html#/bord" class="app-quick"><span>▦</span><strong>Planning</strong><small>Werk & ploeg</small></a>
-        <a href="/werk.html#/klussen" class="app-quick"><span>▤</span><strong>Klussen</strong><small>Alle dossiers</small></a>
-        <a href="/werk.html#/papier" class="app-quick"><span>€</span><strong>Offertes & facturen</strong><small>Papierwerk</small></a>
-        <a href="/werk.html#/uren" class="app-quick"><span>◷</span><strong>Uren</strong><small>Registreren</small></a>
-        <a href="#bon" class="app-quick app-quick-primary"><span>▣</span><strong>Bon scannen</strong><small>Automatisch uitlezen</small></a>
-        <a href="#werkfoto" class="app-quick app-quick-primary"><span>◎</span><strong>Werkfoto's</strong><small>Naar klusmap</small></a>
-        <a href="/werk.html#/cloud" class="app-quick"><span>☁</span><strong>Cloud</strong><small>5 GB opslag</small></a>
-        <a href="/werk.html#/winst" class="app-quick"><span>↗</span><strong>Winst</strong><small>Omzet & kosten</small></a>
-        <a href="/werk.html#/slim" class="app-quick"><span>✦</span><strong>AI-assistent</strong><small>Slimmer werken</small></a>
-        <a href="/account.html" class="app-quick"><span>●</span><strong>Account</strong><small>Abonnement & app</small></a>
+      <nav class="app-home-grid" aria-label="Meest gebruikte functies">
+        <a href="/werk.html#/uren" class="app-home-tile">
+          <span class="app-launch-icon">◷</span>
+          <strong>Uren boeken</strong>
+          <small>Direct op de klus</small>
+        </a>
+        <a href="/werk.html#/klussen" class="app-home-tile">
+          <span class="app-launch-icon">▤</span>
+          <strong>Klussen</strong>
+          <small>Open je dossiers</small>
+        </a>
+        <a href="#werkfoto" class="app-home-tile">
+          <span class="app-launch-icon">◎</span>
+          <strong>Werkfoto</strong>
+          <small>Direct naar klusmap</small>
+        </a>
+        <a href="/werk.html#/papier" class="app-home-tile">
+          <span class="app-launch-icon">€</span>
+          <strong>Offerte / factuur</strong>
+          <small>Snel klantdocument maken</small>
+        </a>
+        <a href="/werk.html#/bord" class="app-home-tile">
+          <span class="app-launch-icon">▦</span>
+          <strong>Planning</strong>
+          <small>Vandaag en komende klussen</small>
+        </a>
+        <a href="/werk.html#/boekhouding" class="app-home-tile">
+          <span class="app-launch-icon">↗</span>
+          <strong>Boekhouding</strong>
+          <small>Bonnen, btw en overzicht</small>
+        </a>
       </nav>
+
+      <div class="app-home-more">
+        <a href="/werk.html#/cloud">☁ Bestanden</a>
+        <a href="/werk.html#/slim">✦ Slim werken</a>
+        <a href="/werk.html#/boekhouder">⇩ Boekhouder</a>
+      </div>
+
+      <div class="app-camera-note">
+        <span aria-hidden="true">📱</span>
+        <p><strong>Camera klaar voor gebruik</strong><small>Bij de eerste scan vraagt je telefoon één keer toestemming.</small></p>
+      </div>
     </section>
 
     <section class="app-panel" id="bon">
@@ -167,18 +187,17 @@
     </section>
   </main>
 
-  <nav class="mobile-app-bottom">
-    <a href="/werk.html#/">Vandaag</a>
-    <a href="#bon">Bon</a>
-    <a href="#werkfoto">Foto</a>
-    <a href="/werk.html#/boekhouding">Boekhouding</a>
-    <a href="/werk.html#/cloud">Cloud</a>
-    <a href="/account.html">Account</a>
+  <nav class="mobile-app-bottom" aria-label="Snelmenu">
+    <a href="#top"><span>⌂</span><strong>Vandaag</strong></a>
+    <a href="#bon" class="mobile-app-bottom-primary"><span>📷</span><strong>Bon</strong></a>
+    <a href="/werk.html#/uren"><span>◷</span><strong>Uren</strong></a>
+    <a href="/werk.html#/klussen"><span>▤</span><strong>Klussen</strong></a>
+    <a href="/werk.html#/meer"><span>•••</span><strong>Meer</strong></a>
   </nav>
 
   <script src="/js/self-heal.js?v=1"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script type="module" src="/js/vakento-app.js?v=boek2"></script>
+  <script type="module" src="/js/vakento-app.js?v=phone1"></script>
   <script src="/js/install-app.js?v=app6"></script>
   <script src="/js/max.js?v=max1"></script>
   <script src="/js/i18n.js?v=2"></script>

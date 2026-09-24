@@ -17,7 +17,7 @@ try {
         (window.VakentoI18n?.t("Gratis tot ") || "Gratis tot ") + tot + (window.VakentoI18n?.t(". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan. ") || ". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan. ") + "<a href=\"account.html\">" + (window.VakentoI18n?.t("Betalen") || "Betalen") + "</a>";
       document.querySelector(".app-bar")?.insertAdjacentElement("afterend", note);
     }
-    await import("./app.js?v=contacts2");
+    await import("./app.js?v=contacts3");
   }
 } catch (err) {
   window.VakentoHeal?.report?.(err, { kind: "gate-load" });

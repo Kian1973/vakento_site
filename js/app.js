@@ -992,10 +992,21 @@ function viewPapier() {
       <div class="offer-editor-heading">
         <div>
           <p class="kicker">Nieuwe offerte</p>
-          <h2>Maak de offerte regel voor regel</h2>
-          <p class="muted">Duidelijk invoeren, direct bedragen en btw zien. Nederlandse spellingcontrole staat aan.</p>
+          <h2>Hoe wil je de offerte maken?</h2>
+          <p class="muted">Kies zelf invullen of laat Vakento AI een eerste opzet berekenen. Je kunt alles daarna nog aanpassen.</p>
         </div>
         <span class="offer-editor-badge">Concept</span>
+      </div>
+
+      <div class="offer-mode-switch" role="group" aria-label="Manier van offerte maken">
+        <button type="button" class="offer-mode-card active" data-offer-mode="manual" aria-pressed="true">
+          <span class="offer-mode-icon">✎</span>
+          <span><strong>Zelf offerte maken</strong><small>Vul zelf omschrijving, aantallen, prijzen en btw in.</small></span>
+        </button>
+        <button type="button" class="offer-mode-card" data-offer-mode="ai" aria-pressed="false">
+          <span class="offer-mode-icon">✦</span>
+          <span><strong>Offerte maken met AI</strong><small>Beschrijf de klus en laat Vakento uren, regels en prijzen voorstellen.</small></span>
+        </button>
       </div>
 
       <div class="offer-editor-meta">
@@ -1033,7 +1044,7 @@ function viewPapier() {
         ${offerteEditorRegel({ aantal: 1, eenheid: "st", stukprijsInclBtw: 0, prijsInvoer: "incl", btw: 21 })}
       </div>
 
-      <div class="offer-editor-ai">
+      <div class="offer-editor-ai" data-offer-ai-panel hidden>
         <label>Sneller met Vakento AI
           <textarea name="vraag" rows="2" spellcheck="true" lang="nl" autocapitalize="sentences" placeholder="Bijvoorbeeld: plafond 44 m² spuiten, muren 42 m² schilderen en 3 kozijnen aflakken"></textarea>
         </label>
@@ -1334,6 +1345,26 @@ function bind(root) {
   const offerForm = root.querySelector("form[data-offerte-editor]");
   if (offerForm) {
     const linesBox = offerForm.querySelector("[data-offer-lines]");
+    const aiPanel = offerForm.querySelector("[data-offer-ai-panel]");
+    const modeButtons = [...offerForm.querySelectorAll("[data-offer-mode]")];
+
+    const setOfferMode = (mode = "manual") => {
+      const next = mode === "ai" ? "ai" : "manual";
+      offerForm.dataset.offerMode = next;
+      modeButtons.forEach((btn) => {
+        const active = btn.dataset.offerMode === next;
+        btn.classList.toggle("active", active);
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      if (aiPanel) aiPanel.hidden = next !== "ai";
+      if (next === "ai") {
+        setTimeout(() => offerForm.querySelector('[name="vraag"]')?.focus(), 0);
+      } else {
+        setTimeout(() => offerForm.querySelector('[name="regel_tekst"]')?.focus(), 0);
+      }
+    };
+
+    modeButtons.forEach((btn) => btn.addEventListener("click", () => setOfferMode(btn.dataset.offerMode)));
 
     const syncOfferRow = (row, changedName = "") => {
       if (!row) return;
@@ -1534,6 +1565,7 @@ function bind(root) {
       persist();
     });
 
+    setOfferMode("manual");
     updateOfferTotals();
   }
 

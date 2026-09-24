@@ -97,7 +97,7 @@ function regelsTabel(regels) {
   const rows = normalized
     .map(
       (r) =>
-        `<tr><td>${esc(r.tekst)}<br><small>${r.btw}% btw</small></td><td class="num">${esc(euro(r.bedrag))}</td></tr>`
+        `<tr><td>${esc(r.tekst)}${r.extra ? `<br><small>${esc(r.extra)}</small>` : ""}${r.aantal && r.stukprijs != null ? `<br><small>${esc(r.aantal)} ${esc(r.eenheid || "st")} × ${esc(euro(r.stukprijs))} · ${r.btw}% btw</small>` : `<br><small>${r.btw}% btw</small>`}</td><td class="num">${esc(euro(r.bedrag))}</td></tr>`
     )
     .join("");
 
@@ -171,13 +171,15 @@ export function htmlOfferte(data, o) {
         <p class="kicker">Offerte</p>
         <h1>${esc(o.nr)}</h1>
         <p>${esc(o.titel)}</p>
+        ${o.datum ? `<p><small>Offertedatum: ${esc(o.datum)}${o.geldigTot ? ` · Geldig tot: ${esc(o.geldigTot)}` : ""}</small></p>` : ""}
       </div>
       <div>
-        <p class="kicker">Aan</p>
         <p><strong>${esc(c?.name)}</strong><br>${esc(c?.contact || "")}<br>${esc(c?.plaats || "")}<br>${esc(c?.tel || "")}</p>
       </div>
     </div>
+    ${o.intro ? `<p style="margin:0 0 18px;white-space:pre-line">${esc(o.intro)}</p>` : ""}
     ${regelsTabel(o.regels)}
+    ${o.opmerkingen ? `<div style="margin-top:18px"><strong>Opmerkingen en afspraken</strong><p style="white-space:pre-line">${esc(o.opmerkingen)}</p></div>` : ""}
     ${o.risico ? `<p style="margin-top:18px">${esc(o.risico)}</p>` : ""}`;
   return blad(data, binnen);
 }

@@ -88,7 +88,7 @@ function persist() {
   render();
 }
 
-function volgendeOfferteNummer() {
+function huidigVolgendOfferteNummer() {
   const hoogsteBestaande = (data.offertes || []).reduce((max, offerte) => {
     const match = String(offerte?.nr || "").match(/(?:^|\D)(\d+)$/);
     const n = match ? Number(match[1]) : 0;
@@ -97,8 +97,14 @@ function volgendeOfferteNummer() {
 
   const bewaard = Number(data.nextOfferteNummer || 0);
   const nummer = Math.max(1040, hoogsteBestaande + 1, Number.isFinite(bewaard) ? bewaard : 0);
-  data.nextOfferteNummer = nummer + 1;
   return "OFF-" + nummer;
+}
+
+function volgendeOfferteNummer() {
+  const nr = huidigVolgendOfferteNummer();
+  const nummer = Number(String(nr).replace(/\D/g, ""));
+  data.nextOfferteNummer = nummer + 1;
+  return nr;
 }
 
 function nav(hash) {
@@ -1008,7 +1014,10 @@ function viewPapier() {
           <h2>Hoe wil je de offerte maken?</h2>
           <p class="muted">Kies zelf invullen of laat Vakento AI een eerste opzet berekenen. Je kunt alles daarna nog aanpassen.</p>
         </div>
-        <span class="offer-editor-badge">Concept</span>
+        <div class="offer-editor-head-meta">
+          <span class="offer-number-preview">Offertenummer <strong>${huidigVolgendOfferteNummer()}</strong></span>
+          <span class="offer-editor-badge">Concept</span>
+        </div>
       </div>
 
       <div class="offer-mode-switch" role="group" aria-label="Manier van offerte maken">

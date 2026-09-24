@@ -4,14 +4,26 @@ const login = document.querySelector("[data-login]");
 const board = document.querySelector("[data-board]");
 const err = document.querySelector("[data-err]");
 
+function memberState(u) {
+  if (u.admin) return "admin";
+  if (u.trial) return "trial";
+  if (u.paid) return "active";
+  return "inactive";
+}
+
 function rowUser(u) {
   const plan = u.planSku === "proplus" ? "proplus" : "werkplaats";
-  return `<tr>
-    <td>${u.name}<br><span class="muted">${u.email}</span></td>
-    <td class="${u.paid ? "ok" : "warn"}">${u.trial ? "proef tot " : u.paid ? "lid tot " : ""}${u.paidUntil ? new Date(u.paidUntil).toLocaleDateString("nl-NL") : "niet betaald"}</td>
+  const state = memberState(u);
+  const stateLabel = state === "trial" ? "Proefperiode" : state === "active" ? "Actief" : state === "admin" ? "Admin" : "Niet actief";
+  const paidUntil = u.paidUntil ? new Date(u.paidUntil).toLocaleDateString("nl-NL") : "—";
+  return `<tr data-member-row data-state="${state}" data-search="${String((u.name || "") + " " + (u.email || "")).toLowerCase()}">
+    <td><strong>${u.name || "Naam onbekend"}</strong></td>
+    <td><span class="member-email">${u.email || "—"}</span></td>
+    <td><span class="member-status ${state}">${stateLabel}</span></td>
     <td>${plan === "proplus" ? "Pro+" : "Pro"}</td>
+    <td>${paidUntil}</td>
     <td>${gb(u.usedBytes)} / ${gb(u.quotaBytes)} GB</td>
-    <td>${u.admin ? "baas" : "lid"}</td>
+    <td>${u.admin ? "admin" : "lid"}</td>
     <td>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <select data-plan="${u.id}">
@@ -36,7 +48,8 @@ async function teken(data) {
       <div class="stat"><span class="muted">Omzet iDEAL</span><b>${euro(data.omzet)}</b></div>
       <div class="stat"><span class="muted">Mollie / AI</span><b>${data.health.mollie ? (data.health.mollieLive ? "live iDEAL" : "test iDEAL") : "sleutel ontbreekt"} / ${data.health.ai ? "AI aan" : "AI uit"}</b></div>
     </div>`;
-  document.querySelector("[data-users]").innerHTML = data.users.map(rowUser).join("") || "<tr><td>Nog geen leden.</td></tr>";
+  document.querySelector("[data-users]").innerHTML = data.users.map(rowUser).join("") || "<tr><td colspan=\"8\">Nog geen leden.</td></tr>";
+  applyMemberFilter();
   document.querySelector("[data-pay]").innerHTML =
     data.payments
       .map((p) => `<tr><td>${p.id}</td><td>${p.sku}</td><td>${euro(p.amount)}</td><td>${p.status}</td></tr>`)
@@ -141,3 +154,30 @@ addMember?.addEventListener("submit", async (e) => {
     }
   }
 });
+
+
+const memberSearch = document.querySelector("[data-member-search]");
+const memberFilter = document.querySelector("[data-member-filter]");
+
+function applyMemberFilter() {
+  const query = String(memberSearch?.value || "").trim().toLowerCase();
+  const filter = memberFilter?.value || "all";
+  let visible = 0;
+
+  document.querySelectorAll("[data-member-row]").forEach((row) => {
+    const text = row.dataset.search || "";
+    const state = row.dataset.state || "inactive";
+    const matchesQuery = !query || text.includes(query);
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "admin" ? state === "admin" : state === filter);
+    row.hidden = !(matchesQuery && matchesFilter);
+    if (!row.hidden) visible++;
+  });
+
+  const count = document.querySelector("[data-member-count]");
+  if (count) count.textContent = String(visible);
+}
+
+memberSearch?.addEventListener("input", applyMemberFilter);
+memberFilter?.addEventListener("change", applyMemberFilter);

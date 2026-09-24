@@ -438,27 +438,18 @@
           </div>
         </div>
 
-        <div id="account" style="max-width:860px;margin:36px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <div id="account" style="max-width:860px;margin:36px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:18px">
           <div class="price-card">
-            <span class="kicker">Lid worden</span>
-            <h3>Start 3 dagen gratis.</h3>
-            <form data-register style="display:grid;gap:12px;margin-top:18px">
-              <label>Bedrijf / naam<input name="name" required placeholder="Jouw zaak" style="width:100%;padding:12px;margin-top:6px"></label>
-              <label>E-mail<input name="email" type="email" required style="width:100%;padding:12px;margin-top:6px"></label>
-              <label>Wachtwoord<input name="password" type="password" minlength="8" required style="width:100%;padding:12px;margin-top:6px"></label>
-              <button class="button full" type="submit">Start 3 dagen gratis</button>
-              <p data-err hidden></p>
-            </form>
+            <span class="kicker">Nieuw bij Vakento</span>
+            <h3>In 1 minuut beginnen.</h3>
+            <p>Alleen je naam, e-mailadres en een wachtwoord. Geen betaalgegevens nodig voor de proefperiode.</p>
+            <a class="button full" href="/account.html?mode=register&lang=nl" style="margin-top:18px">Start 3 dagen gratis</a>
           </div>
           <div class="price-card" id="inloggen">
-            <span class="kicker">Al lid</span>
-            <h3>Direct naar je eigen Vakento.</h3>
-            <form data-login style="display:grid;gap:12px;margin-top:18px">
-              <label>E-mail<input name="email" type="email" required style="width:100%;padding:12px;margin-top:6px"></label>
-              <label>Wachtwoord<input name="password" type="password" required style="width:100%;padding:12px;margin-top:6px"></label>
-              <button class="button ghost full" type="submit">Inloggen</button>
-              <p data-err hidden></p>
-            </form>
+            <span class="kicker">Heb je al een account?</span>
+            <h3>Direct inloggen.</h3>
+            <p>Vul alleen je e-mailadres en wachtwoord in en ga meteen naar je Vakento.</p>
+            <a class="button ghost full" href="/account.html?mode=login&lang=nl" style="margin-top:18px">Inloggen</a>
           </div>
         </div>
       </div>

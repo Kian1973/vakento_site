@@ -868,3 +868,126 @@ input, select, textarea {
   .offer-line-remove{position:absolute;right:10px;top:10px}
   .offer-editor-description{padding-right:42px}
 }
+
+
+/* Papier-pagina kleur en leesbaarheid */
+.papier-set{
+  margin-top:18px;
+  padding:14px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#eef5fd 0%,#f7fbff 100%);
+  border:1px solid #d9e7f5;
+}
+.papier-set>form.card{
+  background:#f8fbff;
+  border-color:#cfe0f2;
+  box-shadow:0 8px 24px rgba(30,90,166,.055);
+}
+.papier-set>form.card .kicker{color:#1e5aa6}
+.papier-set>div.card{
+  background:#fff9ef;
+  border-color:#eadfca;
+  box-shadow:0 8px 24px rgba(136,91,27,.055);
+}
+.papier-set input,
+.papier-set textarea,
+.papier-set select{
+  background:#fff;
+}
+
+.offer-editor-card{
+  background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+  border-color:#cfdff0;
+  box-shadow:0 12px 30px rgba(30,90,166,.06);
+}
+.offer-editor-heading{
+  margin:-22px -22px 0;
+  padding:20px 22px;
+  border-radius:16px 16px 0 0;
+  background:linear-gradient(135deg,#eaf3ff 0%,#f5f9ff 100%);
+  border-bottom:1px solid #d4e3f2;
+}
+.offer-editor-heading .kicker{color:#1e5aa6}
+.offer-editor-meta{
+  padding:14px;
+  border-radius:14px;
+  background:#f3f8fd;
+  border:1px solid #dce8f4;
+}
+.offer-editor-meta input,
+.offer-editor-meta select,
+.offer-editor-card>label>textarea{
+  background:#fff;
+}
+.offer-editor-lines-head{
+  padding:14px 16px;
+  border-radius:14px;
+  background:#fff6ed;
+  border:1px solid #f1dcc8;
+}
+.offer-editor-lines-head strong{color:#8a4a16}
+.offer-editor-line{
+  background:#fcfdff;
+  border-color:#d9e5f1;
+  box-shadow:0 3px 12px rgba(18,24,38,.025);
+}
+.offer-editor-line:nth-child(even){
+  background:#f6faff;
+}
+.offer-editor-line:focus-within{
+  border-color:#8db2db;
+  box-shadow:0 0 0 3px rgba(30,90,166,.07);
+}
+.offer-editor-ai{
+  background:linear-gradient(135deg,#edf8f3 0%,#f6fbf8 100%);
+  border-color:#cfe8dc;
+  border-left:4px solid #35a36f;
+}
+.offer-editor-ai label:first-child::before{
+  content:"AI-hulp";
+  width:max-content;
+  margin-bottom:2px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#daf2e6;
+  color:#23744e;
+  font-size:.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.offer-editor-footer{
+  margin:0 -22px -22px;
+  padding:16px 22px 18px;
+  border-radius:0 0 16px 16px;
+  background:#f4f7fb;
+  border-top:1px solid #dbe4ee;
+}
+.offer-editor-totals{
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #dce5ef;
+}
+.offer-editor-grand{
+  padding-left:14px;
+  border-left:3px solid #1e5aa6;
+}
+.offer-vat-card{
+  background:linear-gradient(180deg,#ffffff,#f8fbff);
+  border-color:#d5e3f1;
+  box-shadow:0 7px 20px rgba(30,90,166,.04);
+}
+.offer-vat-line{
+  background:#f4f8fc;
+  border-color:#dce7f2;
+}
+.offer-vat-summary{
+  background:#fff8ef;
+  border-color:#ead9bf;
+}
+@media(max-width:720px){
+  .papier-set{padding:10px}
+  .offer-editor-heading{margin:-15px -15px 0;padding:16px 15px}
+  .offer-editor-footer{margin:0 -15px -15px;padding:14px 15px 16px}
+}

@@ -10,11 +10,11 @@ try {
       sessionStorage.setItem("vakento.firm", user.name || "");
     } catch (_) {}
     if (user.trial && user.paidUntil) {
-      const tot = new Date(user.paidUntil).toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
+      const tot = new Date(user.paidUntil).toLocaleDateString(window.VakentoI18n?.locale || "nl-NL", { day: "numeric", month: "long" });
       const note = document.createElement("p");
       note.className = "trial-bar";
       note.innerHTML =
-        "Gratis tot " + tot + ". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan. <a href=\"account.html\">Betalen</a>";
+        (window.VakentoI18n?.t("Gratis tot ") || "Gratis tot ") + tot + (window.VakentoI18n?.t(". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan. ") || ". Daarna stopt het vanzelf. Betaal je, dan blijft alles staan. ") + "<a href=\"account.html\">" + (window.VakentoI18n?.t("Betalen") || "Betalen") + "</a>";
       document.querySelector(".app-bar")?.insertAdjacentElement("afterend", note);
     }
     await import("./app.js?v=rompslomp1");

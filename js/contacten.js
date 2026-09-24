@@ -75,7 +75,7 @@ function rowsHtml(contacts = []) {
         <strong>${esc(c.name || "Naamloos contact")}</strong>
         <small>${esc(meta)}</small>
       </td>
-      <td class="contact-type-cell"><span class="contact-pill">${c.type === "leverancier" ? "Leverancier" : "Klant"}</span></td>
+      <td class="contact-type-cell"><span class="contact-pill ${c.type === "leverancier" ? "contact-pill-supplier" : "contact-pill-customer"}">${c.type === "leverancier" ? "Leverancier" : "Klant"}</span></td>
       <td class="contact-place-cell">${esc(c.plaats || "—")}</td>
       <td class="contact-reach">${reach || '<span class="muted">Geen contactgegevens</span>'}</td>
       <td class="contact-action"><button class="contact-open" type="button" data-contact-edit="${esc(c.id)}" aria-label="Open ${esc(c.name || "contact")}">Open</button></td>
@@ -91,7 +91,7 @@ export function viewContacten(data) {
         <p class="kicker">Relaties</p>
         <div class="contacts-title-row">
           <h1>Contacten</h1>
-          <span class="contacts-count">${contacten.length}</span>
+          <span class="contacts-count" data-contacts-count>${contacten.length}</span>
         </div>
         <p class="muted">Klanten en leveranciers overzichtelijk bij elkaar.</p>
       </div>
@@ -110,7 +110,7 @@ export function viewContacten(data) {
 
     <div class="contacts-db-state" data-contacts-db-state>
       <span class="contacts-status-dot" aria-hidden="true"></span>
-      <span class="muted">Verbinden met de Vakento database…</span>
+      <span class="muted" data-contacts-db-text>Verbinden met de Vakento database…</span>
     </div>
 
     <section class="contacts-controlbar">
@@ -203,12 +203,14 @@ export function bindContacten(root, { data, toast }) {
 
   const setState = (text, ok = true) => {
     if (!state) return;
-    state.querySelector("span").textContent = text;
+    state.querySelector("[data-contacts-db-text]").textContent = text;
     state.classList.toggle("warn", !ok);
   };
 
   const renderRows = () => {
     list.innerHTML = rowsHtml(data.klanten || []);
+    const count = root.querySelector("[data-contacts-count]");
+    if (count) count.textContent = String((data.klanten || []).length);
     bindEditButtons();
     applyFilter();
   };

@@ -141,18 +141,23 @@ export function werkbonUitUren(data, klusId) {
 }
 
 
-export async function verrijkMetServer(task, local, context) {
+export async function verrijkMetServer(task, local, context, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch("/api/brein", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ task, local, context }),
+      signal: controller.signal,
     });
     if (!res.ok) return { ...local, bron: local.bron };
     const json = await res.json();
     return { ...local, ...json, bron: json.bron || "ai+vakverstand" };
   } catch {
     return local;
+  } finally {
+    clearTimeout(timer);
   }
 }

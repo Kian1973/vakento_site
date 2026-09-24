@@ -1020,3 +1020,6 @@ input, select, textarea {
 @media(max-width:720px){
   .offer-mode-switch{grid-template-columns:1fr}
 }
+
+.offer-delete{margin-left:auto;color:#a23b2b!important;border-color:#ead4cf!important;background:#fff8f6!important}
+.offer-delete:hover{background:#fff0ec!important;border-color:#d9aea5!important}

@@ -1,5 +1,5 @@
 (() => {
-  const SUPPORTED = ["nl", "en", "de", "pl"];
+  const SUPPORTED = ["nl", "en", "de", "pl", "ar"];
 
   const dictionaries = {
     en: {
@@ -1854,6 +1854,166 @@
   ]
 };
 
+  const arabicDictionary = {
+    "Hoofdmenu":"القائمة الرئيسية",
+    "Vandaag":"اليوم",
+    "Geld":"المال",
+    "Bestanden":"الملفات",
+    "Meer":"المزيد",
+    "Werkplaats | Vakento":"مساحة العمل | Vakento",
+    "Werkplaats":"مساحة العمل",
+    "Overzicht":"نظرة عامة",
+    "Planning":"التخطيط",
+    "Klussen":"المهام",
+    "Relaties":"جهات الاتصال",
+    "Contacten":"جهات الاتصال",
+    "Ploeg":"الفريق",
+    "Administratie":"الإدارة",
+    "Offertes & facturen":"عروض الأسعار والفواتير",
+    "Offertes":"عروض الأسعار",
+    "Facturen":"الفواتير",
+    "Inkoop":"المشتريات",
+    "Uren":"الساعات",
+    "Boekhouding":"المحاسبة",
+    "Winst":"الربح",
+    "Openstaand":"المبالغ المستحقة",
+    "Werk":"العمل",
+    "Artikelen & prijzen":"المنتجات والأسعار",
+    "Calculatie":"الحساب",
+    "Taken":"المهام",
+    "Materiaal":"المواد",
+    "Cloud":"السحابة",
+    "Slim":"ذكي",
+    "AI-assistent":"مساعد الذكاء الاصطناعي",
+    "Slim werken":"عمل أذكى",
+    "Overstappen":"الانتقال",
+    "Overstappen van Rompslomp":"الانتقال من Rompslomp",
+    "Mijn account":"حسابي",
+    "Vakento app":"تطبيق Vakento",
+    "Systeemcontrole":"فحص النظام",
+    "Uitloggen":"تسجيل الخروج",
+    "Menu":"القائمة",
+    "Account":"الحساب",
+    "Mijn Vakento":"Vakento الخاص بي",
+    "Bon scannen":"مسح الإيصال",
+    "Uren boeken":"تسجيل الساعات",
+    "Laden…":"جارٍ التحميل…",
+    "Online":"متصل",
+    "Camera":"الكاميرا",
+    "Belangrijkste onderdelen":"الأقسام الرئيسية",
+    "Dagoverzicht":"ملخص اليوم",
+    "Werk & ploeg":"العمل والفريق",
+    "Alle dossiers":"كل الملفات",
+    "Papierwerk":"الأوراق",
+    "Registreren":"تسجيل",
+    "Automatisch uitlezen":"قراءة تلقائية",
+    "Werkfoto's":"صور العمل",
+    "Naar klusmap":"إلى مجلد المهمة",
+    "5 GB opslag":"سعة تخزين 5 جيجابايت",
+    "Omzet & kosten":"الإيرادات والتكاليف",
+    "Abonnement & app":"الاشتراك والتطبيق",
+    "Scan bon automatisch":"مسح الإيصال تلقائيًا",
+    "Datum":"التاريخ",
+    "Leverancier":"المورّد",
+    "Totaal incl. btw":"الإجمالي شامل الضريبة",
+    "BTW inbegrepen":"الضريبة مشمولة",
+    "Bedrag excl. btw":"المبلغ قبل الضريبة",
+    "BTW uit totaal":"الضريبة من الإجمالي",
+    "Betaald met":"طريقة الدفع",
+    "Zakelijke rekening":"حساب الأعمال",
+    "Pin / betaalpas":"بطاقة خصم",
+    "Creditcard":"بطاقة ائتمان",
+    "Contant":"نقدًا",
+    "Notitie":"ملاحظة",
+    "Opslaan":"حفظ",
+    "Annuleren":"إلغاء",
+    "Verwijderen":"حذف",
+    "Bewerken":"تعديل",
+    "Sluiten":"إغلاق",
+    "Zoeken":"بحث",
+    "Alle":"الكل",
+    "Klanten":"العملاء",
+    "Leveranciers":"المورّدون",
+    "Nieuw contact":"جهة اتصال جديدة",
+    "Bedrijf":"شركة",
+    "Particulier":"فرد",
+    "Naam / bedrijfsnaam *":"الاسم / اسم الشركة *",
+    "Contactpersoon":"جهة الاتصال",
+    "E-mailadres":"البريد الإلكتروني",
+    "Land":"الدولة",
+    "Telefoonnummer":"رقم الهاتف",
+    "Klantnummer":"رقم العميل",
+    "Betaaltermijn":"مهلة الدفع",
+    "14 dagen":"14 يومًا",
+    "30 dagen":"30 يومًا",
+    "60 dagen":"60 يومًا",
+    "Omschrijving":"الوصف",
+    "Bedrag":"المبلغ",
+    "Status":"الحالة",
+    "Betaald":"مدفوع",
+    "Nog te betalen":"متبقي للدفع",
+    "Factuur":"فاتورة",
+    "Offerte":"عرض سعر",
+    "Aan":"إلى",
+    "Totaal excl. btw":"الإجمالي قبل الضريبة",
+    "Totaal incl. btw":"الإجمالي شامل الضريبة",
+    "Print / pdf":"طباعة / PDF",
+    "Nieuwe factuur":"فاتورة جديدة",
+    "Nieuwe klus":"مهمة جديدة",
+    "Nieuwe bon scannen":"مسح إيصال جديد",
+    "Open bon":"فتح الإيصال",
+    "Klant":"العميل",
+    "Werkzaamheden":"الأعمال",
+    "Werkbon bewaren":"حفظ أمر العمل",
+    "Nieuwe inkoopboeking":"عملية شراء جديدة",
+    "Kosten":"التكاليف",
+    "Resultaat":"النتيجة",
+    "Betalingen":"المدفوعات",
+    "Boekjaar":"السنة المالية",
+    "Te controleren":"بحاجة للمراجعة",
+    "Mijn boekhouder":"محاسبي",
+    "Export boekhouder":"تصدير للمحاسب",
+    "RGS-journaal":"دفتر RGS",
+    "UBL-facturen":"فواتير UBL",
+    "Volledige back-up":"نسخة احتياطية كاملة",
+    "Inloggen of registreren | Vakento":"تسجيل الدخول أو إنشاء حساب | Vakento",
+    "Terug":"رجوع",
+    "Welkom.":"مرحبًا.",
+    "Nieuw account":"حساب جديد",
+    "Wachtwoord":"كلمة المرور",
+    "Wachtwoord vergeten?":"هل نسيت كلمة المرور؟",
+    "Wachtwoord herstellen":"استعادة كلمة المرور",
+    "Inloggen":"تسجيل الدخول",
+    "Kies een wachtwoord":"اختر كلمة مرور",
+    "Account maken en beginnen":"إنشاء الحساب والبدء",
+    "3 dagen gratis.":"3 أيام مجانًا.",
+    "Heb je al een account?":"هل لديك حساب بالفعل؟",
+    "Wachtwoord vergeten":"نسيت كلمة المرور",
+    "Stuur herstellink":"إرسال رابط الاستعادة",
+    "Account maken…":"جارٍ إنشاء الحساب…",
+    "Inloggen…":"جارٍ تسجيل الدخول…",
+    "Bedrijfsgegevens":"بيانات الشركة",
+    "Bedrijfsnaam":"اسم الشركة",
+    "Adres":"العنوان",
+    "Postcode":"الرمز البريدي",
+    "Plaats":"المدينة",
+    "Telefoon":"الهاتف",
+    "KvK":"رقم السجل التجاري",
+    "btw-nummer":"رقم ضريبة القيمة المضافة",
+    "Briefpapier bewaren":"حفظ بيانات المراسلات",
+    "Vraag":"سؤال",
+    "Stuur":"إرسال",
+    "Vorige":"السابق",
+    "Volgende":"التالي",
+    "Ja":"نعم",
+    "Nee":"لا",
+    "Open de werkplaats":"فتح مساحة العمل",
+    "Naar de werkplaats":"إلى مساحة العمل",
+    "Naar account":"إلى الحساب",
+    "Even wachten.":"يرجى الانتظار.",
+    "Vakento is geïnstalleerd.":"تم تثبيت Vakento."
+  };
+
   function queryLang() {
     const p = new URLSearchParams(location.search).get("lang");
     return SUPPORTED.includes(p) ? p : "";
@@ -1874,10 +2034,18 @@
   }
 
   let lang = queryLang() || storedLang() || browserLang();
-  const source = { ...(dictionaries[lang] || {}), ...(extraDictionaries[lang] || {}) };
+  const source = { ...(dictionaries[lang] || {}), ...(extraDictionaries[lang] || {}), ...(lang === "ar" ? arabicDictionary : {}) };
 
   try { localStorage.setItem("vakento.lang", lang); } catch (_) {}
   document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  if (lang === "ar" && !document.querySelector('link[data-vakento-rtl]')) {
+    const rtl = document.createElement("link");
+    rtl.rel = "stylesheet";
+    rtl.href = "/css/rtl.css?v=1";
+    rtl.dataset.vakentoRtl = "1";
+    document.head.appendChild(rtl);
+  }
 
   function translateText(text) {
     if (!text) return text;

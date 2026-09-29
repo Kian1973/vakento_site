@@ -1,0 +1,11 @@
+html[dir="rtl"] body{direction:rtl;text-align:right}
+html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{direction:rtl;text-align:right}
+html[dir="rtl"] .workspace-sidebar{left:auto!important;right:0!important;border-right:0!important;border-left:1px solid var(--line)}
+html[dir="rtl"] .workspace-main{margin-left:0!important;margin-right:248px!important}
+html[dir="rtl"] .workspace-brand small{margin-left:0!important;margin-right:44px!important}
+html[dir="rtl"] .mobile-nav{left:auto!important;right:0!important}
+html[dir="rtl"] .workspace-nav a,html[dir="rtl"] .workspace-account a{text-align:right}
+html[dir="rtl"] .workspace-topbar,html[dir="rtl"] .nav,html[dir="rtl"] .nav-actions{direction:rtl}
+html[dir="rtl"] .simple-action{text-align:right!important}
+html[dir="rtl"] .language-menu{direction:ltr}
+@media(max-width:899px){html[dir="rtl"] .workspace-main{margin-right:0!important}}

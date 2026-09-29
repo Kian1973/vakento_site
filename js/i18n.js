@@ -2097,6 +2097,7 @@
         <option value="en">EN</option>
         <option value="de">DE</option>
         <option value="pl">PL</option>
+        <option value="ar">AR</option>
       </select>
     `;
 
@@ -2125,7 +2126,7 @@
     }
   }
 
-  const localeMap = { nl: "nl-NL", en: "en-GB", de: "de-DE", pl: "pl-PL" };
+  const localeMap = { nl: "nl-NL", en: "en-GB", de: "de-DE", pl: "pl-PL", ar: "ar" };
   window.VakentoI18n = {
     lang,
     locale: localeMap[lang] || "nl-NL",

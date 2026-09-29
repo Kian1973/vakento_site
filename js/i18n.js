@@ -2233,7 +2233,8 @@
     return SUPPORTED.includes(v) ? v : "nl";
   }
 
-  let lang = queryLang() || storedLang() || browserLang();
+  const isDutchHomepage = location.pathname === "/" || /\/index\.html$/.test(location.pathname);
+  let lang = queryLang() || (isDutchHomepage ? "nl" : (storedLang() || browserLang()));
   const source = { ...(dictionaries[lang] || {}), ...(extraDictionaries[lang] || {}), ...(lang === "ar" ? arabicDictionary : {}) };
 
   try { localStorage.setItem("vakento.lang", lang); } catch (_) {}

@@ -2285,7 +2285,7 @@
   }
 
   function addSwitcher() {
-    if (document.querySelector("[data-vakento-language]")) return;
+    if (document.querySelector("[data-vakento-language], .language-menu")) return;
 
     const wrap = document.createElement("label");
     wrap.dataset.vakentoLanguage = "";

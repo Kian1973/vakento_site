@@ -928,7 +928,8 @@ async function saveReceiptCorrectionToCloud(row) {
 
 function offerteEditorRegel(r = {}) {
   const aantal = Number(r.aantal ?? 1) || 1;
-  const btw = [0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21;
+  const btwVerlegd = r.btwVerlegd === true || r.btw === "verlegd";
+  const btw = btwVerlegd ? 0 : ([0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21);
   const factor = 1 + btw / 100;
   const eenheid = String(r.eenheid || "st");
   const prijsInvoer = r.prijsInvoer === "excl" ? "excl" : "incl";
@@ -979,7 +980,8 @@ function offerteEditorRegel(r = {}) {
       <select name="regel_btw">
         <option value="21" ${btw === 21 ? "selected" : ""}>21%</option>
         <option value="9" ${btw === 9 ? "selected" : ""}>9%</option>
-        <option value="0" ${btw === 0 ? "selected" : ""}>0%</option>
+        <option value="0" ${btw === 0 && !btwVerlegd ? "selected" : ""}>0%</option>
+        <option value="verlegd" ${btwVerlegd ? "selected" : ""}>Btw verlegd</option>
       </select>
     </label>
     <div class="offer-editor-line-total">
@@ -994,7 +996,9 @@ function offerteEditorRegel(r = {}) {
 function offerteRegelsUitEditor(form) {
   return [...form.querySelectorAll("[data-offer-line]")].map((row) => {
     const aantal = Math.max(0, Number(row.querySelector('[name="regel_aantal"]')?.value || 0));
-    const btw = Number(row.querySelector('[name="regel_btw"]')?.value || 21);
+    const btwKeuze = String(row.querySelector('[name="regel_btw"]')?.value || "21");
+    const btwVerlegd = btwKeuze === "verlegd";
+    const btw = btwVerlegd ? 0 : Number(btwKeuze || 21);
     const factor = 1 + btw / 100;
     const mode = row.dataset.priceMode === "excl" ? "excl" : "incl";
     const inputExcl = Math.max(0, Number(row.querySelector('[name="regel_prijs_excl"]')?.value || 0));
@@ -1012,6 +1016,7 @@ function offerteRegelsUitEditor(form) {
       bedrag: Math.round(aantal * stukprijs * 100) / 100,
       bedragInclBtw: Math.round(aantal * stukprijsInclBtw * 100) / 100,
       btw,
+      btwVerlegd,
     };
   }).filter((r) => r.tekst);
 }
@@ -1136,6 +1141,7 @@ function viewPapier(vasteSoort = "") {
             <option value="behang9">9% behangen woning ouder dan 2 jaar</option>
             <option value="isolatieMix">Isolatie: arbeid 9%, materiaal 21%</option>
             <option value="schoonmaak9">9% schoonmaak in woning</option>
+            <option value="verlegd">Btw verlegd</option>
           </select>
         </label>
         <button class="btn btn-ghost" type="button" data-offer-ai>Vul offerteregels met AI</button>
@@ -1198,6 +1204,7 @@ function viewPapier(vasteSoort = "") {
             <option value="21">21%</option>
             <option value="9">9%</option>
             <option value="0">0%</option>
+            <option value="verlegd">Btw verlegd</option>
           </select>
         </label>
       </div>
@@ -1516,7 +1523,8 @@ function bind(root) {
       if (changedName === "regel_prijs_incl") row.dataset.priceMode = "incl";
 
       const mode = row.dataset.priceMode === "excl" ? "excl" : "incl";
-      const btw = Number(row.querySelector('[name="regel_btw"]')?.value || 21);
+      const btwKeuze = String(row.querySelector('[name="regel_btw"]')?.value || "21");
+      const btw = btwKeuze === "verlegd" ? 0 : Number(btwKeuze || 21);
       const factor = 1 + btw / 100;
       const exclInput = row.querySelector('[name="regel_prijs_excl"]');
       const inclInput = row.querySelector('[name="regel_prijs_incl"]');
@@ -1603,6 +1611,7 @@ function bind(root) {
 
       const regelBtw = (r) => {
         const tekst = String(r?.tekst || "").toLowerCase();
+        if (btwCategorie === "verlegd") return 0;
         if (btwCategorie === "standaard21") return 21;
         if (["schilder9","stukadoor9","behang9","schoonmaak9"].includes(btwCategorie)) return 9;
         if (btwCategorie === "isolatieMix") {
@@ -1752,7 +1761,9 @@ function bind(root) {
     const klantId = String(formData.get("klant") || "");
     const titel = String(formData.get("titel") || "").trim();
     const bedrag = Math.max(0, Number(formData.get("bedrag") || 0));
-    const btwRaw = Number(formData.get("btw") || 21);
+    const btwKeuze = String(formData.get("btw") || "21");
+    const btwVerlegd = btwKeuze === "verlegd";
+    const btwRaw = btwVerlegd ? 0 : Number(btwKeuze);
     const btw = [0, 9, 21].includes(btwRaw) ? btwRaw : 21;
     const dag = String(formData.get("dag") || iso(new Date()));
 
@@ -1767,7 +1778,7 @@ function bind(root) {
       klus: "",
       titel,
       bedrag,
-      regels: [{ tekst: titel, bedrag, btw }],
+      regels: [{ tekst: titel, bedrag, btw, btwVerlegd }],
       status: "open",
       dag,
     });

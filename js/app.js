@@ -35,7 +35,7 @@ import {
   htmlFactuur,
   htmlDoc,
   openPapier,
-} from "./papier.js?v=offerte1";
+} from "./papier.js?v=btw-verlegd1";
 import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
@@ -449,22 +449,19 @@ function som(regels) {
 }
 
 function btwOverzicht(regels) {
-  const rows = (regels || []).map((r) => ({
-    bedrag: Number(r.bedrag || 0),
-    btw: [9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21,
-  }));
-  const basis9 = rows.filter((r) => r.btw === 9).reduce((a, r) => a + r.bedrag, 0);
-  const basis21 = rows.filter((r) => r.btw === 21).reduce((a, r) => a + r.bedrag, 0);
+  const rows = (regels || []).map((r) => {
+    const btwVerlegd = r.btwVerlegd === true || r.btw === "verlegd";
+    const btw = btwVerlegd ? 0 : ([0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21);
+    return { bedrag: Number(r.bedrag || 0), btw, btwVerlegd };
+  });
+  const basis9 = rows.filter((r) => r.btw === 9 && !r.btwVerlegd).reduce((a, r) => a + r.bedrag, 0);
+  const basis21 = rows.filter((r) => r.btw === 21 && !r.btwVerlegd).reduce((a, r) => a + r.bedrag, 0);
+  const basis0 = rows.filter((r) => r.btw === 0 && !r.btwVerlegd).reduce((a, r) => a + r.bedrag, 0);
+  const basisVerlegd = rows.filter((r) => r.btwVerlegd).reduce((a, r) => a + r.bedrag, 0);
   const btw9 = basis9 * 0.09;
   const btw21 = basis21 * 0.21;
-  return {
-    excl: basis9 + basis21,
-    basis9,
-    basis21,
-    btw9,
-    btw21,
-    incl: basis9 + basis21 + btw9 + btw21,
-  };
+  const excl = basis9 + basis21 + basis0 + basisVerlegd;
+  return { excl, basis9, basis21, basis0, basisVerlegd, btw9, btw21, incl: excl + btw9 + btw21 };
 }
 
 
@@ -1243,7 +1240,8 @@ function viewPapier(vasteSoort = "") {
 
             <div class="offer-vat-lines">
               ${(o.regels || []).map((r, index) => {
-                const tarief = [9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21;
+                const btwVerlegd = r.btwVerlegd === true || r.btw === "verlegd";
+                const tarief = btwVerlegd ? 0 : ([0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21);
                 return `<div class="offer-vat-line">
                   <div>
                     <strong>${esc(r.tekst || "Regel")}</strong>
@@ -1251,8 +1249,10 @@ function viewPapier(vasteSoort = "") {
                   </div>
                   <label>BTW
                     <select data-offerte-btw="${o.id}|${index}">
-                      <option value="9" ${tarief === 9 ? "selected" : ""}>9%</option>
-                      <option value="21" ${tarief === 21 ? "selected" : ""}>21%</option>
+                      <option value="21" ${tarief === 21 && !btwVerlegd ? "selected" : ""}>21%</option>
+                      <option value="9" ${tarief === 9 && !btwVerlegd ? "selected" : ""}>9%</option>
+                      <option value="0" ${tarief === 0 && !btwVerlegd ? "selected" : ""}>0%</option>
+                      <option value="verlegd" ${btwVerlegd ? "selected" : ""}>Btw verlegd</option>
                     </select>
                   </label>
                 </div>`;
@@ -1262,6 +1262,8 @@ function viewPapier(vasteSoort = "") {
             <div class="offer-vat-summary">
               ${btw.basis9 ? `<span>9%: ${euro(btw.basis9)} + ${euro(btw.btw9)} btw</span>` : ""}
               ${btw.basis21 ? `<span>21%: ${euro(btw.basis21)} + ${euro(btw.btw21)} btw</span>` : ""}
+              ${btw.basis0 ? `<span>0%: ${euro(btw.basis0)}</span>` : ""}
+              ${btw.basisVerlegd ? `<span>Btw verlegd: ${euro(btw.basisVerlegd)}</span>` : ""}
               <strong>Excl. btw ${euro(btw.excl)}</strong>
             </div>
 
@@ -1794,7 +1796,9 @@ function bind(root) {
       const offerte = data.offertes.find((o) => o.id === offerteId);
       const regel = offerte?.regels?.[index];
       if (!regel) return;
-      regel.btw = Number(select.value) === 9 ? 9 : 21;
+      const btwKeuze = String(select.value || "21");
+      regel.btwVerlegd = btwKeuze === "verlegd";
+      regel.btw = regel.btwVerlegd ? 0 : ([0, 9, 21].includes(Number(btwKeuze)) ? Number(btwKeuze) : 21);
 
       // Nieuwe/open facturen van dezelfde klus bijwerken als ze al bestaan.
       data.facturen
@@ -1804,7 +1808,7 @@ function bind(root) {
           f.bedrag = som(f.regels);
         });
 
-      toast("BTW aangepast naar " + regel.btw + "%");
+      toast(regel.btwVerlegd ? "BTW aangepast naar verlegd" : "BTW aangepast naar " + regel.btw + "%");
       persist();
     });
   });

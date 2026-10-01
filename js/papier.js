@@ -88,22 +88,26 @@ function voet(data) {
 }
 
 function regelsTabel(regels) {
-  const normalized = (regels || []).map((r) => ({
-    ...r,
-    bedrag: Number(r.bedrag || 0),
-    btw: [0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21,
-  }));
+  const normalized = (regels || []).map((r) => {
+    const btwVerlegd = r.btwVerlegd === true || r.btw === "verlegd";
+    const btw = btwVerlegd ? 0 : ([0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21);
+    return { ...r, bedrag: Number(r.bedrag || 0), btw, btwVerlegd };
+  });
 
   const rows = normalized
-    .map(
-      (r) =>
-        `<tr><td>${esc(r.tekst)}${r.extra ? `<br><small>${esc(r.extra)}</small>` : ""}${r.aantal && r.stukprijs != null ? `<br><small>${esc(r.aantal)} ${esc(r.eenheid || "st")} × ${esc(euro(r.stukprijs))} · ${r.btw}% btw</small>` : `<br><small>${r.btw}% btw</small>`}</td><td class="num">${esc(euro(r.bedrag))}</td></tr>`
-    )
+    .map((r) => {
+      const btwLabel = r.btwVerlegd ? "Btw verlegd" : (r.btw + "% btw");
+      const details = r.aantal && r.stukprijs != null
+        ? `<br><small>${esc(r.aantal)} ${esc(r.eenheid || "st")} × ${esc(euro(r.stukprijs))} · ${btwLabel}</small>`
+        : `<br><small>${btwLabel}</small>`;
+      return `<tr><td>${esc(r.tekst)}${r.extra ? `<br><small>${esc(r.extra)}</small>` : ""}${details}</td><td class="num">${esc(euro(r.bedrag))}</td></tr>`;
+    })
     .join("");
 
   const excl = normalized.reduce((sum, r) => sum + r.bedrag, 0);
-  const btw9Basis = normalized.filter((r) => r.btw === 9).reduce((sum, r) => sum + r.bedrag, 0);
-  const btw21Basis = normalized.filter((r) => r.btw === 21).reduce((sum, r) => sum + r.bedrag, 0);
+  const btw9Basis = normalized.filter((r) => r.btw === 9 && !r.btwVerlegd).reduce((sum, r) => sum + r.bedrag, 0);
+  const btw21Basis = normalized.filter((r) => r.btw === 21 && !r.btwVerlegd).reduce((sum, r) => sum + r.bedrag, 0);
+  const verlegdBasis = normalized.filter((r) => r.btwVerlegd).reduce((sum, r) => sum + r.bedrag, 0);
   const btw9 = btw9Basis * 0.09;
   const btw21 = btw21Basis * 0.21;
   const totaal = excl + btw9 + btw21;
@@ -116,9 +120,11 @@ function regelsTabel(regels) {
         <tr><td>Totaal excl. btw</td><td class="num">${esc(euro(excl))}</td></tr>
         ${btw9Basis ? `<tr><td>btw 9% over ${esc(euro(btw9Basis))}</td><td class="num">${esc(euro(btw9))}</td></tr>` : ""}
         ${btw21Basis ? `<tr><td>btw 21% over ${esc(euro(btw21Basis))}</td><td class="num">${esc(euro(btw21))}</td></tr>` : ""}
+        ${verlegdBasis ? `<tr><td>Btw verlegd over ${esc(euro(verlegdBasis))}</td><td class="num">€ 0,00</td></tr>` : ""}
         <tr class="totaal"><td>Totaal incl. btw</td><td class="num">${esc(euro(totaal))}</td></tr>
       </tfoot>
-    </table>`;
+    </table>
+    ${verlegdBasis ? `<p style="margin-top:12px"><strong>Btw verlegd</strong> — de btw wordt niet door de leverancier in rekening gebracht.</p>` : ""}`;
 }
 
 const SHEET_CSS = `

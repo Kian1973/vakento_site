@@ -1203,8 +1203,8 @@ function viewPapier(vasteSoort = "") {
       </label>
 
       <div class="grid-2">
-        <label>Bedrag excl. btw
-          <input name="bedrag" type="number" min="0" step="0.01" placeholder="0,00" required>
+        <label>Volledig bedrag excl. btw
+          <input name="bedragBasis" type="number" min="0" step="0.01" placeholder="0,00" required>
         </label>
         <label>BTW
           <select name="btw">
@@ -1216,8 +1216,35 @@ function viewPapier(vasteSoort = "") {
         </label>
       </div>
 
+      <div class="grid-2">
+        <label>Factuursoort
+          <select name="factuurSoort">
+            <option value="normaal">Normale factuur</option>
+            <option value="aanbetaling">Aanbetalingsfactuur</option>
+          </select>
+        </label>
+        <label data-aanbetaling-percentage hidden>Aanbetaling %
+          <input name="aanbetalingPercentage" type="number" min="1" max="100" step="1" value="30" inputmode="numeric">
+        </label>
+      </div>
+
+      <div class="card" data-aanbetaling-preview hidden style="padding:14px">
+        <div class="row">
+          <span class="muted">Factuurbedrag excl. btw</span>
+          <strong data-aanbetaling-excl>€ 0,00</strong>
+        </div>
+        <div class="row">
+          <span class="muted">BTW</span>
+          <strong data-aanbetaling-btw>€ 0,00</strong>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <strong>Te factureren</strong>
+          <strong data-aanbetaling-incl>€ 0,00</strong>
+        </div>
+      </div>
+
       <div class="offer-editor-footer">
-        <p class="muted" style="margin:0">De factuur wordt opgeslagen als openstaand.</p>
+        <p class="muted" style="margin:0" data-factuur-hint>De factuur wordt opgeslagen als openstaand.</p>
         <button class="btn" type="submit">Factuur opslaan</button>
       </div>
     </form>` : ""}
@@ -1776,7 +1803,11 @@ function bind(root) {
     const formData = new FormData(invoiceForm);
     const klantId = String(formData.get("klant") || "");
     const titel = String(formData.get("titel") || "").trim();
-    const bedrag = Math.max(0, Number(formData.get("bedrag") || 0));
+    const basisBedrag = Math.max(0, Number(formData.get("bedragBasis") || 0));
+    const factuurSoort = String(formData.get("factuurSoort") || "normaal");
+    const percentageRaw = Math.max(1, Math.min(100, Number(formData.get("aanbetalingPercentage") || 30)));
+    const percentage = factuurSoort === "aanbetaling" ? percentageRaw : 100;
+    const bedrag = Math.round((basisBedrag * percentage / 100) * 100) / 100;
     const btwKeuze = String(formData.get("btw") || "21");
     const btwVerlegd = btwKeuze === "verlegd";
     const btwRaw = btwVerlegd ? 0 : Number(btwKeuze);
@@ -1785,19 +1816,67 @@ function bind(root) {
 
     if (!klantId) return toast("Kies eerst een klant");
     if (!titel) return toast("Geef de factuur een omschrijving");
-    if (!(bedrag > 0)) return toast("Vul een bedrag groter dan 0 in");
+    if (!(basisBedrag > 0)) return toast("Vul een bedrag groter dan 0 in");
+
+    const factuurTitel = factuurSoort === "aanbetaling"
+      ? `Aanbetaling ${percentage}% · ${titel}`
+      : titel;
 
     data.facturen.unshift({
       id: "f" + Date.now(),
       nr: volgendeFactuurNummer(),
       klant: klantId,
       klus: "",
-      titel,
+      titel: factuurTitel,
       bedrag,
-      regels: [{ tekst: titel, bedrag, btw, btwVerlegd }],
+      basisBedrag,
+      factuurSoort,
+      aanbetalingPercentage: percentage,
+      regels: [{ tekst: factuurTitel, bedrag, btw, btwVerlegd }],
       status: "open",
       dag,
     });
+
+  if (invoiceForm) {
+    const soortEl = invoiceForm.elements.factuurSoort;
+    const pctWrap = invoiceForm.querySelector("[data-aanbetaling-percentage]");
+    const pctEl = invoiceForm.elements.aanbetalingPercentage;
+    const basisEl = invoiceForm.elements.bedragBasis;
+    const btwEl = invoiceForm.elements.btw;
+    const preview = invoiceForm.querySelector("[data-aanbetaling-preview]");
+    const hint = invoiceForm.querySelector("[data-factuur-hint]");
+
+    const updateAanbetalingPreview = () => {
+      const isAanbetaling = String(soortEl?.value || "normaal") === "aanbetaling";
+      if (pctWrap) pctWrap.hidden = !isAanbetaling;
+      if (preview) preview.hidden = !isAanbetaling;
+
+      const basis = Math.max(0, Number(basisEl?.value || 0));
+      const pct = isAanbetaling ? Math.max(1, Math.min(100, Number(pctEl?.value || 30))) : 100;
+      const excl = Math.round((basis * pct / 100) * 100) / 100;
+      const btwKeuze = String(btwEl?.value || "21");
+      const verlegd = btwKeuze === "verlegd";
+      const rate = verlegd ? 0 : ([0,9,21].includes(Number(btwKeuze)) ? Number(btwKeuze) : 21);
+      const vat = Math.round((excl * rate / 100) * 100) / 100;
+      const incl = Math.round((excl + vat) * 100) / 100;
+
+      const exclEl = invoiceForm.querySelector("[data-aanbetaling-excl]");
+      const vatEl = invoiceForm.querySelector("[data-aanbetaling-btw]");
+      const inclEl = invoiceForm.querySelector("[data-aanbetaling-incl]");
+      if (exclEl) exclEl.textContent = euro(excl);
+      if (vatEl) vatEl.textContent = verlegd ? "Btw verlegd" : euro(vat);
+      if (inclEl) inclEl.textContent = euro(incl);
+      if (hint) hint.textContent = isAanbetaling
+        ? `Aanbetalingsfactuur: ${pct}% van het volledige bedrag wordt gefactureerd.`
+        : "De factuur wordt opgeslagen als openstaand.";
+    };
+
+    [soortEl, pctEl, basisEl, btwEl].forEach((el) => {
+      el?.addEventListener("input", updateAanbetalingPreview);
+      el?.addEventListener("change", updateAanbetalingPreview);
+    });
+    updateAanbetalingPreview();
+  }
 
     toast("Factuur opgeslagen");
     persist();

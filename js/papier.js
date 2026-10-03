@@ -133,7 +133,7 @@ const SHEET_CSS = `
 body { margin: 0; background: #d8d0c2; color: #1b1610; font-family: Outfit, Segoe UI, sans-serif; }
 .sheet {
   width: 210mm; min-height: 297mm; margin: 12px auto; padding: 16mm 18mm 18mm;
-  background: #f7f1e6; box-shadow: 0 8px 28px rgba(27,22,16,.18);
+  background: #fff; box-shadow: 0 8px 28px rgba(27,22,16,.18);
 }
 .brief-kop { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start;
   padding-bottom: 14px; border-bottom: 3px solid #a33b1d; }

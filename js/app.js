@@ -476,14 +476,23 @@ function bookMoney(v) {
   return new Intl.NumberFormat(window.VakentoI18n?.locale || "nl-NL", { style: "currency", currency: "EUR" }).format(bookRound(v));
 }
 function invoiceBookCalc(f) {
-  const regels = (f.regels?.length ? f.regels : [{ tekst: f.titel, bedrag: f.bedrag, btw: f.btw || 21 }])
-    .map(r => ({ bedrag: bookNum(r.bedrag), btw: [0,9,21].includes(Number(r.btw)) ? Number(r.btw) : 21 }));
-  const ex9 = bookRound(regels.filter(r=>r.btw===9).reduce((s,r)=>s+r.bedrag,0));
-  const ex21 = bookRound(regels.filter(r=>r.btw===21).reduce((s,r)=>s+r.bedrag,0));
-  const ex0 = bookRound(regels.filter(r=>r.btw===0).reduce((s,r)=>s+r.bedrag,0));
+  const regels = (f.regels?.length ? f.regels : [{ tekst: f.titel, bedrag: f.bedrag, btw: f.btw || 21, btwVerlegd: f.btwVerlegd === true }])
+    .map(r => {
+      const btwVerlegd = r.btwVerlegd === true || r.btw === "verlegd";
+      return {
+        bedrag: bookNum(r.bedrag),
+        btw: btwVerlegd ? 0 : ([0,9,21].includes(Number(r.btw)) ? Number(r.btw) : 21),
+        btwVerlegd
+      };
+    });
+  const ex9 = bookRound(regels.filter(r=>r.btw===9 && !r.btwVerlegd).reduce((s,r)=>s+r.bedrag,0));
+  const ex21 = bookRound(regels.filter(r=>r.btw===21 && !r.btwVerlegd).reduce((s,r)=>s+r.bedrag,0));
+  const ex0 = bookRound(regels.filter(r=>r.btw===0 && !r.btwVerlegd).reduce((s,r)=>s+r.bedrag,0));
+  const exVerlegd = bookRound(regels.filter(r=>r.btwVerlegd).reduce((s,r)=>s+r.bedrag,0));
   const vat9 = bookRound(ex9*.09);
   const vat21 = bookRound(ex21*.21);
-  return { ex9, ex21, ex0, vat9, vat21, ex:bookRound(ex9+ex21+ex0), vat:bookRound(vat9+vat21), incl:bookRound(ex9+ex21+ex0+vat9+vat21) };
+  const ex = bookRound(ex9+ex21+ex0+exVerlegd);
+  return { ex9, ex21, ex0, exVerlegd, vat9, vat21, ex, vat:bookRound(vat9+vat21), incl:bookRound(ex+vat9+vat21) };
 }
 function purchaseBookCalc(x) {
   const rate = [0,9,21].includes(Number(x.btw)) ? Number(x.btw) : null;
@@ -622,14 +631,15 @@ function downloadBookBlob(content, name, type="text/csv;charset=utf-8") {
 }
 function bookPackageFiles() {
   const t = bookTotals();
-  const sales = [["Datum","Factuurnummer","Klant","Omschrijving","Excl 9%","BTW 9%","Excl 21%","BTW 21%","Excl 0%","Totaal excl","Totaal btw","Totaal incl","Status","Betaald op"]];
-  t.sales.forEach(({f,c})=>sales.push([f.dag||"",f.nr||"",klant(data,f.klant)?.name||"",f.titel||"",c.ex9,c.vat9,c.ex21,c.vat21,c.ex0,c.ex,c.vat,c.incl,f.status||"",f.betaaldOp||""]));
+  const sales = [["Datum","Factuurnummer","Klant","Omschrijving","Excl 9%","BTW 9%","Excl 21%","BTW 21%","Excl 0%","Btw verlegd","Totaal excl","Totaal btw","Totaal incl","Status","Betaald op"]];
+  t.sales.forEach(({f,c})=>sales.push([f.dag||"",f.nr||"",klant(data,f.klant)?.name||"",f.titel||"",c.ex9,c.vat9,c.ex21,c.vat21,c.ex0,c.exVerlegd,c.ex,c.vat,c.incl,f.status||"",f.betaaldOp||""]));
   const purchases = [["Datum","Leverancier","Omschrijving","Categorie","Excl btw","BTW %","BTW bedrag","BTW aftrekbaar","Incl btw","Betaalwijze","Status","Bonbestand"]];
   t.purchases.forEach(({x,c})=>purchases.push([x.dag||x.datum||"",x.leverancier||"",x.tekst||x.notitie||"",x.categorie||"4999",c.net,c.rate??"",c.vat,x.btwAftrekbaar===true?"ja":x.btwAftrekbaar===false?"nee":"controle",c.gross,x.betaaldMet||x.betaalwijze||"",x.status||"betaald",x.bestand||""]));
   const vat = [["Onderdeel","Grondslag","BTW"],
     ["Verkoop 9%",bookRound(t.sales.reduce((s,x)=>s+x.c.ex9,0)),bookRound(t.sales.reduce((s,x)=>s+x.c.vat9,0))],
     ["Verkoop 21%",bookRound(t.sales.reduce((s,x)=>s+x.c.ex21,0)),bookRound(t.sales.reduce((s,x)=>s+x.c.vat21,0))],
     ["Verkoop 0%",bookRound(t.sales.reduce((s,x)=>s+x.c.ex0,0)),0],
+    ["Verkoop btw verlegd",bookRound(t.sales.reduce((s,x)=>s+x.c.exVerlegd,0)),0],
     ["Voorbelasting aftrekbaar","",t.inputVat],
     ["Indicatief BTW-saldo","",t.vatDue]
   ];
@@ -1282,11 +1292,15 @@ function viewPapier(vasteSoort = "") {
     <div class="list">
       ${data.facturen
         .map(
-          (f) => `<article class="item"><strong>${f.nr}</strong><span>${f.titel} · ${euro(f.bedrag)} · ${f.status}</span>
+          (f) => {
+          const factuurCalc = invoiceBookCalc(f);
+          const btwLabel = factuurCalc.exVerlegd > 0 ? " · Btw verlegd" : "";
+          return `<article class="item"><strong>${f.nr}</strong><span>${f.titel} · ${euro(factuurCalc.incl)} · ${f.status}${btwLabel}</span>
           <div class="actions">
             <button class="btn btn-ghost" data-print="factuur|${f.id}">Briefpapier</button>
             ${f.status === "open" ? `<button class="btn" data-betaald="${f.id}">Ontvangen</button><button class="btn btn-ghost" data-termijn="${f.id}">Termijn 40%</button>` : `<span class="ok">Betaald</span>`}
-          </div></article>`
+          </div></article>`;
+        }
         )
         .join("")}
     </div>
@@ -2004,17 +2018,32 @@ function bind(root) {
   root.querySelectorAll("[data-termijn]").forEach((btn) =>
     btn.addEventListener("click", () => {
       const f = data.facturen.find((x) => x.id === btn.dataset.termijn);
-      const deel = Math.round(f.bedrag * 0.4);
+      const deel = Math.round(f.bedrag * 0.4 * 100) / 100;
+      const factor = f.bedrag > 0 ? deel / f.bedrag : 0;
+      const termijnRegels = (f.regels || []).map((r) => ({
+        ...r,
+        bedrag: Math.round(bookNum(r.bedrag) * factor * 100) / 100,
+        bedragInclBtw: r.bedragInclBtw != null ? Math.round(bookNum(r.bedragInclBtw) * factor * 100) / 100 : undefined,
+      }));
       data.facturen.unshift({
         id: "f" + Date.now(),
         nr: f.nr + "-T1",
         klant: f.klant,
+        klus: f.klus || "",
         titel: "Termijn 40% · " + f.titel,
         bedrag: deel,
+        regels: termijnRegels.length ? termijnRegels : [{ tekst: "Termijn 40% · " + f.titel, bedrag: deel, btw: f.btw || 21, btwVerlegd: f.btwVerlegd === true }],
         status: "open",
         dag: iso(new Date()),
       });
-      f.bedrag = f.bedrag - deel;
+      f.bedrag = Math.round((f.bedrag - deel) * 100) / 100;
+      if (Array.isArray(f.regels) && f.regels.length) {
+        f.regels = f.regels.map((r) => ({
+          ...r,
+          bedrag: Math.round(bookNum(r.bedrag) * (1 - factor) * 100) / 100,
+          bedragInclBtw: r.bedragInclBtw != null ? Math.round(bookNum(r.bedragInclBtw) * (1 - factor) * 100) / 100 : undefined,
+        }));
+      }
       toast("Termijnfactuur 40%");
       persist();
     })

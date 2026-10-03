@@ -141,13 +141,20 @@
     ]
   }
   </script>
+
+<style>
+.brand-logo{display:inline-flex;align-items:center;line-height:0}
+.brand-logo-img{display:block;width:190px;max-width:42vw;height:auto}
+.site-header .brand-logo-img,.topbar .brand-logo-img{width:178px}
+.footer-brand .brand-logo-img{width:165px}
+@media(max-width:620px){.site-header .brand-logo-img,.topbar .brand-logo-img{width:145px;max-width:48vw}}
+</style>
 </head>
 <body>
   <header class="site-header">
     <div class="shell nav">
-      <a class="brand" href="#top" aria-label="Vakento home">
-        <span class="brand-mark" aria-hidden="true">V</span>
-        <span>vakento</span>
+      <a class="brand brand-logo" href="#top" aria-label="Vakento home">
+        <img src="/assets/vakento-logo.svg" alt="Vakento" class="brand-logo-img">
       </a>
       <nav class="desktop-nav" aria-label="Hoofdnavigatie">
         <a href="#mogelijkheden">Functies</a>

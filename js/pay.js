@@ -38,6 +38,41 @@ async function afterAuth() {
   location.replace("/#inloggen");
 }
 
+async function trackRegistrationConversion() {
+  return new Promise((resolve) => {
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+
+    window.dataLayer = window.dataLayer || [];
+    if (typeof window.gtag !== "function") {
+      window.gtag = function () {
+        window.dataLayer.push(arguments);
+      };
+
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = "https://www.googletagmanager.com/gtag/js?id=AW-18472572363";
+      document.head.appendChild(script);
+
+      window.gtag("js", new Date());
+      window.gtag("config", "AW-18472572363");
+    }
+
+    window.gtag("event", "conversion", {
+      send_to: "AW-18472572363/lPeeCIOA95AdEMurtOhE",
+      value: 1.0,
+      currency: "EUR",
+      event_callback: done,
+    });
+
+    setTimeout(done, 1200);
+  });
+}
+
 
 async function bindAuth(form, mode) {
   form?.addEventListener("submit", async (e) => {
@@ -57,6 +92,9 @@ async function bindAuth(form, mode) {
         email: f.get("email"),
         password: f.get("password"),
       });
+      if (mode === "register") {
+        await trackRegistrationConversion();
+      }
       await afterAuth();
     } catch (ex) {
       showErr(err, ex.message);

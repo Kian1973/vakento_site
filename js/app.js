@@ -43,6 +43,8 @@ import { viewContacten, bindContacten } from "./contacten.js?v=color2";
 import { viewRompslomp, bindRompslomp } from "./rompslomp.js?v=2";
 import { viewBoekhoudingPlus, bindBoekhoudingPlus } from "./boekhouding-plus.js?v=1";
 import { viewBoekhouder, bindBoekhouder } from "./boekhouder.js?v=1";
+import { viewCalculatie, bindCalculatie } from "./calculatie.js?v=1";
+import { viewBelastingcontrole, bindBelastingcontrole } from "./belastingcontrole.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();
@@ -70,7 +72,8 @@ const routes = {
   "#/boekhouding": viewBoekhouding,
   "#/boekhouding-plus": () => viewBoekhoudingPlus(data),
   "#/boekhouder": () => viewBoekhouder(data),
-  "#/calculatie": () => viewCalc(data),
+  "#/calculatie": () => viewCalculatie(data),
+  "#/belastingcontrole": () => viewBelastingcontrole(data),
   "#/taken": () => viewTaken(data),
   "#/cloud": viewCloud,
   "#/slim": () => viewSlim(data),
@@ -362,7 +365,8 @@ function viewMeer() {
       <a class="simple-more-link" href="#/contacten"><strong>Contacten</strong><span>Klanten en leveranciers.</span></a>
       <a class="simple-more-link" href="#/inkoop"><strong>Inkoop</strong><span>Leveranciers en inkopen.</span></a>
       <a class="simple-more-link" href="#/stam"><strong>Artikelen & prijzen</strong><span>Vaste diensten en materialen.</span></a>
-      <a class="simple-more-link" href="#/calculatie"><strong>Calculatie</strong><span>Kosten en toeslagen vooraf.</span></a>
+      <a class="simple-more-link" href="#/calculatie"><strong>Calculatie</strong><span>Uren, materiaal, overhead, winst en btw doorrekenen.</span></a>
+      <a class="simple-more-link" href="#/belastingcontrole"><strong>Belastingcontrole</strong><span>Automatische controle op btw, KOR, uren en investeringen.</span></a>
       <a class="simple-more-link" href="#/taken"><strong>Taken</strong><span>Korte opdrachten en acties.</span></a>
       <a class="simple-more-link" href="#/spullen"><strong>Materiaal</strong><span>Voorraad en spullen.</span></a>
       <a class="simple-more-link" href="#/slim"><strong>Slim werken</strong><span>Werkbon, meerwerk en AI-hulp.</span></a>
@@ -2353,6 +2357,8 @@ function bind(root) {
   bindRompslomp(root, { data, persist, toast });
   bindBoekhoudingPlus(root, { data, persist, toast });
   bindBoekhouder(root, { data, persist, toast });
+  bindCalculatie(root, { data, persist, toast });
+  bindBelastingcontrole(root, { data, persist, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);
 }

@@ -46,6 +46,69 @@
       link: "Open Boekhouding"
     },
     {
+      keys: ["btw aangifte", "omzetbelasting", "kwartaal aangifte", "btw kwartaal", "btw betalen", "aangiftedatum"],
+      title: "BTW-aangifte",
+      answer: "De meeste ondernemers doen btw-aangifte per kwartaal. Voor 2026 zijn de uiterste aangifte- en betaaldatums voor kwartaalaangifte: 30 april, 31 juli, 31 oktober en 31 januari 2027. Controleer altijd Mijn Belastingdienst Zakelijk voor jouw eigen tijdvak en betalingskenmerk.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/uiterste-aangifte-en-betaaldatums",
+      link: "Belastingdienst: btw-datums"
+    },
+    {
+      keys: ["kor", "kleineondernemersregeling", "kleine ondernemersregeling", "omzetgrens kor"],
+      title: "Kleineondernemersregeling (KOR)",
+      answer: "De KOR is een btw-vrijstelling voor ondernemers die aan de voorwaarden voldoen. Bij deelname bereken je in beginsel geen btw aan klanten en trek je in beginsel ook geen btw op kosten en investeringen af. Welke omzet meetelt en of deelname gunstig is, hangt van je situatie af. Controleer de actuele voorwaarden bij de Belastingdienst.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/kor-voorwaarden",
+      link: "Belastingdienst: KOR"
+    },
+    {
+      keys: ["zelfstandigenaftrek", "startersaftrek", "urencriterium", "1225 uur", "ondernemersaftrek"],
+      title: "Zelfstandigenaftrek en startersaftrek 2026",
+      answer: "In 2026 is de zelfstandigenaftrek €1.200 voor ondernemers die aan de voorwaarden en het urencriterium voldoen. De startersaftrek kan de zelfstandigenaftrek onder voorwaarden met €2.123 verhogen. Controleer altijd of je fiscaal ondernemer bent en aan het urencriterium voldoet.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/winst/inkomstenbelasting/veranderingen-inkomstenbelasting-2026/ondernemersaftrek-2026/zelfstandigenaftrek-2026",
+      link: "Belastingdienst: zelfstandigenaftrek 2026"
+    },
+    {
+      keys: ["mkb winstvrijstelling", "mkb-winstvrijstelling", "winstvrijstelling"],
+      title: "Mkb-winstvrijstelling 2026",
+      answer: "De mkb-winstvrijstelling is in 2026 12,7% van de winst na ondernemersaftrek. De vrijstelling wordt automatisch verwerkt in de aangifte als je ondernemer bent voor de inkomstenbelasting. Bij verlies kan de vrijstelling het fiscale verlies juist verkleinen.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/winst/inkomstenbelasting/inkomstenbelasting_voor_ondernemers/mkb_winstvrijstelling",
+      link: "Belastingdienst: mkb-winstvrijstelling"
+    },
+    {
+      keys: ["kia", "investeringsaftrek", "kleinschaligheidsinvesteringsaftrek", "investering bedrijfsmiddel"],
+      title: "Kleinschaligheidsinvesteringsaftrek 2026",
+      answer: "Voor de KIA moet je in 2026 in totaal tussen €2.901 en €398.236 investeren in kwalificerende bedrijfsmiddelen. Een bedrijfsmiddel van minder dan €450 komt in beginsel niet voor KIA in aanmerking. Het exacte aftrekbedrag hangt af van je totale investeringsbedrag.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/winst/inkomstenbelasting/veranderingen-inkomstenbelasting-2026/investeringsaftrek-2026/kleinschaligheidsinvesteringsaftrek-2026",
+      link: "Belastingdienst: KIA 2026"
+    },
+    {
+      keys: ["zakelijke kosten", "aftrekbare kosten", "kosten aftrekken", "prive zakelijk", "gemengde kosten"],
+      title: "Zakelijke kosten",
+      answer: "Zakelijke kosten zijn in beginsel aftrekbaar van de winst voor zover ze voor de onderneming zijn gemaakt. Bij gemengde of privé-uitgaven gelden beperkingen of correcties. Bewaar facturen en bonnen en leg bij twijfel vast waarom een uitgave zakelijk is.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/nl/ondernemers/content/welke-kosten-mag-ik-aftrekken",
+      link: "Belastingdienst: zakelijke kosten"
+    },
+    {
+      keys: ["bewaarplicht", "administratie bewaren", "7 jaar", "bewaartermijn", "boekhouding bewaren"],
+      title: "Administratie en bewaarplicht",
+      answer: "Ondernemers moeten hun administratie bewaren. Voor veel basisgegevens geldt een fiscale bewaarplicht van 7 jaar; voor bepaalde gegevens, waaronder sommige gegevens over onroerende zaken, kan een langere termijn gelden. Zorg dat facturen, bonnen, bankgegevens en onderliggende administratie terugvindbaar blijven.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/nl/ondernemers/content/administratie-bewaren",
+      link: "Belastingdienst: administratie bewaren"
+    },
+    {
+      keys: ["inkomstenbelasting", "winst belasting", "belasting over winst", "voorlopige aanslag", "ib ondernemer"],
+      title: "Inkomstenbelasting voor ondernemers",
+      answer: "Bij een eenmanszaak of vof wordt de fiscale winst in beginsel belast in de inkomstenbelasting. Ondernemersaftrek, mkb-winstvrijstelling en persoonlijke omstandigheden kunnen het belastbare bedrag beïnvloeden. Reserveer gedurende het jaar geld voor inkomstenbelasting en bijdrage Zorgverzekeringswet en overweeg een voorlopige aanslag.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/nl/ondernemers/content/inkomstenbelasting",
+      link: "Belastingdienst: inkomstenbelasting"
+    },
+    {
+      keys: ["btw verlegd", "verleggingsregeling", "btw verleggen", "onderaannemer", "aannemer"],
+      title: "BTW verlegd",
+      answer: "Bij bepaalde leveringen en diensten moet de btw worden verlegd naar de afnemer. Dit komt onder andere voor in delen van de bouw en bij onderaanneming. Zet bij toepassing van de verleggingsregeling geen normaal btw-bedrag op de factuur maar vermeld de vereiste verleggingsinformatie. Controleer altijd of de wettelijke voorwaarden in jouw situatie gelden.",
+      href: "https://www.belastingdienst.nl/wps/wcm/connect/nl/btw/content/btw-verleggen",
+      link: "Belastingdienst: btw verleggen"
+    },
+    {
       keys: ["cloud", "bestand", "bestanden", "opslag", "map", "mappen", "document"],
       title: "Vakento Cloud",
       answer: "In de Vakento Cloud bewaar je documenten, bonnen, werkfoto's en andere bestanden. Zo blijven bestanden bij je werk en hoef je niet te zoeken tussen losse telefoons en computers.",
@@ -145,7 +208,7 @@
     }
   ];
 
-  const GENERAL = "Ik ben Max, de Vakento-hulp. Vraag me bijvoorbeeld hoe je een offerte maakt, bonnen scant, contacten beheert, 9% btw gebruikt, uren boekt, bestanden in de Cloud zet of de mobiele app gebruikt.";
+  const GENERAL = "Ik ben Max, je Vakento-, boekhoud- en belastinghulp voor Nederlandse zzp’ers en kleine bedrijven. Vraag me over offertes, facturen, btw, KOR, zakelijke kosten, inkomstenbelasting, ondernemersaftrek, investeringen, boekhouding of het gebruik van Vakento. Belastingregels kunnen per jaar en situatie verschillen; bij belangrijke beslissingen verwijs ik je naar de actuele Belastingdienst-regels.";
 
   const css = document.createElement("style");
   css.textContent = `
@@ -188,12 +251,12 @@
   panel.innerHTML = `
     <div class="max-head">
       <div class="max-avatar">M</div>
-      <div><strong>Max</strong><small>Vakento-hulp</small></div>
+      <div><strong>Max</strong><small>Vakento · boekhouding · belasting</small></div>
       <button class="max-close" type="button" aria-label="Sluiten">×</button>
     </div>
     <div class="max-messages" data-max-messages></div>
     <form class="max-form" data-max-form>
-      <input name="q" autocomplete="off" placeholder="Vraag iets over Vakento..." aria-label="Vraag aan Max">
+      <input name="q" autocomplete="off" placeholder="Vraag Max over Vakento, boekhouding of belasting..." aria-label="Vraag aan Max">
       <button type="submit">Stuur</button>
     </form>
   `;
@@ -262,7 +325,7 @@
           local:{tekst:fallback?.answer || GENERAL},
           context:{
             vraag:question,
-            rol:"Je bent Max, de helpchat van Vakento. Antwoord alleen over de mogelijkheden en het gebruik van Vakento. Wees kort, duidelijk en praktisch. Verzin geen functies die niet in de kennis staan.",
+            rol:"Je bent Max, de assistent van Vakento voor Nederlandse zzp’ers en kleine bedrijven. Je beantwoordt vragen over Vakento, boekhouding, btw, inkomstenbelasting en ondernemingsbelastingen. Wees duidelijk, praktisch en voorzichtig. Gebruik de meegegeven kennis als basis. Verzin geen tarieven, aftrekposten, deadlines of wettelijke voorwaarden. Benoem bij fiscale vragen het belastingjaar als dat relevant is. Als een antwoord afhangt van de persoonlijke situatie of actuele wetgeving, zeg dat duidelijk en adviseer controle bij de Belastingdienst of een boekhouder. Geef geen zekerheid waar die niet bestaat.",
             vakento:KNOWLEDGE
           }
         })
@@ -299,7 +362,7 @@
       addMsg('<strong>Hoi, ik ben Max.</strong><br>' + escapeHtml(GENERAL));
       const quick = document.createElement("div");
       quick.className = "max-quick";
-      ["Bonnen scannen","Offerte maken","9% btw","Contacten","Mobiele app","Boekhouding"].forEach(label => {
+      ["BTW-aangifte","Zakelijke kosten","Zelfstandigenaftrek","KOR","Bonnen scannen","Boekhouding"].forEach(label => {
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = label;

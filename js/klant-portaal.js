@@ -47,6 +47,11 @@ function render(box, data, k) {
   const facturen = (data.facturen || []).filter((f) => f.klant === k.klant && f.titel && (f.titel.includes(k.title) || f.klus === k.id));
   const factAlt = facturen.length ? facturen : (data.facturen || []).filter((f) => f.klant === k.klant).slice(0, 3);
   const bonnen = (data.bonnen || []).filter((b) => b.klus === k.id);
+  const documenten = (data.documenten || []).filter((d) => d.klus === k.id || d.klant === k.klant);
+  const werkbonnen = (data.werkbonnen || []).filter((w) => w.klus === k.id);
+  const openstaand = factAlt.filter((f) => f.status === "open").reduce((s, f) => s + Number(f.bedrag || 0), 0);
+  const gefactureerd = factAlt.reduce((s, f) => s + Number(f.bedrag || 0), 0);
+  const offerteTotaal = offertes.reduce((s,o)=>s+som(o.regels),0);
   const ploeg = (k.people || []).map((id) => person(id)).filter(Boolean);
   const logo = p.logo
     ? `<img class="portal-logo" src="${p.logo}" alt="${esc(data.firm)}">`
@@ -77,6 +82,19 @@ function render(box, data, k) {
             `<li class="${i < idx ? "done" : i === idx ? "now" : ""}"><span>${i + 1}</span>${esc(s.label)}</li>`
         ).join("")}
       </ol>
+    </section>
+
+    <section class="card portal-block">
+      <p class="kicker">Overzicht</p>
+      <div class="portal-grid">
+        <article><strong>Offerte</strong><p class="money">${esc(euro(offerteTotaal))}</p></article>
+        <article><strong>Gefactureerd</strong><p class="money">${esc(euro(gefactureerd))}</p></article>
+        <article><strong>Openstaand</strong><p class="money">${esc(euro(openstaand))}</p></article>
+      </div>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn btn-ghost" type="button" data-print>Print / bewaar als PDF</button>
+        ${k.cloudShareUrl ? `<a class="btn" href="${esc(k.cloudShareUrl)}" target="_blank" rel="noopener">Documenten openen</a>` : ""}
+      </div>
     </section>
 
     <div class="portal-grid">
@@ -157,6 +175,18 @@ function render(box, data, k) {
         : `<section class="card portal-block"><p class="kicker">Werk</p><h3>Nog geen rapport</h3><p class="muted">Foto’s en toelichting komen hier zodra de ploeg een werkbon zet.</p></section>`
     }
 
+    ${werkbonnen.length ? `<section class="card portal-block">
+      <p class="kicker">Werkbonnen</p>
+      <h3>Uitgevoerde werkzaamheden</h3>
+      <div class="list">${werkbonnen.map(w=>`<article class="item"><strong>${esc(w.titel||w.tekst||"Werkbon")}</strong><span>${esc(w.tekst||w.omschrijving||"")}</span></article>`).join("")}</div>
+    </section>` : ""}
+
+    ${documenten.length ? `<section class="card portal-block">
+      <p class="kicker">Documenten</p>
+      <h3>Bestanden bij deze klus</h3>
+      <div class="list">${documenten.map(d=>`<article class="item"><strong>${esc(d.naam||d.name||"Document")}</strong><span>${esc(d.soort||d.type||"Bestand")}</span></article>`).join("")}</div>
+    </section>` : ""}
+
     <section class="card portal-contact">
       <p class="kicker">Contact</p>
       <h3>${esc(data.firm)}</h3>
@@ -179,4 +209,5 @@ if (!k) renderUnknown(box);
 else {
   document.title = k.title + " | " + (data.firm || "Vakento");
   render(box, data, k);
+  box.querySelector("[data-print]")?.addEventListener("click", () => window.print());
 }

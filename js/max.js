@@ -313,6 +313,35 @@
 
   const KNOWLEDGE = KB.map(x => x.title + ": " + x.answer).join("\n");
 
+  function currentBusinessContext() {
+    try {
+      const uid = sessionStorage.getItem("vakento.uid") || "";
+      const key = uid ? "vakento.v3." + uid : "vakento.v3";
+      const d = JSON.parse(localStorage.getItem(key) || "{}");
+      const invoices = Array.isArray(d.facturen) ? d.facturen : [];
+      const expenses = Array.isArray(d.inkoop) ? d.inkoop : [];
+      const hours = Array.isArray(d.uren) ? d.uren : [];
+      const open = invoices.filter(f => String(f.status || "").toLowerCase() === "open");
+      const turnover = invoices.reduce((s,f) => s + Number(f.bedrag || 0), 0);
+      const costs = expenses.reduce((s,x) => s + Number(x.bedrag || 0), 0);
+      const totalHours = hours.reduce((s,x) => s + Number(x.uren || 0), 0);
+      return [
+        "Bedrijf: " + String(d.firm || ""),
+        "Aantal klanten: " + (Array.isArray(d.klanten) ? d.klanten.length : 0),
+        "Aantal klussen: " + (Array.isArray(d.klussen) ? d.klussen.length : 0),
+        "Aantal facturen: " + invoices.length,
+        "Openstaande facturen: " + open.length,
+        "Totaal factuurbedrag in opgeslagen administratie: " + turnover.toFixed(2),
+        "Totaal geregistreerde inkoop: " + costs.toFixed(2),
+        "Totaal geregistreerde uren: " + totalHours.toFixed(1),
+        "KOR ingesteld: " + (d.taxSettings?.kor ? "ja" : "nee"),
+        "IB-ondernemer ingesteld: " + (d.taxSettings?.ibEntrepreneur ? "ja" : "nee")
+      ].join("\n");
+    } catch (_) {
+      return "Geen lokale bedrijfscontext beschikbaar.";
+    }
+  }
+
   async function askServer(question, fallback) {
     try {
       const res = await fetch("/api/brein", {
@@ -326,7 +355,8 @@
           context:{
             vraag:question,
             rol:"Je bent Max, de assistent van Vakento voor Nederlandse zzp’ers en kleine bedrijven. Je beantwoordt vragen over Vakento, boekhouding, btw, inkomstenbelasting en ondernemingsbelastingen. Wees duidelijk, praktisch en voorzichtig. Gebruik de meegegeven kennis als basis. Verzin geen tarieven, aftrekposten, deadlines of wettelijke voorwaarden. Benoem bij fiscale vragen het belastingjaar als dat relevant is. Als een antwoord afhangt van de persoonlijke situatie of actuele wetgeving, zeg dat duidelijk en adviseer controle bij de Belastingdienst of een boekhouder. Geef geen zekerheid waar die niet bestaat.",
-            vakento:KNOWLEDGE
+            vakento:KNOWLEDGE,
+            bedrijfscontext:currentBusinessContext()
           }
         })
       });

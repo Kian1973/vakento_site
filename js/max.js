@@ -109,6 +109,20 @@
       link: "Belastingdienst: btw verleggen"
     },
     {
+      keys: ["calculatie", "voorcalculatie", "kostprijs", "winstopslag", "overhead", "marge", "verkoopprijs"],
+      title: "Calculatie",
+      answer: "In Calculatie reken je uren, uurtarief, materiaal, onderaanneming, reis- en overige kosten, overhead, winstopslag en btw door. Je kunt een calculatie bewaren en er direct een conceptofferte van maken.",
+      href: "/werk.html#/calculatie",
+      link: "Open Calculatie"
+    },
+    {
+      keys: ["belastingcontrole", "fiscale controle", "btw controle", "belasting check", "belastingcheck"],
+      title: "Belastingcontrole",
+      answer: "De Belastingcontrole controleert je Vakento-administratie op opvallende btw-instellingen, KOR in combinatie met btw, ontbrekende bewijsstukken, geregistreerde ondernemersuren en 2026-investeringen voor een KIA-indicatie. Het is een controlehulp en geen automatische belastingaangifte.",
+      href: "/werk.html#/belastingcontrole",
+      link: "Open Belastingcontrole"
+    },
+    {
       keys: ["cloud", "bestand", "bestanden", "opslag", "map", "mappen", "document"],
       title: "Vakento Cloud",
       answer: "In de Vakento Cloud bewaar je documenten, bonnen, werkfoto's en andere bestanden. Zo blijven bestanden bij je werk en hoef je niet te zoeken tussen losse telefoons en computers.",

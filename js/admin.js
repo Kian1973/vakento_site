@@ -30,8 +30,15 @@ function rowUser(u) {
           <option value="werkplaats" ${plan === "werkplaats" ? "selected" : ""}>Pro</option>
           <option value="proplus" ${plan === "proplus" ? "selected" : ""}>Pro+</option>
         </select>
-        <input data-months="${u.id}" type="number" min="1" max="1200" value="1" style="width:78px" aria-label="Aantal maanden">
-        <button class="btn btn-ghost" data-membership="${u.id}">Toepassen</button>
+        <select data-months="${u.id}" aria-label="Duur lidmaatschap">
+          <option value="1">1 maand</option>
+          <option value="3">3 maanden</option>
+          <option value="6">6 maanden</option>
+          <option value="12" selected>12 maanden</option>
+          <option value="24">24 maanden</option>
+          <option value="60">5 jaar</option>
+        </select>
+        <button class="btn" data-membership="${u.id}">${u.trial ? "Maak lid" : "Verleng lidmaatschap"}</button>
         <button class="btn btn-ghost" data-gb="${u.id}">+1 GB</button>
         ${u.admin ? '<span class="muted">Beveiligd</span>' : `<button class="btn btn-ghost" type="button" data-delete-member="${u.id || ""}" data-delete-email="${u.email || ""}" style="border-color:#b42318;color:#b42318">Verwijderen</button>`}
       </div>
@@ -60,8 +67,24 @@ async function teken(data) {
       const id = btn.dataset.membership;
       const plan = board.querySelector(`[data-plan="${id}"]`).value;
       const months = Number(board.querySelector(`[data-months="${id}"]`).value);
-      await api("/api/admin/lidmaatschap", { userId: id, plan, months });
-      await laad();
+      const original = btn.textContent;
+      btn.disabled = true;
+      const isTrial = btn.closest("tr")?.dataset.state === "trial";
+      btn.textContent = isTrial ? "Activeren…" : "Verlengen…";
+      try {
+        await api("/api/admin/lidmaatschap", {
+          userId: id,
+          plan,
+          months,
+          endTrial: true,
+          activate: true
+        });
+        await laad();
+      } catch (ex) {
+        alert(ex.message || "Lidmaatschap aanpassen is niet gelukt.");
+        btn.disabled = false;
+        btn.textContent = original;
+      }
     })
   );
   board.querySelectorAll("[data-gb]").forEach((btn) =>

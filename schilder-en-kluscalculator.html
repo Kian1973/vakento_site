@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ff6b35">
+  <title>Schilderwerk- en kluscalculator | Gratis berekenen | Vakento</title>
+  <meta name="description" content="Bereken zelf uren, verf, materialen, offerteprijs en btw voor muren, plafonds, kozijnen, deuren en houtrot. Twee berekeningen gratis bij Vakento.">
+  <link rel="canonical" href="https://vakento.nl/schilder-en-kluscalculator.html">
+  <link rel="icon" href="/assets/vakento-app-icon.svg" type="image/svg+xml">
+  <style>
+    :root{--bg:#f6f8fa;--ink:#162434;--muted:#637184;--line:#dee4eb;--brand:#ff6b35;--dark:#13212f;--soft:#fff1e9}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+    .shell{width:min(1120px,calc(100% - 32px));margin:0 auto}
+    header{background:white;border-bottom:1px solid var(--line)}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:15px 0}
+    .nav img{width:170px;max-width:42vw;display:block}
+    .nav-right{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    a{color:inherit}
+    .nav-right a{text-decoration:none;font-weight:700;font-size:.9rem}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;background:var(--brand);color:white!important;text-decoration:none;font-weight:800;font-size:1rem;padding:13px 20px;cursor:pointer}
+    .btn:hover{background:#df501e}
+    .btn:disabled{background:#a9b3be;cursor:not-allowed}
+    .btn-alt{background:white!important;color:var(--ink)!important;border:1px solid var(--line)}
+    .hero{background:radial-gradient(circle at 90% 10%,#ffe2d2 0,transparent 35%),white;padding:48px 0 43px}
+    .kicker{font-size:.83rem;letter-spacing:.09em;text-transform:uppercase;color:#b34620;font-weight:850}
+    h1{font-size:clamp(2.1rem,5vw,3.55rem);letter-spacing:-.04em;line-height:1.13;max-width:820px;margin:14px 0}
+    .hero p{max-width:820px;color:var(--muted);font-size:1.09rem}
+    .counter{display:inline-flex;margin-top:7px;padding:10px 16px;border:1px solid #f2d6c7;background:#fff4ee;border-radius:100px;color:#923d1e;font-weight:800}
+    main{padding:34px 0 70px}
+    .intro{margin:0 0 25px;color:var(--muted)}
+    .work-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+    fieldset{border:1px solid var(--line);min-width:0}
+    .work{background:white;border-radius:19px;padding:21px;box-shadow:0 10px 30px #162b430a}
+    .work legend{font-size:1.18rem;font-weight:900;padding:0 7px}
+    .work .toggle{display:flex;align-items:center;gap:10px;font-weight:750;color:#263646;margin-bottom:14px}
+    .work .toggle input{width:20px;height:20px;accent-color:#e7602f;flex-shrink:0}
+    .work:not(.selected){background:#fdfdfd}
+    .work:not(.selected) .details{opacity:.65}
+    .help{margin:0 0 8px;font-size:.9rem;color:var(--muted)}
+    .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px;row-gap:10px}
+    label.field{font-size:.84rem;font-weight:750;display:block}
+    input:not([type=checkbox]),select{width:100%;padding:11px;margin-top:5px;border:1px solid #cbd3dd;border-radius:10px;font:inherit;color:var(--ink);background:#fff}
+    input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2673bb;outline-offset:3px}
+    .settings{background:white;border:1px solid var(--line);border-radius:19px;padding:23px;margin-top:22px}
+    .settings h2{font-size:1.3rem;margin:0 0 8px}
+    .settings p{font-size:.92rem;color:var(--muted);margin:0 0 13px}
+    .settings .fields{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+    .error{color:#b51f2d;font-weight:700;margin:12px 0}
+    .result{margin-top:30px;background:white;border:1px solid var(--line);border-radius:20px;padding:25px}
+    .result h2{margin:0 0 6px}
+    .result p{color:var(--muted)}
+    .summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}
+    .metric{background:#fff2eb;border-radius:13px;padding:13px}
+    .metric span{display:block;color:#734432;font-size:.85rem}
+    .metric strong{display:block;font-size:1.35rem}
+    table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+    th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:right}
+    th:first-child,td:first-child{text-align:left}
+    .scroll{overflow-x:auto}
+    .small{font-size:.87rem;color:var(--muted)}
+    .totals{margin:20px 0 0 auto;max-width:530px}
+    .totals .line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:8px 2px}
+    .totals .line strong{white-space:nowrap}
+    .totals .main{font-size:1.3rem;font-weight:900}
+    .gate{margin-top:25px;padding:28px;border-radius:20px;background:var(--dark);color:white}
+    .gate h2{margin:0 0 8px}
+    .gate p{margin:0 0 17px;color:#c9d5e1}
+    [hidden]{display:none!important}
+    .footnote{font-size:.9rem;color:var(--muted);margin-top:23px}
+    footer{background:white;border-top:1px solid var(--line);padding:23px 0;color:var(--muted);font-size:.9rem}
+    @media(max-width:780px){.work-list{grid-template-columns:1fr}.settings .fields{grid-template-columns:repeat(2,minmax(0,1fr))}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:460px){.fields,.settings .fields{grid-template-columns:1fr}.summary{grid-template-columns:1fr}.work,.settings,.result{padding:16px}.nav{align-items:flex-start}.hero{padding:33px 0}}
+    @media print{header,.counter,.actions,.gate,.footnote,.intro,.work-list,.settings,footer{display:none!important}body{background:white}.result{border:none;padding:0;margin:0}}
+  </style>
+  <script src="/assets/schilder-calculator.js?v=1" defer></script>
+</head>
+<body>
+  <header><div class="shell nav">
+    <a href="/" aria-label="Vakento homepage"><img src="/assets/vakento-logo.svg" alt="Vakento"></a>
+    <div class="nav-right">
+      <a href="/calculators.html">Andere calculators</a>
+      <a href="/account.html?mode=login&amp;lang=nl">Inloggen</a>
+      <a href="/account.html?mode=register&amp;lang=nl" class="btn">Lid worden</a>
+    </div>
+  </div></header>
+  <section class="hero"><div class="shell">
+    <span class="kicker">Vakento • voor vakmensen</span>
+    <h1>Schilderwerk- en kluscalculator</h1>
+    <p>Bereken muren, plafonds, kozijnen, deuren en houtrot samen in één klus. Je ziet de geschatte werkuren, benodigde liters verf, materiaalkosten en offerteprijs. Pas alle aannames aan jouw manier van werken aan.</p>
+    <div class="counter" id="remaining" aria-live="polite">Gratis berekeningen controleren…</div>
+  </div></section>
+  <main class="shell">
+    <p class="intro">Vink de werkzaamheden aan die bij jouw klus horen. Een berekening met meerdere onderdelen telt als <strong>één gratis berekening</strong>. De eerste twee berekeningen zijn gratis, gedeeld met de andere Vakento-calculators.</p>
+    <form id="estimator" novalidate>
+      <div class="work-list">
+        <fieldset class="work selected" data-kind="walls"><legend>Muren schilderen</legend>
+          <label class="toggle"><input name="include" type="checkbox" checked> Meerekenen</label>
+          <div class="details">
+            <p class="help">Vul het netto schilderoppervlak in, dus exclusief ramen en deuren.</p>
+            <div class="fields">
+              <label class="field">Oppervlak (m²)<input name="quantity" type="number" min="0" step="any" value="40" inputmode="decimal"></label>
+              <label class="field">Arbeid (uur per m²)<input name="labor" type="number" min="0" step="any" value="0.20" inputmode="decimal"></label>
+              <label class="field">Aantal lagen<input name="coats" type="number" min="1" max="10" step="1" value="2"></label>
+              <label class="field">Dekking (m² per liter per laag)<input name="coverage" type="number" min="0.1" step="any" value="9"></label>
+              <label class="field">Verfprijs per liter excl. btw (€)<input name="paintPrice" type="number" min="0" step="any" value="20"></label>
+              <label class="field">Andere materialen per m² excl. btw (€)<input name="otherUnit" type="number" min="0" step="any" value="1"></label>
+              <label class="field">Btw-tarief<select name="vat"><option value="21" selected>21%</option><option value="9">9%</option></select></label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="work" data-kind="ceilings"><legend>Plafonds schilderen</legend>
+          <label class="toggle"><input name="include" type="checkbox"> Meerekenen</label>
+          <div class="details">
+            <p class="help">Vul het netto plafondoppervlak in, inclusief eventueel extra voor strijklicht.</p>
+            <div class="fields">
+              <label class="field">Oppervlak (m²)<input name="quantity" type="number" min="0" step="any" value="35"></label>
+              <label class="field">Arbeid (uur per m²)<input name="labor" type="number" min="0" step="any" value="0.25"></label>
+              <label class="field">Aantal lagen<input name="coats" type="number" min="1" max="10" step="1" value="2"></label>
+              <label class="field">Dekking (m² per liter per laag)<input name="coverage" type="number" min="0.1" step="any" value="9"></label>
+              <label class="field">Verfprijs per liter excl. btw (€)<input name="paintPrice" type="number" min="0" step="any" value="22"></label>
+              <label class="field">Andere materialen per m² excl. btw (€)<input name="otherUnit" type="number" min="0" step="any" value="1.25"></label>
+              <label class="field">Btw-tarief<select name="vat"><option value="21" selected>21%</option><option value="9">9%</option></select></label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="work" data-kind="frames"><legend>Kozijnen schilderen</legend>
+          <label class="toggle"><input name="include" type="checkbox"> Meerekenen</label>
+          <div class="details">
+            <p class="help">Meet het geschatte te schilderen houtoppervlak per kozijn. De tijd is inclusief gangbare voorbereiding.</p>
+            <div class="fields">
+              <label class="field">Aantal kozijnen<input name="quantity" type="number" min="0" step="1" value="5"></label>
+              <label class="field">Schilderoppervlak per kozijn (m²)<input name="surface" type="number" min="0" step="any" value="1.2"></label>
+              <label class="field">Arbeid per kozijn (uur)<input name="labor" type="number" min="0" step="any" value="2.5"></label>
+              <label class="field">Aantal lagen<input name="coats" type="number" min="1" max="10" step="1" value="2"></label>
+              <label class="field">Dekking (m² per liter per laag)<input name="coverage" type="number" min="0.1" step="any" value="10"></label>
+              <label class="field">Verfprijs per liter excl. btw (€)<input name="paintPrice" type="number" min="0" step="any" value="33"></label>
+              <label class="field">Andere materialen per kozijn (€)<input name="otherUnit" type="number" min="0" step="any" value="5"></label>
+              <label class="field">Btw-tarief<select name="vat"><option value="21" selected>21%</option><option value="9">9%</option></select></label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="work" data-kind="doors"><legend>Deuren schilderen</legend>
+          <label class="toggle"><input name="include" type="checkbox"> Meerekenen</label>
+          <div class="details">
+            <p class="help">Het oppervlak van 3,4 m² is een schatting voor beide zijden van één deur. Pas dit aan.</p>
+            <div class="fields">
+              <label class="field">Aantal deuren<input name="quantity" type="number" min="0" step="1" value="3"></label>
+              <label class="field">Schilderoppervlak per deur (m²)<input name="surface" type="number" min="0" step="any" value="3.4"></label>
+              <label class="field">Arbeid per deur (uur)<input name="labor" type="number" min="0" step="any" value="3"></label>
+              <label class="field">Aantal lagen<input name="coats" type="number" min="1" max="10" step="1" value="2"></label>
+              <label class="field">Dekking (m² per liter per laag)<input name="coverage" type="number" min="0.1" step="any" value="10"></label>
+              <label class="field">Verfprijs per liter excl. btw (€)<input name="paintPrice" type="number" min="0" step="any" value="33"></label>
+              <label class="field">Andere materialen per deur (€)<input name="otherUnit" type="number" min="0" step="any" value="5"></label>
+              <label class="field">Btw-tarief<select name="vat"><option value="21" selected>21%</option><option value="9">9%</option></select></label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="work" data-kind="rot"><legend>Houtrot herstellen</legend>
+          <label class="toggle"><input name="include" type="checkbox"> Meerekenen</label>
+          <div class="details">
+            <p class="help">Voor kleine reparatieplekken. Vervangen van houtdelen kan anders belast en geprijsd zijn; vul schilderwerk apart in.</p>
+            <div class="fields">
+              <label class="field">Aantal reparatieplekken<input name="quantity" type="number" min="0" step="1" value="2"></label>
+              <label class="field">Arbeid per plek (uur)<input name="labor" type="number" min="0" step="any" value="2"></label>
+              <label class="field">Reparatiemateriaal per plek (€)<input name="otherUnit" type="number" min="0" step="any" value="20"></label>
+              <label class="field">Btw-tarief<select name="vat"><option value="21" selected>21%</option><option value="9">9% (indien van toepassing)</option></select></label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <section class="settings" aria-labelledby="settings-title">
+        <h2 id="settings-title">Uurtarief, opslag en overige kosten</h2>
+        <p>Alle prijzen zijn richtbedragen exclusief btw, geen actuele marktprijzen. Pas ze aan je eigen inkoopprijzen en tijdsinschatting aan. De opslag wordt toegepast op de berekende verkoopwaarde van arbeid en materialen.</p>
+        <div class="fields">
+          <label class="field">Uurtarief excl. btw (€)<input id="hourRate" type="number" min="0" step="any" value="55"></label>
+          <label class="field">Extra voorbereiding (uren)<input id="prepHours" type="number" min="0" step="any" value="1"></label>
+          <label class="field">Overheadopslag (%)<input id="overhead" type="number" min="0" max="1000" step="any" value="8"></label>
+          <label class="field">Extra prijsopslag (%)<input id="markup" type="number" min="0" max="1000" step="any" value="10"></label>
+          <label class="field">Reis/overige kosten excl. btw (€)<input id="extras" type="number" min="0" step="any" value="35"></label>
+          <label class="field">Btw overige kosten/voorbereiding<select id="extrasVat"><option value="21" selected>21%</option><option value="9">9% (indien van toepassing)</option></select></label>
+          <label class="field">Extra verfmarge (%)<input id="waste" type="number" min="0" max="1000" step="any" value="10"></label>
+        </div>
+      </section>
+      <div class="actions">
+        <button id="calculate" type="submit" class="btn" disabled>Bereken mijn klus</button>
+        <a href="/calculators.html" class="btn btn-alt">Andere calculators</a>
+      </div>
+      <p class="error" id="error" role="alert" aria-live="assertive"></p>
+    </form>
+    <section id="result" class="result" hidden aria-live="polite">
+      <h2>Jouw klusberekening</h2>
+      <p>Indicatie op basis van jouw ingevulde gegevens. Geen officiële offerte.</p>
+      <div class="summary">
+        <div class="metric"><span>Totale arbeid</span><strong id="sumHours">–</strong></div>
+        <div class="metric"><span>Benodigde verf</span><strong id="sumPaint">–</strong></div>
+        <div class="metric"><span>Offerte inclusief btw</span><strong id="sumTotal">–</strong></div>
+      </div>
+      <div class="scroll"><table>
+        <thead><tr><th>Werkzaamheid</th><th>Uren</th><th>Verf</th><th>Prijs excl. btw</th><th>Btw</th><th>Prijs incl. btw</th></tr></thead>
+        <tbody id="resultRows"></tbody>
+      </table></div>
+      <div class="totals">
+        <div class="line"><span>Arbeid (basis)</span><strong id="laborTotal"></strong></div>
+        <div class="line"><span>Verf en materialen (basis)</span><strong id="materialsTotal"></strong></div>
+        <div class="line"><span>Reis/overige kosten (basis)</span><strong id="extraTotal"></strong></div>
+        <div class="line"><span>Overheadopslag</span><strong id="overheadTotal"></strong></div>
+        <div class="line"><span>Extra prijsopslag</span><strong id="markupTotal"></strong></div>
+        <div class="line"><span>Offerte excl. btw</span><strong id="exVatTotal"></strong></div>
+        <div class="line"><span>9% btw</span><strong id="vat9Total"></strong></div>
+        <div class="line"><span>21% btw</span><strong id="vat21Total"></strong></div>
+        <div class="line main"><span>Totaal incl. btw</span><strong id="inclVatTotal"></strong></div>
+      </div>
+      <p class="small">Verfhoeveelheid is een theoretisch verbruik inclusief verfmarge, niet afgerond op verpakkingen. Bij slechte ondergronden, voorstrijk, spuitverlies en extra lagen kan het werkelijke verbruik afwijken. Controleer het btw-tarief per werkzaamheid.</p>
+      <div class="actions"><button type="button" class="btn btn-alt" id="printResult">Afdrukken / bewaren als pdf</button><a class="btn" href="/account.html?mode=register&amp;lang=nl">Berekening professioneel beheren in Vakento</a></div>
+    </section>
+    <section id="member-gate" class="gate" hidden tabindex="-1" aria-labelledby="gate-title">
+      <h2 id="gate-title">Je twee gratis berekeningen zijn gebruikt.</h2>
+      <p>Wil je verder calculeren, offertes opslaan en klanten beheren? Maak dan een Vakento-account aan.</p>
+      <div class="actions"><a class="btn" href="/account.html?mode=register&amp;lang=nl">Lid worden</a><a class="btn btn-alt" href="/account.html?mode=login&amp;lang=nl">Ik heb al een account</a></div>
+    </section>
+    <p class="footnote"><strong>Btw:</strong> schilderwerk aan daarvoor in aanmerking komende woningen ouder dan 2 jaar kan onder 9% vallen; niet alle houtrot-, herstel- of vervangingswerkzaamheden vallen daaronder. Kies per onderdeel het toepasselijke tarief. <a href="https://www.belastingdienst.nl/wps/wcm/connect/bldcontentnl/belastingdienst/zakelijk/btw/tarieven_en_vrijstellingen/diensten_9_btw/werkzaamheden_aan_woningen/schilderen" target="_blank" rel="noopener noreferrer">Bekijk de regels bij de Belastingdienst</a>. De gratis limiet wordt per browser bijgehouden en is niet waterdicht tussen apparaten. Je invulgegevens worden niet naar Vakento verstuurd; alleen de teller wordt lokaal bewaard.</p>
+  </main>
+  <footer><div class="shell">© Vakento – Slimme bedrijfssoftware voor vakmensen. <a href="/">Terug naar de homepage</a></div></footer>
+</body>
+</html>

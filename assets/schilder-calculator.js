@@ -1,8 +1,7 @@
 (() => {
   "use strict";
 
-  // Shared with /calculators.html: three trial calculations in total per browser.
-  const KEY = "vakento.publicCalculators.used.v1";
+  // The VPS is the authoritative source for free usage. No browser-side quota.
   const LIMIT = 3;
   const LABELS = {
     walls: "Muren schilderen",
@@ -20,38 +19,30 @@
   const button = document.getElementById("calculate");
   const error = document.getElementById("error");
   if (!form || !result || !counter || !button || !gate) return;
-
-  let used = 0;
-  let member = false;
-  let storageAvailable = false;
-  try {
-    localStorage.setItem(KEY + ".check", "1");
-    localStorage.removeItem(KEY + ".check");
-    used = clampCount(localStorage.getItem(KEY));
-    storageAvailable = true;
-  } catch (_) {
-    // Fallback is the current page session; the UI explains the limitation.
-  }
-
-  function clampCount(value) {
-    const n = Number.parseInt(value, 10);
-    return Number.isFinite(n) ? Math.min(LIMIT, Math.max(0, n)) : 0;
-  }
+  let used=3, member=false, ready=false, busy=false;
   function update() {
-    const remaining = Math.max(0, LIMIT - used);
-    counter.textContent = member
-      ? "Vakento-lid: onbeperkt rekenen"
-      : (remaining === 0
-          ? "Je 3 gratis berekeningen zijn gebruikt"
-          : "Nog " + remaining + " gratis berekening" + (remaining === 1 ? "" : "en"));
-    if (!storageAvailable && !member) {
-      counter.textContent += " (alleen deze sessie)";
-    }
-    gate.hidden = member || remaining > 0;
-    button.disabled = !member && remaining === 0;
-    document.querySelectorAll(".work").forEach((work) => {
-      work.classList.toggle("selected", work.querySelector('[name="include"]').checked);
+    const remaining = Math.max(0, LIMIT-used);
+    counter.textContent = !ready ? "Serververbinding controleren…" :
+      member ? "Vakento-lid: onbeperkt rekenen" :
+      remaining===0 ? "Je 3 gratis berekeningen zijn gebruikt" :
+      "Nog "+remaining+" gratis berekening"+(remaining===1?"":"en");
+    gate.hidden = !ready || member || remaining>0;
+    button.disabled = !ready || busy || (!member && remaining===0);
+    document.querySelectorAll(".work").forEach(work=>{
+      work.classList.toggle("selected",work.querySelector('[name="include"]').checked);
     });
+  }
+  async function consume() {
+    const response=await fetch("/api/public-calculators/consume",{
+      method:"POST",credentials:"same-origin",cache:"no-store",
+      headers:{"Content-Type":"application/json","X-Vakento-Calculator":"1"},
+      body:JSON.stringify({calculator:"estimator"})
+    });
+    const data=await response.json().catch(()=>null);
+    if(data && Number.isInteger(data.used)) used=data.used;
+    if(response.status===409) return false;
+    if(!response.ok || !data || data.allowed!==true) throw Error("Serverregistratie niet beschikbaar. Probeer het later opnieuw.");
+    return true;
   }
   function readNumber(parent, name, {requiredPositive=false, integer=false, max=100000000} = {}) {
     const input = name.startsWith("#") ? document.querySelector(name) : parent.querySelector('[name="'+name+'"]');
@@ -161,47 +152,29 @@
   form.addEventListener("change", (e) => {
     if (e.target.matches('[name="include"]')) update();
   });
-  form.addEventListener("submit",(e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    error.textContent = "";
-    if (!member && used >= LIMIT) {
-      update();
-      gate.focus();
-      return;
-    }
+    if (!ready || busy) return;
+    error.textContent="";
+    if (!member && used>=LIMIT) {update();gate.focus();return;}
+    let data;
+    try {data=calculation();}
+    catch(err){error.textContent=err instanceof Error?err.message:"Controleer de gegevens.";result.hidden=true;return;}
+    busy=true;update();
     try {
-      const data = calculation();
+      if(!member && !await consume()){update();gate.focus();return;}
       render(data);
-      if (!member) {
-        used = Math.min(LIMIT, used + 1);
-        if (storageAvailable) {
-          try { localStorage.setItem(KEY,String(used)); }
-          catch (_) { storageAvailable = false; }
-        }
-      }
-      update();
-    } catch (err) {
-      error.textContent = err instanceof Error ? err.message : "Controleer de gegevens.";
-      result.hidden = true;
-    }
+    }catch(err){error.textContent=err instanceof Error?err.message:"Registratie mislukt.";result.hidden=true;}
+    finally{busy=false;update();}
   });
-  document.getElementById("printResult")?.addEventListener("click",() => window.print());
-  window.addEventListener("storage",(e) => {
-    if (e.key === KEY && !member) {
-      used = clampCount(e.newValue);
-      update();
-    }
-  });
-  window.addEventListener("pageshow", () => {
-    if (storageAvailable && !member) {
-      try { used = clampCount(localStorage.getItem(KEY)); }
-      catch (_) { storageAvailable = false; }
-      update();
-    }
-  });
+  document.getElementById("printResult")?.addEventListener("click",()=>window.print());
   update();
-  fetch("/api/me",{credentials:"same-origin",cache:"no-store"})
-    .then(r => r.ok ? r.json().catch(() => null) : null)
-    .then(user => { if (user && user.paid === true) { member = true; update(); } })
-    .catch(() => {});
+  Promise.all([
+    fetch("/api/me",{credentials:"same-origin",cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),
+    fetch("/api/public-calculators/status",{credentials:"same-origin",cache:"no-store"}).then(r=>{if(!r.ok)throw Error("quota");return r.json();})
+  ]).then(([user,quota])=>{
+    if(!quota || !Number.isInteger(quota.used)) throw Error("Invalid quota");
+    member=!!(user && user.paid===true);
+    used=quota.used;ready=true;update();
+  }).catch(()=>{counter.textContent="Gratis berekeningen tijdelijk niet beschikbaar. Probeer later opnieuw.";});
 })();

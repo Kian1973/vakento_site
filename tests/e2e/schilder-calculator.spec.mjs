@@ -10,19 +10,21 @@ test.describe('Schilderwerk en kluscalculator', () => {
     await expect(page.getByRole('link',{name:'Bereken schilder- en kluswerk'})).toHaveAttribute('href','/schilder-en-kluscalculator.html');
   });
 
-  test('muren, plafonds, kozijnen, deuren en houtrot en twee gratis calculaties @smoke',async ({page}) => {
+  test('muren, plafonds, kozijnen, deuren en houtrot en drie gratis calculaties @smoke',async ({page}) => {
     await page.goto('/schilder-en-kluscalculator.html');
     for(const title of ['Muren schilderen','Plafonds schilderen','Kozijnen schilderen','Deuren schilderen','Houtrot herstellen']) {
       await expect(page.getByText(title,{exact:true})).toBeVisible();
     }
-    await expect(page.locator('#remaining')).toContainText('Nog 2 gratis berekeningen');
+    await expect(page.locator('#remaining')).toContainText('Nog 3 gratis berekeningen');
     await page.getByRole('button',{name:'Bereken mijn klus'}).click();
     await expect(page.locator('#result')).toBeVisible();
     await expect(page.locator('#sumHours')).toContainText('9 uur');
     await expect(page.locator('#sumPaint')).toContainText('9,78 liter');
     await expect(page.locator('#remaining')).toContainText('Nog 1 gratis berekening');
     await page.getByRole('button',{name:'Bereken mijn klus'}).click();
-    await expect(page.locator('#remaining')).toContainText('Je 2 gratis berekeningen zijn gebruikt');
+    await expect(page.locator('#remaining')).toContainText('Nog 1 gratis berekening');
+    await page.getByRole('button',{name:'Bereken mijn klus'}).click();
+    await expect(page.locator('#remaining')).toContainText('Je 3 gratis berekeningen zijn gebruikt');
     await expect(page.getByRole('button',{name:'Bereken mijn klus'})).toBeDisabled();
     await expect(page.locator('#member-gate').getByRole('link',{name:'Lid worden'})).toHaveAttribute('href','/account.html?mode=register&lang=nl');
     await page.reload();
@@ -44,14 +46,14 @@ test.describe('Schilderwerk en kluscalculator', () => {
     await page.locator('[data-kind="walls"] [name="coverage"]').fill('0');
     await page.getByRole('button',{name:'Bereken mijn klus'}).click();
     await expect(page.locator('#error')).not.toBeEmpty();
-    await expect(page.locator('#remaining')).toContainText('Nog 2 gratis berekeningen');
+    await expect(page.locator('#remaining')).toContainText('Nog 3 gratis berekeningen');
   });
 
   test('quota wordt gedeeld met gewone calculators @smoke',async ({page}) => {
     await page.goto('/calculators.html');
     await page.getByRole('button',{name:'Bereken kluswinst'}).click();
     await page.goto('/schilder-en-kluscalculator.html');
-    await expect(page.locator('#remaining')).toContainText('Nog 1 gratis berekening');
+    await expect(page.locator('#remaining')).toContainText('Nog 2 gratis berekeningen');
   });
 
   test('mobiele weergave past zonder horizontale overflow @smoke', async ({page}) => {

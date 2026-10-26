@@ -11,23 +11,25 @@ test.describe('Publieke Vakento calculators', () => {
   test('homepage verwijst naar drie calculators @smoke', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('link', { name: 'Gratis calculators', exact: true })).toHaveAttribute('href', '/calculators.html');
-    await expect(page.getByRole('link', { name: 'Doe 2 berekeningen gratis' })).toHaveAttribute('href', '/calculators.html');
+    await expect(page.getByRole('link', { name: 'Doe 3 berekeningen gratis' })).toHaveAttribute('href', '/calculators.html');
   });
 
-  test('twee gratis berekeningen verdeeld over alle drie, daarna lid worden @smoke', async ({ page }) => {
+  test('drie gratis berekeningen verdeeld over alle drie, daarna lid worden @smoke', async ({ page }) => {
     await page.goto('/calculators.html');
     await expect(page.getByRole('heading', { name: 'Uurtarief berekenen' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Offerteprijs berekenen' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Kluswinst berekenen' })).toBeVisible();
 
-    await expect(page.locator('#remaining')).toContainText('Nog 2 gratis berekeningen');
+    await expect(page.locator('#remaining')).toContainText('Nog 3 gratis berekeningen');
     await page.getByRole('button', { name: 'Bereken mijn uurtarief' }).click();
     await expect(page.locator('#hour-form + .result')).toContainText('€\u00a044,00');
     await expect(page.locator('#remaining')).toContainText('Nog 1 gratis berekening');
 
     await page.getByRole('button', { name: 'Bereken offerteprijs' }).click();
     await expect(page.locator('#quote-form + .result')).toContainText('1.790,86');
-    await expect(page.locator('#remaining')).toContainText('Je 2 gratis berekeningen zijn gebruikt');
+    await expect(page.locator('#remaining')).toContainText('Nog 1 gratis berekening');
+    await page.getByRole('button', { name: 'Bereken kluswinst' }).click();
+    await expect(page.locator('#remaining')).toContainText('Je 3 gratis berekeningen zijn gebruikt');
     await expect(page.locator('#member-gate')).toBeVisible();
     await expect(page.locator('#member-gate').getByRole('link', { name: 'Lid worden' }))
       .toHaveAttribute('href', '/account.html?mode=register&lang=nl');
@@ -54,7 +56,7 @@ test.describe('Publieke Vakento calculators', () => {
     await page.locator('#hour-billable').fill('0');
     await page.getByRole('button', { name: 'Bereken mijn uurtarief' }).click();
     await expect(page.locator('#hour-form .error')).toContainText('Factureerbare uren moeten hoger zijn dan nul');
-    await expect(page.locator('#remaining')).toContainText('Nog 2 gratis berekeningen');
+    await expect(page.locator('#remaining')).toContainText('Nog 3 gratis berekeningen');
   });
 
   test('klein scherm: alle calculators blijven bruikbaar @smoke', async ({ page }) => {
@@ -65,7 +67,7 @@ test.describe('Publieke Vakento calculators', () => {
     expect(isOverflowing).toBe(false);
   });
 
-  test('betaald account mag ook na twee berekeningen blijven rekenen @smoke', async ({ page }) => {
+  test('betaald account mag ook na drie berekeningen blijven rekenen @smoke', async ({ page }) => {
     await page.route('**/api/me', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{"paid":true}' })
     );

@@ -1,9 +1,9 @@
 (() => {
   "use strict";
 
-  // Shared with /calculators.html: two trial calculations in total per browser.
+  // Shared with /calculators.html: three trial calculations in total per browser.
   const KEY = "vakento.publicCalculators.used.v1";
-  const LIMIT = 2;
+  const LIMIT = 3;
   const LABELS = {
     walls: "Muren schilderen",
     ceilings: "Plafonds schilderen",
@@ -42,7 +42,7 @@
     counter.textContent = member
       ? "Vakento-lid: onbeperkt rekenen"
       : (remaining === 0
-          ? "Je 2 gratis berekeningen zijn gebruikt"
+          ? "Je 3 gratis berekeningen zijn gebruikt"
           : "Nog " + remaining + " gratis berekening" + (remaining === 1 ? "" : "en"));
     if (!storageAvailable && !member) {
       counter.textContent += " (alleen deze sessie)";

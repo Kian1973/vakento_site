@@ -7,7 +7,7 @@ TMP="$(mktemp -d)"
 BACKUP="/root/vakento-calculator-backup-$(date +%Y%m%d-%H%M%S)"
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/assets" "$TMP/server" "$BACKUP"
-echo "Vakento installer versie 3 - exact hoofddomein"
+echo "Vakento installer versie 4 - wacht op service"
 echo "[1/6] Bestanden ophalen en controleren"
 for f in calculators.html schilder-en-kluscalculator.html assets/schilder-calculator.js server/public-calculator-quota.py; do
   curl -fLsS --max-time 40 "$REPO/$f" -o "$TMP/$f"
@@ -97,7 +97,23 @@ UNIT
 systemctl daemon-reload
 systemctl enable --now vakento-calculator-quota
 systemctl restart vakento-calculator-quota
-curl -fLsS --retry 4 --retry-delay 1 http://127.0.0.1:38119/health >/dev/null
+echo "Service opstarten en poort 38119 controleren..."
+SERVICE_READY=0
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
+  if curl --silent --show-error --fail --max-time 2 http://127.0.0.1:38119/health > /dev/null 2>/dev/null; then
+    SERVICE_READY=1
+    break
+  fi
+  sleep 2
+done
+if [ "$SERVICE_READY" -ne 1 ]; then
+  echo "FOUT: Vakento quota-service reageert niet. Diagnose:" >&2
+  systemctl --no-pager --full status vakento-calculator-quota.service || true
+  journalctl -u vakento-calculator-quota.service -n 45 --no-pager || true
+  echo "Geen websitebestanden gepubliceerd of Nginx API-routes aangepast." >&2
+  exit 1
+fi
+echo "Quota-service is bereikbaar"
 
 echo "[4/6] Nginx API-routes koppelen"
 cat > /etc/nginx/vakento-calculator-quota.inc <<'NGINX'

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ff6b35">
   <title>Gratis uurtarief, offerteprijs en kluswinst berekenen | Vakento</title>
-  <meta name="description" content="Drie handige Vakento calculators: bereken je uurtarief, offerteprijs of kluswinst. De eerste twee berekeningen zijn gratis.">
+  <meta name="description" content="Drie handige Vakento calculators: bereken je uurtarief, offerteprijs of kluswinst. De eerste drie berekeningen zijn gratis.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://vakento.nl/calculators.html">
   <link rel="icon" href="/assets/vakento-app-icon.svg" type="image/svg+xml">
@@ -67,7 +67,7 @@
 <section class="hero"><div class="shell">
   <span class="eyebrow">Gratis calculators voor zzp'ers en vakmensen</span>
   <h1>Bereken je uurtarief, offerteprijs en kluswinst.</h1>
-  <p class="intro">Maak <strong>twee berekeningen gratis</strong>, verdeeld over alle drie de calculators. Daarna kun je lid worden van Vakento om verder te rekenen. Handig op je telefoon, tablet of computer.</p>
+  <p class="intro">Maak <strong>drie berekeningen gratis</strong>, verdeeld over alle drie de calculators. Daarna kun je lid worden van Vakento om verder te rekenen. Handig op je telefoon, tablet of computer.</p>
   <div class="remaining" id="remaining" role="status" aria-live="polite">Gratis berekeningen controleren…</div>
 </div></section>
 <main class="shell">
@@ -146,20 +146,20 @@
     </article>
   </div>
   <section class="gate" id="member-gate" hidden tabindex="-1" aria-labelledby="gate-title">
-    <h2 id="gate-title">Je twee gratis berekeningen zijn gebruikt.</h2>
+    <h2 id="gate-title">Je drie gratis berekeningen zijn gebruikt.</h2>
     <p>Wil je verder rekenen en je offertes, uren en klussen overzichtelijk bijhouden? Word lid van Vakento.</p>
     <div class="actions">
       <a href="/account.html?mode=register&amp;lang=nl" class="button">Lid worden</a>
       <a href="/account.html?mode=login&amp;lang=nl" class="button light">Ik heb al een account</a>
     </div>
   </section>
-  <p class="footnote">De twee gratis berekeningen worden op dit apparaat/in deze browser bijgehouden. Zonder account is dit geen waterdichte beperking over verschillende apparaten. De berekeningen zijn schattingen; controleer bedragen en belastingregels voordat je een offerte verstuurt.</p>
+  <p class="footnote">De drie gratis berekeningen worden op dit apparaat/in deze browser bijgehouden. Zonder account is dit geen waterdichte beperking over verschillende apparaten. De berekeningen zijn schattingen; controleer bedragen en belastingregels voordat je een offerte verstuurt.</p>
 </main>
 <footer><div class="shell"><span>© Vakento – Bedrijfssoftware voor zzp'ers</span><a href="/">Terug naar Vakento</a></div></footer>
 <script>
 (function () {
   "use strict";
-  var LIMIT = 2;
+  var LIMIT = 3;
   var KEY = "vakento.publicCalculators.used.v1";
   var used = 0;
   var member = false;
@@ -179,7 +179,7 @@
   }
   function updateScreen(){
     var remaining = Math.max(0,LIMIT-used);
-    counter.textContent = member ? "Vakento-lid: onbeperkt rekenen" : remaining === 0 ? "Je 2 gratis berekeningen zijn gebruikt" : "Nog " + remaining + " gratis berekening" + (remaining === 1 ? "" : "en");
+    counter.textContent = member ? "Vakento-lid: onbeperkt rekenen" : remaining === 0 ? "Je 3 gratis berekeningen zijn gebruikt" : "Nog " + remaining + " gratis berekening" + (remaining === 1 ? "" : "en");
     gate.hidden = member || remaining > 0;
     forms.forEach(function(form){form.querySelector('button[type="submit"]').disabled = !member && remaining === 0;});
   }

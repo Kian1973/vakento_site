@@ -7,6 +7,7 @@ TMP="$(mktemp -d)"
 BACKUP="/root/vakento-calculator-backup-$(date +%Y%m%d-%H%M%S)"
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/assets" "$TMP/server" "$BACKUP"
+echo "Vakento installer versie 3 - exact hoofddomein"
 echo "[1/6] Bestanden ophalen en controleren"
 for f in calculators.html schilder-en-kluscalculator.html assets/schilder-calculator.js server/public-calculator-quota.py; do
   curl -fLsS --max-time 40 "$REPO/$f" -o "$TMP/$f"
@@ -37,7 +38,9 @@ for i,h in enumerate(heads):
             end+=1
         if depth: continue
         block=fragment[m.end():end-1]
-        if re.search(r"\bserver_name\s+[^;]*\bvakento\.nl\b[^;]*;",block) and re.search(r"\blisten\s+[^;]*\b443\b",block):
+        server_names = re.findall(r"\bserver_name\s+([^;]+);", block)
+        named_domain = any("vakento.nl" in names.split() for names in server_names)
+        if named_domain and re.search(r"\blisten\s+[^;]*\b443\b",block):
             matches.append((os.path.realpath(path),block))
 matches=list({p:(p,b) for p,b in matches}.values())
 if len(matches)!=1:
@@ -121,7 +124,9 @@ for m in re.finditer(r"\bserver\s*\{",text):
         if text[end]=="}": depth-=1
         end+=1
     block=text[m.end():end-1]
-    if re.search(r"\bserver_name\s+[^;]*\bvakento\.nl\b[^;]*;",block) and re.search(r"\blisten\s+[^;]*\b443\b",block):
+    server_names = re.findall(r"\bserver_name\s+([^;]+);", block)
+    named_domain = any("vakento.nl" in names.split() for names in server_names)
+    if named_domain and re.search(r"\blisten\s+[^;]*\b443\b",block):
         text=text[:m.end()]+"\n    include /etc/nginx/vakento-calculator-quota.inc;\n"+text[m.end():]
         p.write_text(text)
         print("API-koppeling geplaatst")

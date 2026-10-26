@@ -40,7 +40,14 @@ for i,h in enumerate(heads):
         if re.search(r"\bserver_name\s+[^;]*\bvakento\.nl\b[^;]*;",block) and re.search(r"\blisten\s+[^;]*\b443\b",block):
             matches.append((os.path.realpath(path),block))
 matches=list({p:(p,b) for p,b in matches}.values())
-if len(matches)!=1: raise SystemExit("FOUT: Geen eenduidige Vakento HTTPS-vhost: "+str(len(matches))+" matches.")
+if len(matches)!=1:
+    # ISPConfig can expose the same domain through multiple generated configs.
+    # Prefer the explicitly enabled Vakento website vhost, never the mail vhost.
+    primary=[item for item in matches if os.path.basename(item[0])=="100-vakento.nl.vhost"]
+    if len(primary)==1:
+        matches=primary
+if len(matches)!=1:
+    raise SystemExit("FOUT: Geen eenduidige Vakento HTTPS-vhost: "+str(len(matches))+" matches. Kandidaten: "+repr([p for p,_ in matches]))
 vhost,block=matches[0]
 roots=re.findall(r"(?m)^\s*root\s+([^;]+);",block)
 candidates=roots+["/var/www/vakento.nl/web","/var/www/vakento.nl/public_html"]
@@ -130,8 +137,10 @@ fi
 systemctl reload nginx
 
 echo "[5/6] Live API controleren"
-curl -fLsS --max-time 15 --resolve vakento.nl:443:127.0.0.1 \
-  https://vakento.nl/api/public-calculators/status -o "$TMP/quota.json"
+if ! curl -fLsS --max-time 15 --resolve vakento.nl:443:127.0.0.1 \
+  https://vakento.nl/api/public-calculators/status -o "$TMP/quota.json"; then
+  curl -fLsS --max-time 15 https://vakento.nl/api/public-calculators/status -o "$TMP/quota.json"
+fi
 python3 - "$TMP/quota.json" <<'PY'
 import json,sys
 x=json.load(open(sys.argv[1]))

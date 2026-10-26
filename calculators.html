@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ff6b35">
+  <title>Gratis uurtarief, offerteprijs en kluswinst berekenen | Vakento</title>
+  <meta name="description" content="Drie handige Vakento calculators: bereken je uurtarief, offerteprijs of kluswinst. De eerste twee berekeningen zijn gratis.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://vakento.nl/calculators.html">
+  <link rel="icon" href="/assets/vakento-app-icon.svg" type="image/svg+xml">
+  <style>
+    :root{--orange:#ff6b35;--orange-dark:#db4e1c;--ink:#162434;--muted:#637184;--line:#e0e5ee;--bg:#f6f8fa;--white:#fff;--navy:#13212f}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}
+    body{margin:0;color:var(--ink);background:var(--bg);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+    .shell{width:min(1160px,calc(100% - 36px));margin-inline:auto}
+    header{background:#fff;border-bottom:1px solid var(--line)}
+    .nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:17px 0}
+    .logo img{width:164px;max-width:43vw;height:auto;display:block}
+    .navlinks{display:flex;align-items:center;gap:15px;flex-wrap:wrap;font-weight:700;font-size:.91rem}
+    .navlinks a{text-decoration:none;color:inherit}
+    .button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:0;border-radius:12px;background:var(--orange);color:#fff!important;padding:12px 20px;font:800 1rem system-ui,sans-serif;cursor:pointer}
+    .button:hover{background:var(--orange-dark)}
+    .button:disabled{background:#a7afb9;cursor:not-allowed}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #246cc5;outline-offset:3px}
+    .hero{padding:58px 0 45px;background:radial-gradient(circle at 93% 12%,#ffe7da,transparent 32%),#fff}
+    .eyebrow{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:#a93f1b}
+    h1{font-size:clamp(2.1rem,5vw,3.45rem);line-height:1.12;letter-spacing:-.036em;max-width:850px;margin:15px 0}
+    .intro{max-width:780px;color:var(--muted);font-size:1.12rem}
+    .remaining{display:inline-block;margin-top:12px;padding:10px 16px;background:#fff3ec;color:#8d3719;border:1px solid #f5d4c2;border-radius:100px;font-weight:800}
+    main{padding-bottom:70px}
+    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:38px;align-items:start}
+    .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 10px 30px #182b3e0b}
+    .symbol{display:grid;place-items:center;background:#fff0e8;color:#ad431e;width:44px;height:44px;border-radius:13px;font-size:1.3rem;font-weight:900}
+    h2{font-size:1.35rem;line-height:1.25;margin:15px 0 8px}
+    .description{color:var(--muted);font-size:.93rem;margin:0 0 16px}
+    label{display:block;font-weight:750;font-size:.88rem;margin:13px 0 5px}
+    input,select{display:block;width:100%;border:1px solid #cbd4df;border-radius:10px;padding:12px;background:#fff;color:var(--ink);font:inherit}
+    form>.button{width:100%;margin-top:21px}
+    .error{color:#ac2828;font-size:.9rem;margin:8px 0 0;min-height:1.1rem}
+    .result{margin-top:17px;padding:15px;border-radius:14px;background:#f2f9f4;border:1px solid #cde7d1}
+    .result h3{font-size:1rem;margin:0 0 7px}
+    .result dl{margin:0}
+    .result .line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px solid #d5e7d8;padding:7px 0}
+    .result dt{font-size:.87rem}
+    .result dd{font-weight:850;margin:0;text-align:right}
+    .notice{font-size:.85rem;color:var(--muted);margin:9px 0 0}
+    .gate{background:var(--navy);color:#fff;border-radius:21px;padding:28px;margin:32px auto 0;max-width:850px}
+    .gate h2{margin:0 0 8px}
+    .gate p{color:#d3dbe4;margin:0 0 19px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .actions .light{background:#fff;color:var(--ink)!important}
+    .footnote{margin-top:25px;color:var(--muted);font-size:.86rem}
+    footer{padding:25px 0;border-top:1px solid var(--line);background:#fff;color:var(--muted);font-size:.9rem}
+    footer .shell{display:flex;gap:15px;justify-content:space-between;flex-wrap:wrap}
+    footer a{color:inherit}
+    [hidden]{display:none!important}
+    @media(max-width:960px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:680px){.cards{grid-template-columns:1fr}.hero{padding:42px 0 30px}.card{padding:20px}}
+  </style>
+</head>
+<body>
+<header><div class="shell nav">
+  <a href="/" class="logo" aria-label="Vakento homepage"><img src="/assets/vakento-logo.svg" alt="Vakento"></a>
+  <nav class="navlinks" aria-label="Hoofdnavigatie"><a href="/">Home</a><a href="/account.html?mode=login&amp;lang=nl">Inloggen</a><a href="/account.html?mode=register&amp;lang=nl" class="button">Lid worden</a></nav>
+</div></header>
+<section class="hero"><div class="shell">
+  <span class="eyebrow">Gratis calculators voor zzp'ers en vakmensen</span>
+  <h1>Bereken je uurtarief, offerteprijs en kluswinst.</h1>
+  <p class="intro">Maak <strong>twee berekeningen gratis</strong>, verdeeld over alle drie de calculators. Daarna kun je lid worden van Vakento om verder te rekenen. Handig op je telefoon, tablet of computer.</p>
+  <div class="remaining" id="remaining" role="status" aria-live="polite">Gratis berekeningen controleren…</div>
+</div></section>
+<main class="shell">
+  <div class="cards">
+    <article class="card">
+      <span class="symbol" aria-hidden="true">€/u</span>
+      <h2>Uurtarief berekenen</h2>
+      <p class="description">Ontdek welk uurtarief exclusief btw past bij je gewenste inkomen en bedrijfskosten.</p>
+      <form id="hour-form">
+        <label for="hour-income">Gewenst maandinkomen vóór inkomstenbelasting (€)</label>
+        <input name="income" id="hour-income" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="3000" required>
+        <label for="hour-costs">Jaarlijkse bedrijfskosten (€)</label>
+        <input name="costs" id="hour-costs" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="12000" required>
+        <label for="hour-billable">Factureerbare uren per jaar</label>
+        <input name="hours" id="hour-billable" type="number" inputmode="decimal" min="1" max="100000" step="any" value="1200" required>
+        <label for="hour-buffer">Extra buffer (%)</label>
+        <input name="buffer" id="hour-buffer" type="number" inputmode="decimal" min="0" max="1000" step="any" value="10" required>
+        <button type="submit" class="button" disabled>Bereken mijn uurtarief</button>
+        <p class="error" role="alert"></p>
+      </form>
+      <div class="result" hidden aria-live="polite"></div>
+      <p class="notice">Indicatie vóór inkomstenbelasting, pensioen en eventuele privélasten die niet zijn ingevuld.</p>
+    </article>
+    <article class="card">
+      <span class="symbol" aria-hidden="true">€</span>
+      <h2>Offerteprijs berekenen</h2>
+      <p class="description">Reken arbeidskosten, materialen, overige kosten, overhead en winstopslag door.</p>
+      <form id="quote-form">
+        <label for="quote-hours">Aantal uren</label>
+        <input name="hours" id="quote-hours" type="number" inputmode="decimal" min="0" max="100000" step="any" value="16" required>
+        <label for="quote-rate">Uurtarief exclusief btw (€)</label>
+        <input name="rate" id="quote-rate" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="55" required>
+        <label for="quote-materials">Materialen exclusief btw (€)</label>
+        <input name="materials" id="quote-materials" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="250" required>
+        <label for="quote-other">Overige kosten exclusief btw (€)</label>
+        <input name="other" id="quote-other" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="40" required>
+        <label for="quote-overhead">Overheadopslag (%)</label>
+        <input name="overhead" id="quote-overhead" type="number" inputmode="decimal" min="0" max="1000" step="any" value="10" required>
+        <label for="quote-markup">Winstopslag op kostprijs (%)</label>
+        <input name="markup" id="quote-markup" type="number" inputmode="decimal" min="0" max="1000" step="any" value="15" required>
+        <label for="quote-vat">Btw (indicatie)</label>
+        <select name="vat" id="quote-vat"><option value="21">21%</option><option value="9">9%</option><option value="0">0%</option></select>
+        <button type="submit" class="button" disabled>Bereken offerteprijs</button>
+        <p class="error" role="alert"></p>
+      </form>
+      <div class="result" hidden aria-live="polite"></div>
+      <p class="notice">Dit is een prijsindicatie, geen officiële offerte. Controleer het toepasselijke btw-tarief per werkzaamheid.</p>
+    </article>
+    <article class="card">
+      <span class="symbol" aria-hidden="true">↗</span>
+      <h2>Kluswinst berekenen</h2>
+      <p class="description">Wat houd je op een opdracht over na arbeidskosten, materialen en overige uitgaven?</p>
+      <form id="profit-form">
+        <label for="profit-turnover">Omzet exclusief btw (€)</label>
+        <input name="turnover" id="profit-turnover" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="1800" required>
+        <label for="profit-hours">Gewerkte uren</label>
+        <input name="hours" id="profit-hours" type="number" inputmode="decimal" min="0" max="100000" step="any" value="16" required>
+        <label for="profit-cost-rate">Interne arbeidskosten per uur (€)</label>
+        <input name="costRate" id="profit-cost-rate" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="30" required>
+        <label for="profit-materials">Materiaalkosten exclusief btw (€)</label>
+        <input name="materials" id="profit-materials" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="250" required>
+        <label for="profit-other">Overige kosten exclusief btw (€)</label>
+        <input name="other" id="profit-other" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="80" required>
+        <label for="profit-overhead">Toegerekende overhead exclusief btw (€)</label>
+        <input name="overhead" id="profit-overhead" type="number" inputmode="decimal" min="0" max="100000000" step="any" value="100" required>
+        <button type="submit" class="button" disabled>Bereken kluswinst</button>
+        <p class="error" role="alert"></p>
+      </form>
+      <div class="result" hidden aria-live="polite"></div>
+      <p class="notice">De uitkomst is winst vóór belastingen op basis van de door jou ingevulde kosten, inclusief eigen arbeid als je die invult.</p>
+    </article>
+  </div>
+  <section class="gate" id="member-gate" hidden tabindex="-1" aria-labelledby="gate-title">
+    <h2 id="gate-title">Je twee gratis berekeningen zijn gebruikt.</h2>
+    <p>Wil je verder rekenen en je offertes, uren en klussen overzichtelijk bijhouden? Word lid van Vakento.</p>
+    <div class="actions">
+      <a href="/account.html?mode=register&amp;lang=nl" class="button">Lid worden</a>
+      <a href="/account.html?mode=login&amp;lang=nl" class="button light">Ik heb al een account</a>
+    </div>
+  </section>
+  <p class="footnote">De twee gratis berekeningen worden op dit apparaat/in deze browser bijgehouden. Zonder account is dit geen waterdichte beperking over verschillende apparaten. De berekeningen zijn schattingen; controleer bedragen en belastingregels voordat je een offerte verstuurt.</p>
+</main>
+<footer><div class="shell"><span>© Vakento – Bedrijfssoftware voor zzp'ers</span><a href="/">Terug naar Vakento</a></div></footer>
+<script>
+(function () {
+  "use strict";
+  var LIMIT = 2;
+  var KEY = "vakento.publicCalculators.used.v1";
+  var used = 0;
+  var member = false;
+  var storageAvailable = false;
+  var counter = document.getElementById("remaining");
+  var gate = document.getElementById("member-gate");
+  var forms = ["hour-form", "quote-form", "profit-form"].map(function(id){return document.getElementById(id);});
+  var money = new Intl.NumberFormat("nl-NL", {style:"currency",currency:"EUR",maximumFractionDigits:2});
+  var percent = new Intl.NumberFormat("nl-NL", {style:"decimal",maximumFractionDigits:1});
+  try {
+    localStorage.setItem(KEY + ".check", "1");
+    localStorage.removeItem(KEY + ".check");
+    storageAvailable = true;
+    used = Math.min(LIMIT, Math.max(0, parseInt(localStorage.getItem(KEY), 10) || 0));
+  } catch (e) {
+    counter.textContent = "Browseropslag niet beschikbaar; gratis limiet kan niet worden onthouden.";
+  }
+  function updateScreen(){
+    var remaining = Math.max(0,LIMIT-used);
+    counter.textContent = member ? "Vakento-lid: onbeperkt rekenen" : remaining === 0 ? "Je 2 gratis berekeningen zijn gebruikt" : "Nog " + remaining + " gratis berekening" + (remaining === 1 ? "" : "en");
+    gate.hidden = member || remaining > 0;
+    forms.forEach(function(form){form.querySelector('button[type="submit"]').disabled = !member && remaining === 0;});
+  }
+  function value(data,key){
+    var raw = data.get(key);
+    var x = Number(raw);
+    if (raw === null || String(raw).trim() === "" || !Number.isFinite(x) || x < 0 || x > 100000000) throw Error("Vul geldige, niet-negatieve bedragen in.");
+    return x;
+  }
+  function line(name, amount, isPercent){
+    return '<div class="line"><dt>' + name + '</dt><dd>' + (isPercent ? percent.format(amount) + "%" : money.format(amount)) + '</dd></div>';
+  }
+  function compute(form){
+    var data = new FormData(form);
+    var id = form.id;
+    var rows = "";
+    if (id === "hour-form"){
+      var income = value(data,"income"), costs = value(data,"costs"), hours = value(data,"hours"), buffer = value(data,"buffer");
+      if (hours <= 0) throw Error("Factureerbare uren moeten hoger zijn dan nul.");
+      var needed = income * 12 + costs;
+      var target = needed * (1 + buffer / 100);
+      rows = line("Benodigde jaaromzet inclusief buffer",target) + line("Uurtarief excl. btw",target / hours);
+    } else if (id === "quote-form"){
+      var qhours = value(data,"hours"), rate = value(data,"rate"), materials = value(data,"materials"), other = value(data,"other");
+      var overhead = value(data,"overhead"), markup = value(data,"markup"), vat = value(data,"vat");
+      if ([0,9,21].indexOf(vat) === -1) throw Error("Selecteer een geldig btw-tarief.");
+      var direct = qhours * rate + materials + other;
+      var cost = direct * (1 + overhead / 100);
+      var sale = cost * (1 + markup / 100);
+      rows = line("Kostprijs incl. overhead",cost) + line("Winstopslag",sale-cost) + line("Offerte excl. btw",sale) + line("Btw",sale*vat/100) + line("Offerte incl. btw",sale*(1+vat/100));
+    } else if (id === "profit-form"){
+      var turnover=value(data,"turnover"), phours=value(data,"hours"), costRate=value(data,"costRate");
+      var pmaterials=value(data,"materials"), pother=value(data,"other"), poverhead=value(data,"overhead");
+      var totalCost=phours*costRate+pmaterials+pother+poverhead;
+      var profit=turnover-totalCost;
+      rows=line("Totale kosten",totalCost)+line("Kluswinst / -verlies",profit)+line("Winstmarge op omzet",turnover>0 ? profit/turnover*100 : 0,true);
+      if (turnover===0) rows += '<p class="notice">Bij €0 omzet is de marge niet te berekenen.</p>';
+    }
+    if (!rows) throw Error("Berekening niet beschikbaar.");
+    return '<h3>Jouw berekening</h3><dl>' + rows + '</dl>';
+  }
+  forms.forEach(function(form){
+    form.addEventListener("submit",function(e){
+      e.preventDefault();
+      var error=form.querySelector(".error");
+      error.textContent="";
+      if (!member && used >= LIMIT) {gate.hidden=false;gate.focus();return;}
+      try {
+        var result=compute(form);
+        if (!member) {
+          used+=1;
+          if (storageAvailable) {
+            try {localStorage.setItem(KEY,String(used));}
+            catch (err) {storageAvailable=false;}
+          }
+        }
+        var box=form.nextElementSibling;
+        box.innerHTML=result;
+        box.hidden=false;
+        updateScreen();
+      } catch(err) {
+        error.textContent = err && err.message ? err.message : "Controleer je invoer.";
+      }
+    });
+  });
+  window.addEventListener("storage",function(e){
+    if (e.key === KEY && !member){
+      used=Math.min(LIMIT,Math.max(0,parseInt(e.newValue,10)||0));
+      updateScreen();
+    }
+  });
+  updateScreen();
+  fetch("/api/me",{credentials:"same-origin",cache:"no-store"}).then(function(r){
+    if (!r.ok) return null;
+    return r.json().catch(function(){return null;});
+  }).then(function(user){
+    if (user && user.paid === true) {member=true;updateScreen();}
+  }).catch(function(){});
+})();
+</script>
+</body>
+</html>

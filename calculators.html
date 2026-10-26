@@ -160,28 +160,35 @@
 (function () {
   "use strict";
   var LIMIT = 3;
-  var KEY = "vakento.publicCalculators.used.v1";
-  var used = 0;
+  var used = 3;
   var member = false;
-  var storageAvailable = false;
+  var ready = false;
+  var busy = false;
   var counter = document.getElementById("remaining");
   var gate = document.getElementById("member-gate");
   var forms = ["hour-form", "quote-form", "profit-form"].map(function(id){return document.getElementById(id);});
   var money = new Intl.NumberFormat("nl-NL", {style:"currency",currency:"EUR",maximumFractionDigits:2});
   var percent = new Intl.NumberFormat("nl-NL", {style:"decimal",maximumFractionDigits:1});
-  try {
-    localStorage.setItem(KEY + ".check", "1");
-    localStorage.removeItem(KEY + ".check");
-    storageAvailable = true;
-    used = Math.min(LIMIT, Math.max(0, parseInt(localStorage.getItem(KEY), 10) || 0));
-  } catch (e) {
-    counter.textContent = "Browseropslag niet beschikbaar; gratis limiet kan niet worden onthouden.";
-  }
   function updateScreen(){
     var remaining = Math.max(0,LIMIT-used);
-    counter.textContent = member ? "Vakento-lid: onbeperkt rekenen" : remaining === 0 ? "Je 3 gratis berekeningen zijn gebruikt" : "Nog " + remaining + " gratis berekening" + (remaining === 1 ? "" : "en");
-    gate.hidden = member || remaining > 0;
-    forms.forEach(function(form){form.querySelector('button[type="submit"]').disabled = !member && remaining === 0;});
+    counter.textContent = !ready ? "Serververbinding controleren…" :
+      member ? "Vakento-lid: onbeperkt rekenen" :
+      remaining === 0 ? "Je 3 gratis berekeningen zijn gebruikt" :
+      "Nog " + remaining + " gratis berekening" + (remaining === 1 ? "" : "en");
+    gate.hidden = !ready || member || remaining > 0;
+    forms.forEach(function(form){form.querySelector('button[type="submit"]').disabled = !ready || busy || (!member && remaining === 0);});
+  }
+  async function consume(calculator){
+    var response = await fetch("/api/public-calculators/consume",{
+      method:"POST",credentials:"same-origin",cache:"no-store",
+      headers:{"Content-Type":"application/json","X-Vakento-Calculator":"1"},
+      body:JSON.stringify({calculator:calculator})
+    });
+    var data = await response.json().catch(function(){return null;});
+    if (data && Number.isInteger(data.used)) used = data.used;
+    if (response.status === 409) {updateScreen();return false;}
+    if (!response.ok || !data || data.allowed !== true) throw Error("Registratie op de server is niet beschikbaar. Probeer het later opnieuw.");
+    return true;
   }
   function value(data,key){
     var raw = data.get(key);
@@ -222,42 +229,36 @@
     return '<h3>Jouw berekening</h3><dl>' + rows + '</dl>';
   }
   forms.forEach(function(form){
-    form.addEventListener("submit",function(e){
+    form.addEventListener("submit",async function(e){
       e.preventDefault();
+      if (!ready || busy) return;
       var error=form.querySelector(".error");
       error.textContent="";
-      if (!member && used >= LIMIT) {gate.hidden=false;gate.focus();return;}
+      if (!member && used >= LIMIT) {updateScreen();gate.focus();return;}
+      var result;
+      try {result=compute(form);}
+      catch(err){error.textContent=err && err.message ? err.message : "Controleer je invoer.";return;}
+      busy=true;updateScreen();
       try {
-        var result=compute(form);
-        if (!member) {
-          used+=1;
-          if (storageAvailable) {
-            try {localStorage.setItem(KEY,String(used));}
-            catch (err) {storageAvailable=false;}
-          }
-        }
+        if (!member && !await consume(form.id)) {gate.focus();return;}
         var box=form.nextElementSibling;
-        box.innerHTML=result;
-        box.hidden=false;
-        updateScreen();
-      } catch(err) {
-        error.textContent = err && err.message ? err.message : "Controleer je invoer.";
-      }
+        box.innerHTML=result;box.hidden=false;
+      }catch(err){
+        error.textContent=err && err.message ? err.message : "Serverregistratie mislukt.";
+      }finally{busy=false;updateScreen();}
     });
   });
-  window.addEventListener("storage",function(e){
-    if (e.key === KEY && !member){
-      used=Math.min(LIMIT,Math.max(0,parseInt(e.newValue,10)||0));
-      updateScreen();
-    }
-  });
   updateScreen();
-  fetch("/api/me",{credentials:"same-origin",cache:"no-store"}).then(function(r){
-    if (!r.ok) return null;
-    return r.json().catch(function(){return null;});
-  }).then(function(user){
-    if (user && user.paid === true) {member=true;updateScreen();}
-  }).catch(function(){});
+  Promise.all([
+    fetch("/api/me",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch("/api/public-calculators/status",{credentials:"same-origin",cache:"no-store"}).then(function(r){if(!r.ok) throw Error("quota unavailable");return r.json();})
+  ]).then(function(results){
+    member=!!(results[0] && results[0].paid===true);
+    if (!results[1] || !Number.isInteger(results[1].used)) throw Error("Invalid quota");
+    used=results[1].used;ready=true;updateScreen();
+  }).catch(function(){
+    counter.textContent="Gratis berekeningen tijdelijk niet beschikbaar. Probeer later opnieuw.";
+  });
 })();
 </script>
 </body>

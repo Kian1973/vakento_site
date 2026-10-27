@@ -1,96 +1,75 @@
-/** Vakverstand in de browser. Werkt altijd. Server-AI maakt de taal scherper als die aan staat. */
+/** Vakento offertevoorstel. Rekent alleen met door de gebruiker opgegeven tarieven. */
 
-const TARIEF_INCL_BTW = 65;
-const VOORRIJDEN = 45;
-
-const PACKS = [
-  {
-    keys: ["groepenkast", "meterkast", "3-fase", "driefase"],
-    titel: "Groepenkast vernieuwen",
-    uren: 8,
-    regels: [
-      { tekst: "Hoofdschakelaar en aardlekautomaten", bedrag: 620 },
-      { tekst: "Kast 3-fase, inbouw", bedrag: 480 },
-      { tekst: "Afvoer oude kast", bedrag: 95 },
-    ],
-    spullen: ["Hoofdschakelaar 63A", "Aardlekautomaat"],
-    risico: "Netbeheerder soms nodig bij hoofdaansluiting.",
-  },
-  {
-    keys: ["warmtepomp", "cv-ketel", "ketel", "cv "],
-    titel: "Installatie naregelen",
-    uren: 4,
-    regels: [
-      { tekst: "Diagnose en uitlezen storing", bedrag: 165 },
-      { tekst: "Afstellen circuits / druk", bedrag: 210 },
-    ],
-    spullen: ["Manometer", "Inhibitor"],
-    risico: "Garantie van fabrikant checken voor openen.",
-  },
-  {
-    keys: ["sanitair", "toilet", "douche", "wastafel"],
-    titel: "Sanitair vervangen",
-    uren: 6,
-    regels: [
-      { tekst: "Demonteren bestaand", bedrag: 180 },
-      { tekst: "Stellen en aansluiten", bedrag: 420 },
-      { tekst: "Afkitten en opleveren", bedrag: 95 },
-    ],
-    spullen: ["Pex 16mm (rol)", "Siliconen sanitair"],
-    risico: "Tegelwerk extra als wand open moet.",
-  },
-  {
-    keys: ["dakgoot", "hemelwater", "regenpijp"],
-    titel: "Hemelwater herstellen",
-    uren: 5,
-    regels: [
-      { tekst: "Hoogwerker / ladderwerk", bedrag: 220 },
-      { tekst: "Gootdeel vervangen", bedrag: 310 },
-    ],
-    spullen: ["Gootbeugel", "Verbindingsstuk"],
-    risico: "Valbeveiliging verplicht boven 2,5 m.",
-  },
-  {
-    keys: ["wcd", "stopcontact", "groep extra", "krachtgroep"],
-    titel: "Extra groep / WCD",
-    uren: 3,
-    regels: [
-      { tekst: "Sleuven of opbouwbuis", bedrag: 140 },
-      { tekst: "Trekken en aansluiten", bedrag: 190 },
-    ],
-    spullen: ["WCD polarwit"],
-    risico: "Asbest in oude kitranden bij sleuven in de Achterhoekse boerderij.",
-  },
-];
-
-function packFor(text) {
-  const t = text.toLowerCase();
-  return PACKS.find((p) => p.keys.some((k) => t.includes(k))) || {
-    titel: text.slice(0, 48) || "Klus op maat",
-    uren: 4,
-    regels: [{ tekst: "Arbeid en voorrijden, nader te specificeren", bedrag: 0 }],
-    spullen: [],
-    risico: "Na schouw vastzetten.",
-  };
+function veiligBedrag(waarde) {
+  const n = Number(String(waarde ?? "").replace(",", "."));
+  return Number.isFinite(n) ? Math.min(1000000, Math.max(0, n)) : 0;
 }
 
-export function offerteUitTekst(text, plaats = "Achterhoek") {
-  const pack = packFor(text);
-  const arbeid = Math.round(pack.uren * TARIEF_INCL_BTW);
-  const regels = [
-    ...pack.regels,
-    { tekst: `Arbeid ${pack.uren} uur à €${TARIEF_INCL_BTW}`, bedrag: arbeid },
-    { tekst: `Voorrijden ${plaats}`, bedrag: VOORRIJDEN },
-  ];
-  const bedrag = regels.reduce((a, r) => a + r.bedrag, 0);
+function splitsOpdracht(omschrijving) {
+  const tekst = String(omschrijving || "").trim().slice(0, 3000);
+  const stukken = tekst
+    .replace(/\s+\ben\b\s+(?=\d+(?:[.,]\d+)?\s)/gi, " | ")
+    .split(/\s*(?:;|\n|,(?=\s*[^\d])|\|)\s*/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  return stukken.slice(0, 20);
+}
+
+function hoeveelheidUitTekst(tekst) {
+  const m = tekst.match(/(\d+(?:[.,]\d+)?)\s*(m²|m2|m\b|uur\b|uren\b|u\b|stuks?\b|st\b|dagen?\b|keer\b)/i);
+  if (m) {
+    const aantal = veiligBedrag(m[1]);
+    const u = m[2].toLowerCase();
+    const eenheid = /m²|m2/.test(u) ? "m²" : u === "m" ? "m"
+      : /uur|uren|^u$/.test(u) ? "uur" : /dag/.test(u) ? "dag"
+      : u === "keer" ? "keer" : "st";
+    return { aantal, eenheid };
+  }
+  const st = tekst.match(/(\d+(?:[.,]\d+)?)\s*(kozijnen?|deuren?|ramen?|kamers?|plafonds?|wanden?|panelen?|trappen?)\b/i);
+  return st ? { aantal: veiligBedrag(st[1]), eenheid: "st" } : { aantal: 1, eenheid: "st" };
+}
+
+/**
+ * Geeft een bewerkbaar VOORSTEL, geen definitieve calculatie.
+ * Alle tarieven zijn exclusief btw en komen uit de administratie of de invoer.
+ * Onbekende materiaal-/werkprijzen blijven 0 in plaats van te worden verzonnen.
+ */
+export function offerteUitTekst(text, plaats = "", opties = {}) {
+  const omschrijving = String(text || "").trim().slice(0, 3000);
+  const uurtarief = veiligBedrag(opties.uurtariefExclBtw);
+  const voorrijden = veiligBedrag(opties.voorrijkostenExclBtw);
+  const werk = splitsOpdracht(omschrijving);
+  const regels = werk.map(tekst => ({ tekst, ...hoeveelheidUitTekst(tekst) }))
+    .filter(r => r.eenheid !== "uur")
+    .map(r => ({
+      ...r, stukprijs: 0, prijsInvoer: "excl",
+      extra: "Prijs en benodigde materialen zelf controleren en invullen."
+    }));
+
+  const urenMatch = omschrijving.match(/(\d+(?:[.,]\d+)?)\s*(?:uur|uren)\b/i);
+  const uren = urenMatch ? veiligBedrag(urenMatch[1]) : 0;
+  regels.push({
+    tekst: "Arbeid", extra: uren ? "Uren uit klusomschrijving; controleer de hoeveelheid." : "Vul het aantal benodigde uren in.",
+    aantal: uren, eenheid: "uur", stukprijs: uurtarief, prijsInvoer: "excl"
+  });
+
+  if (voorrijden > 0) {
+    regels.push({
+      tekst: "Voorrijkosten" + (plaats ? " " + String(plaats).slice(0, 80) : ""),
+      aantal: 1, eenheid: "keer", stukprijs: voorrijden, prijsInvoer: "excl",
+      extra: "Tarief uit de eigen bedrijfsinstellingen."
+    });
+  }
+
+  const bedrag = regels.reduce((som, r) => som + r.aantal * r.stukprijs, 0);
   return {
-    titel: pack.titel,
+    titel: omschrijving.slice(0, 78) || "Klus op maat",
     regels,
-    bedrag,
-    spullen: pack.spullen,
-    risico: pack.risico,
-    toelichting: `Op basis van vakregels, geen gok uit de lucht. ${pack.uren} uur ingeschat. Arbeid staat op €${TARIEF_INCL_BTW.toFixed(2)} per uur inclusief btw.`,
-    bron: "vakverstand",
+    bedrag: Math.round(bedrag * 100) / 100,
+    spullen: [],
+    risico: "Uren, materialen, btw en eventuele meerkosten controleren voor verzending.",
+    toelichting: "Concept op basis van de klusomschrijving. Onbekende prijzen zijn bewust niet ingevuld. Controleer alle aantallen, uren, tarieven en btw.",
+    bron: "vakverstand"
   };
 }
 

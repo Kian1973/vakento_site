@@ -1750,7 +1750,7 @@ function bind(root) {
           voorrijkostenExclBtw: voorrijden,
           instructie: "Geef alleen werkzaamheden, hoeveelheden en eventueel geschatte uren. Geen verzonnen prijzen."
         }, 8000);
-        const backendWerkte = out?.bron !== "vakverstand" && Array.isArray(out?.regels);
+        const backendWerkte = out?.bron !== "vakverstand" && Array.isArray(out?.regels) && JSON.stringify(out.regels) !== JSON.stringify(local.regels);
         if (backendWerkte && Array.isArray(out.regels) && out.regels.length) {
           const aiRegels = out.regels.slice(0, 20);
           const werkRegels = aiRegels.map(r => {
@@ -1763,7 +1763,7 @@ function bind(root) {
           }).filter(r => r.tekst && r.eenheid !== "uur" &&
             !/^(?:arbeid|voorrijden|voorrijkosten)/i.test(r.tekst));
           const urenSchatting = aiRegels.find(r =>
-            r?.eenheid === "uur" || /\\b(?:arbeid|uren|uurtarief)\\b/i.test(String(r?.tekst || "")));
+            r?.eenheid === "uur" || /\b(?:arbeid|uren|uurtarief)\b/i.test(String(r?.tekst || "")));
           const aiUren = Number(urenSchatting?.aantal);
           const vasteRegels = local.regels.filter(r => r.eenheid === "uur" || /^Voorrijkosten/.test(r.tekst));
           if (Number.isFinite(aiUren) && aiUren > 0 && vasteRegels[0]?.eenheid === "uur" && vasteRegels[0].aantal === 0) {

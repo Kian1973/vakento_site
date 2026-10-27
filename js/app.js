@@ -938,7 +938,8 @@ async function saveReceiptCorrectionToCloud(row) {
 
 
 function offerteEditorRegel(r = {}) {
-  const aantal = Number(r.aantal ?? 1) || 1;
+  const aantalNum = Number(r.aantal ?? 1);
+  const aantal = Number.isFinite(aantalNum) ? Math.max(0, aantalNum) : 1;
   const btwVerlegd = r.btwVerlegd === true || r.btw === "verlegd";
   const btw = btwVerlegd ? 0 : ([0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21);
   const factor = 1 + btw / 100;
@@ -1693,7 +1694,6 @@ function bind(root) {
           const isArbeid = eenheid === "uur" || /\b(arbeid|uren|uurtarief)\b/i.test(tekst);
 
           if (isArbeid) {
-            const serverPrijsIncl = Number(r?.stukprijsInclBtw ?? r?.prijsInclBtw);
             return offerteEditorRegel({
               tekst:r?.tekst || "Arbeid",
               extra:r?.extra || "Controleer uren en uurtarief",
@@ -1740,8 +1740,45 @@ function bind(root) {
         if (!lokaalGelukt) throw new Error("Geen lokale offerteregels");
         toast("Conceptregels klaar. Controleer uren, materialen en prijzen.");
 
-        // Server-AI mag geen niet-geverifieerde prijzen overschrijven.
-        // De offerte blijft bewerkbaar en wordt pas op expliciete actie opgeslagen.
+        // AI helpt met werkzaamheden en uren; prijzen blijven ALTIJD uit eigen invoer.
+        const momentOpgesteld = JSON.stringify(offerteRegelsUitEditor(offerForm));
+        btn.textContent = "AI denkt mee…";
+        const out = await verrijkMetServer("offerte", local, {
+          vraag,
+          plaats: data.place,
+          uurtariefExclBtw: uurtarief,
+          voorrijkostenExclBtw: voorrijden,
+          instructie: "Geef alleen werkzaamheden, hoeveelheden en eventueel geschatte uren. Geen verzonnen prijzen."
+        }, 8000);
+        const backendWerkte = out?.bron !== "vakverstand" && Array.isArray(out?.regels);
+        if (backendWerkte && Array.isArray(out.regels) && out.regels.length) {
+          const aiRegels = out.regels.slice(0, 20);
+          const werkRegels = aiRegels.map(r => {
+            const tekst = String(r?.tekst || "").trim().slice(0, 240);
+            const eenheid = ["st","uur","m","m²","m³","set","keer","dag"].includes(r?.eenheid) ? r.eenheid : "st";
+            const gevraagd = Number(r?.aantal);
+            const aantal = Number.isFinite(gevraagd) ? Math.min(100000, Math.max(0, gevraagd)) : 1;
+            return { tekst, eenheid, aantal, stukprijs: 0, prijsInvoer:"excl",
+              extra: "AI-voorstel. Controleer omvang, materiaal en prijs." };
+          }).filter(r => r.tekst && r.eenheid !== "uur" &&
+            !/^(?:arbeid|voorrijden|voorrijkosten)/i.test(r.tekst));
+          const urenSchatting = aiRegels.find(r =>
+            r?.eenheid === "uur" || /\\b(?:arbeid|uren|uurtarief)\\b/i.test(String(r?.tekst || "")));
+          const aiUren = Number(urenSchatting?.aantal);
+          const vasteRegels = local.regels.filter(r => r.eenheid === "uur" || /^Voorrijkosten/.test(r.tekst));
+          if (Number.isFinite(aiUren) && aiUren > 0 && vasteRegels[0]?.eenheid === "uur" && vasteRegels[0].aantal === 0) {
+            vasteRegels[0] = {...vasteRegels[0], aantal:Math.min(100000, aiUren),
+              extra:"Door AI geschatte uren; bevestig het aantal voor verzending."};
+          }
+          // Nooit gebruikerswijzigingen overschrijven die tijdens de AI-aanvraag zijn gedaan.
+          if (werkRegels.length && JSON.stringify(offerteRegelsUitEditor(offerForm)) === momentOpgesteld) {
+            vulRegels({...local, regels:[...werkRegels, ...vasteRegels]});
+            toast("AI-voorstel klaar. Controleer uren en alle prijzen.");
+          } else if (werkRegels.length) {
+            toast("Je hebt regels aangepast; AI heeft ze niet overschreven.");
+          }
+        }
+        // Zonder bereikbare AI-server blijft de lokale conceptgenerator bruikbaar.
       } catch (err) {
         console.error("Vakento AI-offerte:", err);
         window.VakentoHeal?.report?.(err, { kind:"offerte-ai" });

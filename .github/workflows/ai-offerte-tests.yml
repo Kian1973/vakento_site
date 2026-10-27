@@ -1,0 +1,29 @@
+name: AI-offerte tests
+on:
+  push:
+    branches:
+      - feature/ai-offerte-tarieven-20261027
+  pull_request:
+    paths:
+      - 'js/brein.js'
+      - 'js/app.js'
+      - 'js/offerte-btw.js'
+      - 'tests/unit/**'
+      - '.github/workflows/ai-offerte-tests.yml'
+jobs:
+  offerte:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Controleer syntaxis
+        run: |
+          node --check js/brein.js
+          node --check js/app.js
+          node --check js/offerte-btw.js
+      - name: Test offertes
+        run: node --test tests/unit/offerte-ai.test.mjs

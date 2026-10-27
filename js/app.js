@@ -17,7 +17,7 @@ import {
   planWeek,
   werkbonUitUren,
   verrijkMetServer,
-} from "./brein.js?v=offerte-ai-fix-2";
+} from "./brein.js?v=ai-offerte-20261027";
 import {
   viewInkoop,
   viewStam,

@@ -1155,7 +1155,16 @@ function viewPapier(vasteSoort = "") {
             <option value="verlegd">Btw verlegd</option>
           </select>
         </label>
-        <button class="btn btn-ghost" type="button" data-offer-ai>Vul offerteregels met AI</button>
+        <div class="grid-2">
+          <label>Eigen uurtarief excl. btw (€)
+            <input name="aiUurtarief" type="number" min="0" step="0.01" value="${esc(data.aiOfferteTarieven?.uurtarief ?? (data.artikelen || []).find(a => /^(arbeid|uurtarief)$/i.test(a.naam || ""))?.prijs ?? 0)}">
+          </label>
+          <label>Voorrijkosten excl. btw (€)
+            <input name="aiVoorrijden" type="number" min="0" step="0.01" value="${esc(data.aiOfferteTarieven?.voorrijden ?? (data.artikelen || []).find(a => /^(voorrijden|voorrijkosten)$/i.test(a.naam || ""))?.prijs ?? 0)}">
+          </label>
+        </div>
+        <p class="muted">Dit zijn conceptbedragen. Controleer werkzaamheden, uren, materialen en btw voordat je de offerte verstuurt.</p>
+        <button class="btn btn-ghost" type="button" data-offer-ai>Maak conceptregels</button>
       </div>
 
       <label>Opmerkingen / afspraken
@@ -1680,18 +1689,18 @@ function bind(root) {
           const tekst = String(r?.tekst || "");
           const uurMatch = tekst.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:uur|u\b)/i);
           const eenheid = String(r?.eenheid || (uurMatch ? "uur" : "st"));
-          const aantal = Number(r?.aantal || (uurMatch ? uurMatch[1].replace(",", ".") : 1)) || 1;
+          const aantal = Number(r?.aantal ?? (uurMatch ? uurMatch[1].replace(",", ".") : 1));
           const isArbeid = eenheid === "uur" || /\b(arbeid|uren|uurtarief)\b/i.test(tekst);
 
           if (isArbeid) {
             const serverPrijsIncl = Number(r?.stukprijsInclBtw ?? r?.prijsInclBtw);
             return offerteEditorRegel({
               tekst:r?.tekst || "Arbeid",
-              extra:r?.extra || "Uurtarief € 65,00 inclusief btw",
+              extra:r?.extra || "Controleer uren en uurtarief",
               aantal,
               eenheid:"uur",
-              stukprijsInclBtw:Number.isFinite(serverPrijsIncl) && serverPrijsIncl > 0 ? serverPrijsIncl : 65,
-              prijsInvoer:"incl",
+              stukprijs:Number.isFinite(Number(r?.stukprijs)) ? Number(r.stukprijs) : 0,
+              prijsInvoer:"excl",
               btw
             });
           }
@@ -1719,26 +1728,20 @@ function bind(root) {
       btn.textContent = "Regels invullen…";
 
       try {
-        const local = offerteUitTekst(vraag, data.place);
+        const uurtarief = Math.max(0, Number(formData.get("aiUurtarief") || 0));
+        const voorrijden = Math.max(0, Number(formData.get("aiVoorrijden") || 0));
+        if (!Number.isFinite(uurtarief) || !Number.isFinite(voorrijden)) {
+          return toast("Controleer de ingevulde tarieven");
+        }
+        data.aiOfferteTarieven = { uurtarief, voorrijden };
+        save(data);
+        const local = offerteUitTekst(vraag, data.place, {uurtariefExclBtw:uurtarief, voorrijkostenExclBtw:voorrijden});
         const lokaalGelukt = vulRegels(local);
         if (!lokaalGelukt) throw new Error("Geen lokale offerteregels");
-        toast("Offerteregels ingevuld. AI verfijnt ze nog.");
+        toast("Conceptregels klaar. Controleer uren, materialen en prijzen.");
 
-        btn.textContent = "AI verfijnt…";
-        const out = await verrijkMetServer("offerte", local, {
-          vraag,
-          plaats:data.place,
-          uurtariefInclBtw:65,
-          prijsVoorkeur:"inclusief btw"
-        }, 8000);
-
-        if (Array.isArray(out?.regels) && out.regels.length) {
-          vulRegels(out);
-        }
-
-        toast(out?.bron === "vakverstand"
-          ? "Offerteregels staan klaar."
-          : "AI-offerteregels staan klaar. Controleer de bedragen.");
+        // Server-AI mag geen niet-geverifieerde prijzen overschrijven.
+        // De offerte blijft bewerkbaar en wordt pas op expliciete actie opgeslagen.
       } catch (err) {
         console.error("Vakento AI-offerte:", err);
         window.VakentoHeal?.report?.(err, { kind:"offerte-ai" });

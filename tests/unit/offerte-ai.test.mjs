@@ -45,3 +45,10 @@ test("BTW categorieen en verlegd vlag", () => {
   assert.deepEqual(offerteBtwVoorstel({tekst:"Isolatie arbeid"},"isolatieMix"),{btw:9,btwVerlegd:false});
   assert.deepEqual(offerteBtwVoorstel({tekst:"Arbeid"},"verlegd"),{btw:0,btwVerlegd:true});
 });
+
+test("uren na werkonderdeel geven geen extra losse werkregel", () => {
+  const o=offerteUitTekst("3 deuren schilderen; 4 uur arbeid", "", {uurtariefExclBtw:60});
+  assert.equal(o.regels.length,2);
+  assert.equal(o.regels[0].aantal,3);
+  assert.equal(o.regels[1].aantal,4);
+});

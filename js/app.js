@@ -37,6 +37,7 @@ import {
   openPapier,
 } from "./papier.js?v=btw-verlegd1";
 import { api } from "./api.js";
+import { offerteBtwVoorstel } from "./offerte-btw.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
 import { viewContacten, bindContacten } from "./contacten.js?v=color2";
@@ -1666,17 +1667,6 @@ function bind(root) {
       const btwCategorie = String(formData.get("btwCategorie") || "standaard21");
       const oldLabel = btn.textContent;
 
-      const regelBtw = (r) => {
-        const tekst = String(r?.tekst || "").toLowerCase();
-        if (btwCategorie === "verlegd") return 0;
-        if (btwCategorie === "standaard21") return 21;
-        if (["schilder9","stukadoor9","behang9","schoonmaak9"].includes(btwCategorie)) return 9;
-        if (btwCategorie === "isolatieMix") {
-          return /(materiaal|isolatieplaat|isolatiemateriaal|pir|pur|glaswol|steenwol|eps|xps|folie|regelwerk|bevestiging)/i.test(tekst) ? 21 : 9;
-        }
-        return 21;
-      };
-
       const vulRegels = (resultaat) => {
         const bronRegels = Array.isArray(resultaat?.regels) ? resultaat.regels : [];
         if (!bronRegels.length || !linesBox) return false;
@@ -1686,7 +1676,7 @@ function bind(root) {
         }
 
         linesBox.innerHTML = bronRegels.map((r) => {
-          const btw = regelBtw(r);
+          const { btw, btwVerlegd } = offerteBtwVoorstel(r, btwCategorie);
           const tekst = String(r?.tekst || "");
           const uurMatch = tekst.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:uur|u\b)/i);
           const eenheid = String(r?.eenheid || (uurMatch ? "uur" : "st"));
@@ -1701,7 +1691,8 @@ function bind(root) {
               eenheid:"uur",
               stukprijs:Number.isFinite(Number(r?.stukprijs)) ? Number(r.stukprijs) : 0,
               prijsInvoer:"excl",
-              btw
+              btw,
+              btwVerlegd
             });
           }
 
@@ -1716,7 +1707,8 @@ function bind(root) {
             stukprijsInclBtw:Number.isFinite(prijsIncl) ? prijsIncl : undefined,
             stukprijs:Number.isFinite(prijsExcl) ? prijsExcl : 0,
             prijsInvoer:Number.isFinite(prijsIncl) ? "incl" : "excl",
-            btw
+            btw,
+            btwVerlegd
           });
         }).join("");
 

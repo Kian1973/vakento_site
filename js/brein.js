@@ -16,7 +16,7 @@ function splitsOpdracht(omschrijving) {
 }
 
 function hoeveelheidUitTekst(tekst) {
-  const m = tekst.match(/(\d+(?:[.,]\d+)?)\s*(m²|m2|m\b|uren?\b|u\b|stuks?\b|st\b|dagen?\b|keer\b)/i);
+  const m = tekst.match(/(\d+(?:[.,]\d+)?)\s*(m²|m2|m\b|uur\b|uren\b|u\b|stuks?\b|st\b|dagen?\b|keer\b)/i);
   if (m) {
     const aantal = veiligBedrag(m[1]);
     const u = m[2].toLowerCase();

@@ -18,8 +18,8 @@ function getBaseUrl() {
 }
 
 function getProAmount() {
-  // Vakento Pro: EUR 29,00 excl. 21% btw = EUR 35,09 incl. btw.
-  return clean(process.env.VAKENTO_PRO_AMOUNT) || "35.09";
+  // Vakento Pro: EUR 19,95 incl. btw per maand (21% btw inbegrepen).
+  return clean(process.env.VAKENTO_PRO_AMOUNT) || "19.95";
 }
 
 async function mollie(path, { method = "GET", body } = {}) {

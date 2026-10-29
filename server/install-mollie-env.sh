@@ -23,7 +23,7 @@ install -m 600 /dev/null "${CONF}"
 {
   printf 'MOLLIE_API_KEY=%q\n' "${MOLLIE_API_KEY}"
   printf 'VAKENTO_BASE_URL=%q\n' "https://vakento.nl"
-  printf 'VAKENTO_PRO_AMOUNT=%q\n' "35.09"
+  printf 'VAKENTO_PRO_AMOUNT=%q\n' "19.95"
 } > "${CONF}"
 
 mkdir -p "${DROPIN_DIR}"

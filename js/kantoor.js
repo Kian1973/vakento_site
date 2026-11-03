@@ -249,13 +249,6 @@ export function bindKantoor(root, { data, persist, toast }) {
     a.download = "vakento-facturen.csv";
     a.click();
   });
-  root.querySelectorAll("[data-herinner]").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      const f = data.facturen.find((x) => x.id === btn.dataset.herinner);
-      const c = klant(data, f.klant);
-      toast("Herinnering voor " + (c?.name || "") + ": " + euro(f.bedrag) + " open");
-    })
-  );
   root.querySelectorAll("[data-ubl]")?.forEach((btn) =>
     btn.addEventListener("click", () => {
       const f = data.facturen.find((x) => x.id === btn.dataset.ubl);

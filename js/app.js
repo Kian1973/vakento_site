@@ -17,7 +17,7 @@ import {
   planWeek,
   werkbonUitUren,
   verrijkMetServer,
-} from "./brein.js?v=offerte-ai-fix-2";
+} from "./brein.js?v=ai-offerte-20261027";
 import {
   viewInkoop,
   viewStam,
@@ -37,6 +37,7 @@ import {
   openPapier,
 } from "./papier.js?v=btw-verlegd1";
 import { api } from "./api.js";
+import { offerteBtwVoorstel } from "./offerte-btw.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
 import { viewContacten, bindContacten } from "./contacten.js?v=color2";
@@ -938,7 +939,8 @@ async function saveReceiptCorrectionToCloud(row) {
 
 
 function offerteEditorRegel(r = {}) {
-  const aantal = Number(r.aantal ?? 1) || 1;
+  const aantalNum = Number(r.aantal ?? 1);
+  const aantal = Number.isFinite(aantalNum) ? Math.max(0, aantalNum) : 1;
   const btwVerlegd = r.btwVerlegd === true || r.btw === "verlegd";
   const btw = btwVerlegd ? 0 : ([0, 9, 21].includes(Number(r.btw)) ? Number(r.btw) : 21);
   const factor = 1 + btw / 100;
@@ -1155,7 +1157,16 @@ function viewPapier(vasteSoort = "") {
             <option value="verlegd">Btw verlegd</option>
           </select>
         </label>
-        <button class="btn btn-ghost" type="button" data-offer-ai>Vul offerteregels met AI</button>
+        <div class="grid-2">
+          <label>Eigen uurtarief excl. btw (€)
+            <input name="aiUurtarief" type="number" min="0" step="0.01" value="${esc(data.aiOfferteTarieven?.uurtarief ?? (data.artikelen || []).find(a => /^(arbeid|uurtarief)$/i.test(a.naam || ""))?.prijs ?? 0)}">
+          </label>
+          <label>Voorrijkosten excl. btw (€)
+            <input name="aiVoorrijden" type="number" min="0" step="0.01" value="${esc(data.aiOfferteTarieven?.voorrijden ?? (data.artikelen || []).find(a => /^(voorrijden|voorrijkosten)$/i.test(a.naam || ""))?.prijs ?? 0)}">
+          </label>
+        </div>
+        <p class="muted">Dit zijn conceptbedragen. Controleer werkzaamheden, uren, materialen en btw voordat je de offerte verstuurt.</p>
+        <button class="btn btn-ghost" type="button" data-offer-ai>Maak conceptregels</button>
       </div>
 
       <label>Opmerkingen / afspraken
@@ -1656,17 +1667,6 @@ function bind(root) {
       const btwCategorie = String(formData.get("btwCategorie") || "standaard21");
       const oldLabel = btn.textContent;
 
-      const regelBtw = (r) => {
-        const tekst = String(r?.tekst || "").toLowerCase();
-        if (btwCategorie === "verlegd") return 0;
-        if (btwCategorie === "standaard21") return 21;
-        if (["schilder9","stukadoor9","behang9","schoonmaak9"].includes(btwCategorie)) return 9;
-        if (btwCategorie === "isolatieMix") {
-          return /(materiaal|isolatieplaat|isolatiemateriaal|pir|pur|glaswol|steenwol|eps|xps|folie|regelwerk|bevestiging)/i.test(tekst) ? 21 : 9;
-        }
-        return 21;
-      };
-
       const vulRegels = (resultaat) => {
         const bronRegels = Array.isArray(resultaat?.regels) ? resultaat.regels : [];
         if (!bronRegels.length || !linesBox) return false;
@@ -1676,23 +1676,23 @@ function bind(root) {
         }
 
         linesBox.innerHTML = bronRegels.map((r) => {
-          const btw = regelBtw(r);
+          const { btw, btwVerlegd } = offerteBtwVoorstel(r, btwCategorie);
           const tekst = String(r?.tekst || "");
           const uurMatch = tekst.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:uur|u\b)/i);
           const eenheid = String(r?.eenheid || (uurMatch ? "uur" : "st"));
-          const aantal = Number(r?.aantal || (uurMatch ? uurMatch[1].replace(",", ".") : 1)) || 1;
+          const aantal = Number(r?.aantal ?? (uurMatch ? uurMatch[1].replace(",", ".") : 1));
           const isArbeid = eenheid === "uur" || /\b(arbeid|uren|uurtarief)\b/i.test(tekst);
 
           if (isArbeid) {
-            const serverPrijsIncl = Number(r?.stukprijsInclBtw ?? r?.prijsInclBtw);
             return offerteEditorRegel({
               tekst:r?.tekst || "Arbeid",
-              extra:r?.extra || "Uurtarief € 65,00 inclusief btw",
+              extra:r?.extra || "Controleer uren en uurtarief",
               aantal,
               eenheid:"uur",
-              stukprijsInclBtw:Number.isFinite(serverPrijsIncl) && serverPrijsIncl > 0 ? serverPrijsIncl : 65,
-              prijsInvoer:"incl",
-              btw
+              stukprijs:Number.isFinite(Number(r?.stukprijs)) ? Number(r.stukprijs) : 0,
+              prijsInvoer:"excl",
+              btw,
+              btwVerlegd
             });
           }
 
@@ -1707,7 +1707,8 @@ function bind(root) {
             stukprijsInclBtw:Number.isFinite(prijsIncl) ? prijsIncl : undefined,
             stukprijs:Number.isFinite(prijsExcl) ? prijsExcl : 0,
             prijsInvoer:Number.isFinite(prijsIncl) ? "incl" : "excl",
-            btw
+            btw,
+            btwVerlegd
           });
         }).join("");
 
@@ -1719,26 +1720,57 @@ function bind(root) {
       btn.textContent = "Regels invullen…";
 
       try {
-        const local = offerteUitTekst(vraag, data.place);
+        const uurtarief = Math.max(0, Number(formData.get("aiUurtarief") || 0));
+        const voorrijden = Math.max(0, Number(formData.get("aiVoorrijden") || 0));
+        if (!Number.isFinite(uurtarief) || !Number.isFinite(voorrijden)) {
+          return toast("Controleer de ingevulde tarieven");
+        }
+        data.aiOfferteTarieven = { uurtarief, voorrijden };
+        save(data);
+        const local = offerteUitTekst(vraag, data.place, {uurtariefExclBtw:uurtarief, voorrijkostenExclBtw:voorrijden});
         const lokaalGelukt = vulRegels(local);
         if (!lokaalGelukt) throw new Error("Geen lokale offerteregels");
-        toast("Offerteregels ingevuld. AI verfijnt ze nog.");
+        toast("Conceptregels klaar. Controleer uren, materialen en prijzen.");
 
-        btn.textContent = "AI verfijnt…";
+        // AI helpt met werkzaamheden en uren; prijzen blijven ALTIJD uit eigen invoer.
+        const momentOpgesteld = JSON.stringify(offerteRegelsUitEditor(offerForm));
+        btn.textContent = "AI denkt mee…";
         const out = await verrijkMetServer("offerte", local, {
           vraag,
-          plaats:data.place,
-          uurtariefInclBtw:65,
-          prijsVoorkeur:"inclusief btw"
+          plaats: data.place,
+          uurtariefExclBtw: uurtarief,
+          voorrijkostenExclBtw: voorrijden,
+          instructie: "Geef alleen werkzaamheden, hoeveelheden en eventueel geschatte uren. Geen verzonnen prijzen."
         }, 8000);
-
-        if (Array.isArray(out?.regels) && out.regels.length) {
-          vulRegels(out);
+        const backendWerkte = out?.bron !== "vakverstand" && Array.isArray(out?.regels) && JSON.stringify(out.regels) !== JSON.stringify(local.regels);
+        if (backendWerkte && Array.isArray(out.regels) && out.regels.length) {
+          const aiRegels = out.regels.slice(0, 20);
+          const werkRegels = aiRegels.map(r => {
+            const tekst = String(r?.tekst || "").trim().slice(0, 240);
+            const eenheid = ["st","uur","m","m²","m³","set","keer","dag"].includes(r?.eenheid) ? r.eenheid : "st";
+            const gevraagd = Number(r?.aantal);
+            const aantal = Number.isFinite(gevraagd) ? Math.min(100000, Math.max(0, gevraagd)) : 1;
+            return { tekst, eenheid, aantal, stukprijs: 0, prijsInvoer:"excl",
+              extra: "AI-voorstel. Controleer omvang, materiaal en prijs." };
+          }).filter(r => r.tekst && r.eenheid !== "uur" &&
+            !/^(?:arbeid|voorrijden|voorrijkosten)/i.test(r.tekst));
+          const urenSchatting = aiRegels.find(r =>
+            r?.eenheid === "uur" || /\b(?:arbeid|uren|uurtarief)\b/i.test(String(r?.tekst || "")));
+          const aiUren = Number(urenSchatting?.aantal);
+          const vasteRegels = local.regels.filter(r => r.eenheid === "uur" || /^Voorrijkosten/.test(r.tekst));
+          if (Number.isFinite(aiUren) && aiUren > 0 && vasteRegels[0]?.eenheid === "uur" && vasteRegels[0].aantal === 0) {
+            vasteRegels[0] = {...vasteRegels[0], aantal:Math.min(100000, aiUren),
+              extra:"Door AI geschatte uren; bevestig het aantal voor verzending."};
+          }
+          // Nooit gebruikerswijzigingen overschrijven die tijdens de AI-aanvraag zijn gedaan.
+          if (werkRegels.length && JSON.stringify(offerteRegelsUitEditor(offerForm)) === momentOpgesteld) {
+            vulRegels({...local, regels:[...werkRegels, ...vasteRegels]});
+            toast("AI-voorstel klaar. Controleer uren en alle prijzen.");
+          } else if (werkRegels.length) {
+            toast("Je hebt regels aangepast; AI heeft ze niet overschreven.");
+          }
         }
-
-        toast(out?.bron === "vakverstand"
-          ? "Offerteregels staan klaar."
-          : "AI-offerteregels staan klaar. Controleer de bedragen.");
+        // Zonder bereikbare AI-server blijft de lokale conceptgenerator bruikbaar.
       } catch (err) {
         console.error("Vakento AI-offerte:", err);
         window.VakentoHeal?.report?.(err, { kind:"offerte-ai" });

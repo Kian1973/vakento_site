@@ -58,6 +58,7 @@ function emptyStart() {
     activa: [],
     periodiekeFacturen: [],
     bankMutaties: [],
+    ritten: [],
     auditLog: [],
     boekhoudingPlus: { year: new Date().getFullYear(), administrationName: firm, accountantEmail: "", bankOpeningBalance: 0 },
     boekhouder: { year: new Date().getFullYear(), software: "other" },
@@ -105,6 +106,7 @@ export function load() {
       data.activa ||= [];
       data.periodiekeFacturen ||= [];
       data.bankMutaties ||= [];
+      data.ritten ||= [];
       data.auditLog ||= [];
       data.boekhoudingPlus ||= { year:new Date().getFullYear(), administrationName:data.firm || "", accountantEmail:"", bankOpeningBalance:0 };
       data.boekhouder ||= { year:new Date().getFullYear(), software:"other" };

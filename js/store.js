@@ -144,7 +144,8 @@ export function load() {
       };
       syncPloeg(data);
       return data;
-    }  } catch (error) {
+    }
+  } catch (error) {
     // Bestaande onleesbare administratie nooit door een lege vervangen.
     let existing;
     try { existing = localStorage.getItem(storageKey()); }

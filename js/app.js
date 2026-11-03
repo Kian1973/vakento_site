@@ -40,7 +40,6 @@ import { api } from "./api.js";
 import { viewCloud, mountCloud } from "./cloud.js?v=gallery1";
 import { viewSlim, bindSlim } from "./slim.js?v=1";
 import { viewContacten, bindContacten } from "./contacten.js?v=google1";
-import { viewRompslomp, bindRompslomp } from "./rompslomp.js?v=2";
 import { viewBoekhoudingPlus, bindBoekhoudingPlus } from "./boekhouding-plus.js?v=1";
 import { viewBoekhouder, bindBoekhouder } from "./boekhouder.js?v=1";
 import { viewCalculatie, bindCalculatie } from "./calculatie.js?v=1";
@@ -80,7 +79,6 @@ const routes = {
   "#/taken": () => viewTaken(data),
   "#/cloud": viewCloud,
   "#/slim": () => viewSlim(data),
-  "#/rompslomp": viewRompslomp,
 };
 
 function toast(msg) {
@@ -379,7 +377,6 @@ function viewMeer() {
       <a class="simple-more-link" href="#/boekhouder"><strong>Mijn boekhouder</strong><span>RGS, UBL en compleet exportpakket voor je boekhouder.</span></a>
       <a class="simple-more-link" href="/app.html#bon"><strong>Bon scannen</strong><span>Open direct de camera en sla de bon op.</span></a>
       <a class="simple-more-link" href="/app.html#werkfoto"><strong>Werkfoto maken</strong><span>Zet een foto rechtstreeks in de juiste klusmap.</span></a>
-      <a class="simple-more-link" href="#/rompslomp"><strong>Overstappen</strong><span>Gegevens importeren uit Rompslomp.</span></a>
       <a class="simple-more-link" href="/account.html"><strong>Mijn account</strong><span>Abonnement en app.</span></a>
       <a class="simple-more-link" href="/diagnose.html"><strong>Systeemcontrole</strong><span>Alleen nodig bij problemen.</span></a>
     </div>
@@ -2358,7 +2355,6 @@ function bind(root) {
   bindKantoor(root, { data, persist, toast });
   bindSlim(root, { data, persist, toast });
   bindContacten(root, { data, toast });
-  bindRompslomp(root, { data, persist, toast });
   bindBoekhoudingPlus(root, { data, persist, toast });
   bindBoekhouder(root, { data, persist, toast });
   bindCalculatie(root, { data, persist, toast });

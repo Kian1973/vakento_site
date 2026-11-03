@@ -104,6 +104,8 @@ export function viewContacten(data) {
             <button type="button" data-contact-export>Exporteer CSV</button>
           </div>
         </details>
+        <button class="btn btn-ghost" type="button" data-google-contacts-connect hidden>Google Contacten koppelen</button>
+        <button class="btn btn-ghost" type="button" data-google-contacts-sync hidden>Nu synchroniseren</button>
         <button class="btn" type="button" data-contact-new>+ Nieuw contact</button>
       </div>
     </div>
@@ -111,6 +113,11 @@ export function viewContacten(data) {
     <div class="contacts-db-state" data-contacts-db-state data-no-translate aria-live="polite">
       <span class="contacts-status-dot" aria-hidden="true"></span>
       <span class="muted" data-contacts-db-text>Database controleren…</span>
+    </div>
+
+    <div class="contacts-db-state" data-google-contacts-state role="status" aria-live="polite">
+      <span class="muted" data-google-contacts-text>Google Contacten: koppeling controleren…</span>
+      <button type="button" class="btn btn-ghost" data-google-contacts-disconnect hidden>Ontkoppelen</button>
     </div>
 
     <section class="contacts-controlbar">
@@ -209,6 +216,59 @@ export function bindContacten(root, { data, toast }) {
     state.classList.toggle("warn", !ok);
     state.classList.toggle("ok", ok);
   };
+
+  // Google Contacten wordt uitsluitend via beveiligde backend-routes gekoppeld.
+  // Zonder serverconfiguratie blijven de knoppen verborgen: geen schijnkoppeling.
+  const googleState = root.querySelector("[data-google-contacts-text]");
+  const googleConnect = root.querySelector("[data-google-contacts-connect]");
+  const googleSync = root.querySelector("[data-google-contacts-sync]");
+  const googleDisconnect = root.querySelector("[data-google-contacts-disconnect]");
+  const refreshGoogleStatus = async () => {
+    try {
+      const info = await api("/api/google-contacts/status", null, "GET");
+      const connected = Boolean(info.connected);
+      googleConnect.hidden = connected;
+      googleSync.hidden = !connected;
+      googleDisconnect.hidden = !connected;
+      const last = info.lastSync ? new Date(info.lastSync).toLocaleString("nl-NL") : "nog niet";
+      googleState.textContent = connected
+        ? "Google Contacten gekoppeld · laatst gesynchroniseerd: " + last
+        : "Google Contacten niet gekoppeld. Koppelen is alleen-lezen.";
+    } catch (_) {
+      googleConnect.hidden = true;
+      googleSync.hidden = true;
+      googleDisconnect.hidden = true;
+      googleState.textContent = "Google Contacten is nog niet ingesteld door de beheerder.";
+    }
+  };
+  googleConnect?.addEventListener("click", async () => {
+    try {
+      const result = await api("/api/google-contacts/connect", {}, "POST");
+      if (!result.url || !String(result.url).startsWith("https://accounts.google.com/")) {
+        throw new Error("Ongeldige Google-koppeling.");
+      }
+      window.location.assign(result.url);
+    } catch (err) { toast(err.message || "Google-koppeling mislukt."); }
+  });
+  googleSync?.addEventListener("click", async () => {
+    googleSync.disabled = true;
+    try {
+      const result = await api("/api/google-contacts/sync", {}, "POST");
+      toast((result.imported || 0) + " contacten geïmporteerd of bijgewerkt");
+      await syncFromDatabase();
+      await refreshGoogleStatus();
+    } catch (err) { toast(err.message || "Synchroniseren mislukt."); }
+    finally { googleSync.disabled = false; }
+  });
+  googleDisconnect?.addEventListener("click", async () => {
+    if (!confirm("Google Contacten ontkoppelen? Geïmporteerde contacten blijven in Vakento staan.")) return;
+    try {
+      await api("/api/google-contacts/disconnect", {}, "POST");
+      await refreshGoogleStatus();
+      toast("Google Contacten ontkoppeld");
+    } catch (err) { toast(err.message || "Ontkoppelen mislukt."); }
+  });
+  refreshGoogleStatus();
 
   const renderRows = () => {
     list.innerHTML = rowsHtml(data.klanten || []);

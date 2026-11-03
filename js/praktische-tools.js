@@ -1,5 +1,3 @@
-import { euro } from "./store.js?v=boek1";
-
 const esc = (value) => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 const money = (value) => new Intl.NumberFormat("nl-NL", { style:"currency", currency:"EUR" }).format(Number(value) || 0);
 const csvCell = (value) => '"' + String(value ?? "").replace(/"/g, '""') + '"';
@@ -48,7 +46,7 @@ export function bindRitten(root, {data,persist,toast}) {
     const van = String(input.get("van") || "").trim();
     const naar = String(input.get("naar") || "").trim();
     const doel = String(input.get("doel") || "").trim();
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(datum) || !Number.isFinite(km) || km <= 0 || km > 10000 || !van || !naar || !doel) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(datum) || !Number.isFinite(km) || km <= 0 || km > 10000 || !van || !naar || !doel) {
       toast("Controleer datum, kilometers en omschrijving."); return;
     }
     data.ritten ||= [];
@@ -74,8 +72,8 @@ export function bindBetalingsherinneringen(root, {data,toast}) {
     const nr = String(f.nr || "zonder nummer");
     const bedrag = money(f.bedrag);
     const onderwerp = "Vriendelijke betalingsherinnering factuur " + nr;
-    const tekst = "Beste " + naam + ",\\n\\nVolgens onze administratie staat factuur " + nr + " van " + bedrag + " nog open. Mogelijk is de betaling aan uw aandacht ontsnapt.\\n\\nZou u de betaling willen controleren? Als u inmiddels heeft betaald, kunt u deze herinnering als niet verzonden beschouwen.\\n\\nMet vriendelijke groet,\\n" + (data.firm || "Vakento gebruiker");
-    const email = [c.email,c.mail,c.contact].find(value => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(value || "").trim()));
+    const tekst = "Beste " + naam + ",\n\nVolgens onze administratie staat factuur " + nr + " van " + bedrag + " nog open. Mogelijk is de betaling aan uw aandacht ontsnapt.\n\nZou u de betaling willen controleren? Als u inmiddels heeft betaald, kunt u deze herinnering als niet verzonden beschouwen.\n\nMet vriendelijke groet,\n" + (data.firm || "Vakento gebruiker");
+    const email = [c.email,c.mail,c.contact].find(value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim()));
     const dialog = document.createElement("dialog");
     dialog.style.cssText = "max-width:min(570px,95vw);width:100%;border:1px solid #dbe3ef;border-radius:15px;padding:22px;box-shadow:0 20px 55px #0004";
     const label = document.createElement("h2");label.textContent = "Herinnering controleren";

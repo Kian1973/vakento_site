@@ -13,7 +13,7 @@
   <link rel="icon" href="/assets/vakento-app-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/vakento-app-icon.svg">
   <link rel="stylesheet" href="/css/vakento.css?v=app4">
-  <link rel="stylesheet" href="/css/vakento-app.css?v=phone1">
+  <link rel="stylesheet" href="/css/vakento-app.css?v=header2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,12 +21,12 @@
 <body class="mobile-app-body">
   <header class="mobile-app-top">
     <a class="logo" href="/werk.html"><span class="mark">V</span> Vakento</a>
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="display:grid;text-align:right;line-height:1.1">
+    <div class="app-top-actions">
+      <div class="app-top-account" aria-label="Ingelogd account">
         <strong data-app-user>Vakento</strong>
         <small data-online>Online</small>
       </div>
-      <a class="btn btn-ghost" href="/logout.html?v=2" style="padding:8px 12px;white-space:nowrap">Uitloggen</a>
+      <a class="btn btn-ghost app-top-logout" href="/logout.html?v=2">Uitloggen</a>
     </div>
   </header>
 

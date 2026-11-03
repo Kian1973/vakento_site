@@ -144,8 +144,18 @@ export function load() {
       };
       syncPloeg(data);
       return data;
+    }  } catch (error) {
+    // Bestaande onleesbare administratie nooit door een lege vervangen.
+    let existing;
+    try { existing = localStorage.getItem(storageKey()); }
+    catch (storageError) {
+      throw new Error("Vakento kan de administratieopslag niet lezen; gegevens zijn niet gewijzigd.", { cause: storageError });
     }
-  } catch (_) {}
+    if (existing !== null) {
+      throw new Error("Opgeslagen administratie is beschadigd of onleesbaar; gegevens zijn niet gewijzigd.", { cause: error });
+    }
+    throw error;
+  }
   const data = emptyStart();
   syncPloeg(data);
   save(data);

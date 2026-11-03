@@ -1,0 +1,67 @@
+name: Vakento veilige controles
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vakento-safe-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-checks:
+    name: Controle zonder productiegegevens
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: "true"
+      VAKENTO_BASE_URL: http://127.0.0.1:8765
+      VAKENTO_ALLOW_WRITE_TESTS: "0"
+      VAKENTO_TEST_EMAIL: ""
+      VAKENTO_TEST_PASSWORD: ""
+    steps:
+      - name: Broncode ophalen
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Node.js installeren
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Afhankelijkheden installeren
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Playwright Chromium installeren
+        run: npx playwright install --with-deps chromium
+
+      - name: Alleen lokale website starten
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/vakento-ci-http.log 2>&1 &
+          echo $! > /tmp/vakento-ci-http.pid
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8765/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/vakento-ci-http.log
+          exit 1
+
+      - name: Alleen veilige lokale browsercontroles
+        run: npx playwright test --grep '@ci|homepage, account, assets en 404'
+
+      - name: Testrapport uploaden bij fouten
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vakento-local-testresultaten
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

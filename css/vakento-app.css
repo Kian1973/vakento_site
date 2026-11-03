@@ -94,3 +94,12 @@ html,body{max-width:100%;overflow-x:hidden}
   .app-scan-hero{grid-template-columns:48px minmax(0,1fr) auto;padding:15px}
   .app-scan-hero .app-launch-icon{width:48px;height:48px}
 }
+
+/* Compacte accountweergave bovenaan Vakento App */
+.mobile-app-top .app-top-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:0;margin-left:auto}
+.mobile-app-top .app-top-account{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:3px;min-width:0;max-width:220px;line-height:1.2;text-align:right}
+.mobile-app-top .app-top-account strong{font-size:14px;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mobile-app-top .app-top-account small{display:block;margin:0;color:var(--ok);font-size:11px;line-height:1.2}
+.mobile-app-top .app-top-logout{flex-shrink:0;padding:9px 14px;white-space:nowrap}
+@media(max-width:600px){.mobile-app-top{gap:8px;padding-left:10px;padding-right:10px}.mobile-app-top .app-top-actions{gap:8px}.mobile-app-top .app-top-account{max-width:115px}.mobile-app-top .app-top-account strong{font-size:12px}.mobile-app-top .app-top-logout{padding:8px 10px;font-size:12px}.mobile-app-top .logo{white-space:nowrap;font-size:19px}}
+@media(max-width:390px){.mobile-app-top .app-top-account{max-width:90px}.mobile-app-top .app-top-actions{gap:5px}}

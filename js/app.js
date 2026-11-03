@@ -45,6 +45,7 @@ import { viewBoekhoudingPlus, bindBoekhoudingPlus } from "./boekhouding-plus.js?
 import { viewBoekhouder, bindBoekhouder } from "./boekhouder.js?v=1";
 import { viewCalculatie, bindCalculatie } from "./calculatie.js?v=1";
 import { viewBelastingcontrole, bindBelastingcontrole } from "./belastingcontrole.js?v=1";
+import { viewRitten, bindRitten, bindBetalingsherinneringen } from "./praktische-tools.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();
@@ -74,6 +75,7 @@ const routes = {
   "#/boekhouder": () => viewBoekhouder(data),
   "#/calculatie": () => viewCalculatie(data),
   "#/belastingcontrole": () => viewBelastingcontrole(data),
+  "#/ritten": () => viewRitten(data),
   "#/taken": () => viewTaken(data),
   "#/cloud": viewCloud,
   "#/slim": () => viewSlim(data),
@@ -366,6 +368,7 @@ function viewMeer() {
       <a class="simple-more-link" href="#/inkoop"><strong>Inkoop</strong><span>Leveranciers en inkopen.</span></a>
       <a class="simple-more-link" href="#/stam"><strong>Artikelen & prijzen</strong><span>Vaste diensten en materialen.</span></a>
       <a class="simple-more-link" href="#/calculatie"><strong>Calculatie</strong><span>Uren, materiaal, overhead, winst en btw doorrekenen.</span></a>
+      <a class="simple-more-link" href="#/ritten"><strong>Rittenregistratie</strong><span>Zakelijke kilometers invoeren en exporteren.</span></a>
       <a class="simple-more-link" href="#/belastingcontrole"><strong>Belastingcontrole</strong><span>Automatische controle op btw, KOR, uren en investeringen.</span></a>
       <a class="simple-more-link" href="#/taken"><strong>Taken</strong><span>Korte opdrachten en acties.</span></a>
       <a class="simple-more-link" href="#/spullen"><strong>Materiaal</strong><span>Voorraad en spullen.</span></a>
@@ -2359,6 +2362,8 @@ function bind(root) {
   bindBoekhouder(root, { data, persist, toast });
   bindCalculatie(root, { data, persist, toast });
   bindBelastingcontrole(root, { data, persist, toast });
+  bindRitten(root, { data, persist, toast });
+  bindBetalingsherinneringen(root, { data, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);
 }

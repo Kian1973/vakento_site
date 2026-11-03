@@ -45,7 +45,8 @@ import { viewBoekhoudingPlus, bindBoekhoudingPlus } from "./boekhouding-plus.js?
 import { viewBoekhouder, bindBoekhouder } from "./boekhouder.js?v=1";
 import { viewCalculatie, bindCalculatie } from "./calculatie.js?v=1";
 import { viewBelastingcontrole, bindBelastingcontrole } from "./belastingcontrole.js?v=1";
-import { viewRitten, bindRitten, bindBetalingsherinneringen } from "./praktische-tools.js?v=1";
+import { bindBetalingsherinneringen } from "./praktische-tools.js?v=1";
+import { viewRittenFotos, bindRittenFotos } from "./ritten-fotos.js?v=1";
 
 const $ = (s, r = document) => r.querySelector(s);
 let data = load();
@@ -75,7 +76,7 @@ const routes = {
   "#/boekhouder": () => viewBoekhouder(data),
   "#/calculatie": () => viewCalculatie(data),
   "#/belastingcontrole": () => viewBelastingcontrole(data),
-  "#/ritten": () => viewRitten(data),
+  "#/ritten": () => viewRittenFotos(data),
   "#/taken": () => viewTaken(data),
   "#/cloud": viewCloud,
   "#/slim": () => viewSlim(data),
@@ -2362,7 +2363,7 @@ function bind(root) {
   bindBoekhouder(root, { data, persist, toast });
   bindCalculatie(root, { data, persist, toast });
   bindBelastingcontrole(root, { data, persist, toast });
-  bindRitten(root, { data, persist, toast });
+  bindRittenFotos(root, { data, persist, toast });
   bindBetalingsherinneringen(root, { data, toast });
   const cloudBox = root.querySelector("[data-cloud-app]");
   if (cloudBox) mountCloud(cloudBox);

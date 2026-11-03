@@ -56,7 +56,7 @@ export function viewRittenFotos(data) {
     '<p>Beginstand: <strong>'+kmFmt(r.beginstand)+' km</strong> '+photoLink(r.fotoBegin,"Bekijk beginfoto")+'</p>'+
     '<form class="stack" data-rit-eind="'+e(r.id)+'">'+
     '<label>Eindstand op de teller<input name="eindstand" type="number" min="0" max="9999999" step="1" inputmode="numeric" required></label>'+
-    '<label>Foto van de eindstand<input name="fotoEind" type="file" accept="image/*" capture="environment"></label>'+
+    '<label>Foto van de eindstand<input name="fotoEind" type="file" accept="image/*" capture="environment" required></label>'+
     '<label>Bestemming<input name="naar" maxlength="140" placeholder="Waar ben je aangekomen?" required></label>'+
     '<button class="btn" type="submit">Rit afronden</button></form></article>'
   ).join("");
@@ -76,7 +76,7 @@ export function viewRittenFotos(data) {
     '<label>Vertrekplaats<input name="van" maxlength="140" placeholder="Bijvoorbeeld Winterswijk" required></label>'+
     '<label>Reden van de rit<input name="doel" maxlength="180" placeholder="Bijvoorbeeld klantbezoek" required></label>'+
     '<label>Beginstand op de teller<input name="beginstand" type="number" min="0" max="9999999" step="1" inputmode="numeric" required></label>'+
-    '<label>Foto van de beginstand<input name="fotoBegin" type="file" accept="image/*" capture="environment"></label>'+
+    '<label>Foto van de beginstand<input name="fotoBegin" type="file" accept="image/*" capture="environment" required></label>'+
     '<button class="btn" type="submit">Begin rit bewaren</button></form>'+
     '<p class="muted">De kilometerstand vul je zelf in. De foto wordt veilig bewaard in je Vakento-cloud; Vakento leest de cijfers nog niet automatisch uit de foto.</p></section>'+
     '<section style="margin-top:22px"><h2>Nog af te ronden ('+open.length+')</h2>'+
@@ -96,7 +96,7 @@ export function bindRittenFotos(root,{data,persist,toast}) {
     const id="rit-"+Date.now()+"-"+Math.random().toString(36).slice(2,9);
     button.disabled=true;button.textContent="Foto en rit opslaan…";
     try {
-      const fotoBegin=await uploadPhoto(f.get("fotoBegin")?.size?f.get("fotoBegin"):null,id,"begin");
+      const fotoBegin=await uploadPhoto(f.get("fotoBegin"),id,"begin");
       data.ritten ||= [];
       data.ritten.push({id,datum,van,doel,beginstand:start,fotoBegin,status:"bezig"});
       persist();toast("Rit gestart. Eindstand kun je later toevoegen.");
@@ -108,7 +108,7 @@ export function bindRittenFotos(root,{data,persist,toast}) {
     if(!rit||end===null||end<=Number(rit.beginstand)||!String(f.get("naar")||"").trim()){toast("Controleer bestemming en eindstand.");return;}
     const button=form.querySelector('[type="submit"]');button.disabled=true;button.textContent="Rit afronden…";
     try{
-      const fotoEind=await uploadPhoto(f.get("fotoEind")?.size?f.get("fotoEind"):null,rit.id,"eind");
+      const fotoEind=await uploadPhoto(f.get("fotoEind"),rit.id,"eind");
       rit.fotoEind=fotoEind;rit.eindstand=end;rit.naar=String(f.get("naar")).trim();
       rit.km=Math.round((end-Number(rit.beginstand))*10)/10;rit.status="afgerond";
       persist();toast("Rit afgerond: "+kmFmt(rit.km)+" km");

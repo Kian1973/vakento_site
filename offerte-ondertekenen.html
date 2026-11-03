@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>Offerte ondertekenen | Vakento</title>
+<link rel="stylesheet" href="/css/vakento.css">
+<style>
+.sign-wrap{max-width:760px;margin:25px auto 80px;padding:0 15px}
+.sign-card{background:white;border:1px solid #e2e8f0;border-radius:16px;padding:22px;margin:14px 0}
+.sign-card h1{font-size:clamp(1.6rem,4vw,2.4rem)}
+.sign-table{width:100%;border-collapse:collapse}
+.sign-table td,.sign-table th{padding:9px 6px;border-bottom:1px solid #e2e8f0;text-align:left}
+.sign-table td:last-child{text-align:right}
+.sign-canvas{width:100%;height:190px;touch-action:none;background:#fff;border:2px solid #94a3b8;border-radius:9px}
+.sign-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.sign-error{color:#aa2121}
+.sign-ok{color:#12682f}
+button:disabled{opacity:.55}
+</style>
+</head>
+<body>
+<main class="sign-wrap">
+<a href="/" class="logo"><span class="mark">V</span> Vakento</a>
+<section class="sign-card" id="sign-status" role="status" aria-live="polite">Beveiligde offerte laden…</section>
+<section id="sign-body" hidden>
+  <section class="sign-card">
+    <p class="kicker">Digitaal akkoord</p><h1 id="offer-name"></h1>
+    <p>Offertenummer: <strong id="offer-number"></strong></p>
+    <p>Deze offerte is bestemd voor <strong id="offer-recipient"></strong>.</p>
+    <p id="offer-intro" style="white-space:pre-wrap"></p>
+    <div style="overflow:auto"><table class="sign-table"><thead><tr><th>Omschrijving</th><th>Bedrag excl. btw</th></tr></thead><tbody id="offer-lines"></tbody></table></div>
+    <p id="offer-terms" style="white-space:pre-wrap"></p>
+    <p><strong>Let op:</strong> controleer alle bedragen, btw en voorwaarden in de offerte voordat je tekent.</p>
+  </section>
+  <section class="sign-card">
+    <h2>Identiteit bevestigen</h2>
+    <p>Voor je kunt ondertekenen, ontvang je een eenmalige controlecode op het bij Vakento geregistreerde e-mailadres.</p>
+    <div class="sign-actions">
+      <button class="btn" id="send-code" type="button">Verstuur controlecode</button>
+    </div>
+    <label>Controlecode<input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="12"></label>
+    <button class="btn btn-ghost" id="verify-code" type="button">Code controleren</button>
+    <p id="verify-status" role="status" aria-live="polite"></p>
+  </section>
+  <section class="sign-card">
+    <h2>Ondertekening</h2>
+    <label>Je volledige naam<input id="signer" maxlength="160" autocomplete="name" required></label>
+    <p>Schrijf je handtekening met je vinger of muis in het vak.</p>
+    <canvas class="sign-canvas" id="signature" width="720" height="190" aria-label="Handtekening tekenen"></canvas>
+    <button class="btn btn-ghost" id="erase" type="button">Handtekening wissen</button>
+    <label style="display:block;margin:16px 0"><input type="checkbox" id="consent"> Ik heb deze offerte en de voorwaarden gelezen en ga akkoord met de genoemde werkzaamheden en prijs.</label>
+    <button class="btn" id="sign-submit" type="button" disabled>Akkoord geven en ondertekenen</button>
+    <p id="sign-result" role="status" aria-live="polite"></p>
+  </section>
+</section>
+</main>
+<script type="module" src="/js/offerte-ondertekenen.js?v=1"></script>
+</body></html>

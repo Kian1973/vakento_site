@@ -4,6 +4,20 @@
 
   const KB = [
     {
+      keys: ["onderhoudsplanner", "onderhoudsschema", "onderhoudsplan", "onderhoudsplanning", "periodiek onderhoud", "onderhoud beheren", "onderhoudsbeheer", "onderhoudsregistratie", "schilderwerk onderhoud", "vastgoedonderhoud"],
+      title: "Onderhoudsplanning en onderhoudsschema's",
+      answer: "Met een onderhoudsplan houd je per klant of object bij welk werk nodig is, wanneer een controle of onderhoud terugkomt en welke werkzaamheden zijn uitgevoerd. Open Vakento Planning om je klussen en afspraken te bekijken. Of er voor jouw account al een afzonderlijke Onderhoudsplanner beschikbaar is, controleer je in de ingelogde werkplaats; ik kan de activatie niet vanuit deze chat bevestigen.",
+      href: "/werk.html#/bord",
+      link: "Open Planning"
+    },
+    {
+      keys: ["onderhoud herinnering", "onderhoud herinneringen", "onderhoud terugkerend", "onderhoud interval", "volgend onderhoud", "onderhoud opvolgen"],
+      title: "Herinneringen voor periodiek onderhoud",
+      answer: "Leg voor periodiek onderhoud minimaal de klant, het object, de werkzaamheden, de uitvoerdatum en de volgende controledatum vast. Controleer in Vakento Planning of Slim werken welke vervolgacties voor je account beschikbaar zijn. Automatische meldingen zijn afhankelijk van de daadwerkelijk geactiveerde functie.",
+      href: "/werk.html#/bord",
+      link: "Bekijk de planning"
+    },
+    {
       keys: ["contact", "contacten", "klant", "leverancier", "relatie", "adresboek"],
       title: "Contacten",
       answer: "In Contacten bewaar je klanten en leveranciers centraal met naam, contactpersoon, e-mail, telefoon, adres, KvK, btw-nummer, klantnummer en betaaltermijn. De contacten zijn bedoeld om op laptop en telefoon gelijk te blijven.",
@@ -222,7 +236,7 @@
     }
   ];
 
-  const GENERAL = "Ik ben Max, je Vakento-, boekhoud- en belastinghulp voor Nederlandse zzp’ers en kleine bedrijven. Vraag me over offertes, facturen, btw, KOR, zakelijke kosten, inkomstenbelasting, ondernemersaftrek, investeringen, boekhouding of het gebruik van Vakento. Belastingregels kunnen per jaar en situatie verschillen; bij belangrijke beslissingen verwijs ik je naar de actuele Belastingdienst-regels.";
+  const GENERAL = "Ik ben Max, je hulp bij Vakento, offertes, facturen, onderhoudsplanning, werkbonnen, urenregistratie, boekhouding en belastingvragen voor Nederlandse zzp’ers. Vraag me hoe je een functie gebruikt of waar je iets vindt. Belastingregels kunnen per jaar en situatie verschillen; bij belangrijke beslissingen verwijs ik je naar de actuele Belastingdienst-regels.";
 
   const css = document.createElement("style");
   css.textContent = `
@@ -301,21 +315,22 @@
   }
 
   function localAnswer(q) {
-    const nq = norm(q);
+    const nq = " " + norm(q).replace(/\\s+/g, " ").trim() + " ";
     let best = null;
     let score = 0;
     for (const item of KB) {
       let s = 0;
       for (const key of item.keys) {
-        const nk = norm(key);
-        if (nq.includes(nk)) s += Math.max(2, nk.split(" ").length + 1);
-        for (const part of nk.split(" ")) {
-          if (part.length > 3 && nq.includes(part)) s += 1;
-        }
+        const nk = norm(key).trim();
+        if (!nk) continue;
+        const exact = nq.includes(" " + nk + " ");
+        if (exact) s += 10 + nk.length / 10;
+        else if (nk.includes(" ") && nq.includes(nk)) s += 5;
+        else if (nk.length >= 6 && nq.includes(nk)) s += 3;
       }
       if (s > score) { score = s; best = item; }
     }
-    return score >= 2 ? best : null;
+    return score >= 3 ? best : null;
   }
 
   function formatAnswer(item) {
@@ -358,7 +373,12 @@
 
   async function askServer(question, fallback) {
     try {
-      const res = await fetch("/api/brein", {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      let res;
+      try {
+        res = await fetch("/api/brein", {
+        signal:controller.signal,
         method:"POST",
         credentials:"include",
         cache:"no-store",
@@ -368,12 +388,15 @@
           local:{tekst:fallback?.answer || GENERAL},
           context:{
             vraag:question,
-            rol:"Je bent Max, de assistent van Vakento voor Nederlandse zzp’ers en kleine bedrijven. Je beantwoordt vragen over Vakento, boekhouding, btw, inkomstenbelasting en ondernemingsbelastingen. Wees duidelijk, praktisch en voorzichtig. Gebruik de meegegeven kennis als basis. Verzin geen tarieven, aftrekposten, deadlines of wettelijke voorwaarden. Benoem bij fiscale vragen het belastingjaar als dat relevant is. Als een antwoord afhangt van de persoonlijke situatie of actuele wetgeving, zeg dat duidelijk en adviseer controle bij de Belastingdienst of een boekhouder. Geef geen zekerheid waar die niet bestaat.",
+            rol:"Je bent Max, de Nederlandstalige assistent van Vakento voor zzp’ers en kleine bedrijven. Help met offertes, facturen, onderhoudsplanning, digitale werkbonnen, uren, klanten en boekhouding. Antwoord praktisch en in duidelijk Nederlands. Gebruik de meegegeven kennis als basis, maar maak onderscheid tussen een bestaande en een nog niet bevestigde functie. Raad geen niet-bestaande knoppen of pagina's aan. Verzin geen tarieven, aftrekposten, deadlines of wettelijke voorwaarden. Benoem bij fiscale vragen het belastingjaar als dat relevant is. Als een antwoord afhangt van de persoonlijke situatie of actuele wetgeving, zeg dat duidelijk en adviseer controle bij de Belastingdienst of een boekhouder. Geef geen zekerheid waar die niet bestaat.",
             vakento:KNOWLEDGE,
             bedrijfscontext:currentBusinessContext()
           }
         })
       });
+      } finally {
+        clearTimeout(timeout);
+      }
       if (!res.ok) return null;
       const data = await res.json();
       const text = data.tekst || data.answer || data.antwoord || "";
@@ -406,7 +429,7 @@
       addMsg('<strong>Hoi, ik ben Max.</strong><br>' + escapeHtml(GENERAL));
       const quick = document.createElement("div");
       quick.className = "max-quick";
-      ["BTW-aangifte","Zakelijke kosten","Zelfstandigenaftrek","KOR","Bonnen scannen","Boekhouding"].forEach(label => {
+      ["Onderhoudsplanner","Offertes maken","Werkbonnen","Urenregistratie","Bonnen scannen","Boekhouding"].forEach(label => {
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = label;

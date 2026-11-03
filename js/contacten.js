@@ -113,8 +113,6 @@ export function viewContacten(data) {
       <span class="muted" data-contacts-db-text>Database controleren…</span>
     </div>
 
-    </div>
-
     <section class="contacts-controlbar">
       <label class="contacts-search">
         <span aria-hidden="true">⌕</span>
